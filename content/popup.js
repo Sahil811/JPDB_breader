@@ -117,6 +117,38 @@ const PARTS_OF_SPEECH = {
   va: "Archaic", // Not from JMDict? TODO Don't understand this one, seems identical to #v4n ?
   // 'unc': '', // Not used in jpdb: empty list instead. JMDict: "unclassified"
 };
+
+async function getKanjiDetails(char) {
+  const kanjiAliveApiKey = config.kanjiAliveApiKey;
+
+  if (!kanjiAliveApiKey) {
+    // Skip the API call if the Kanji Alive API key is not provided
+    return null;
+  }
+
+  try {
+    const response = await fetch(
+      `https://kanjialive-api.p.rapidapi.com/api/public/kanji/${encodeURIComponent(
+        char
+      )}`,
+      {
+        headers: {
+          "X-RapidAPI-Key": kanjiAliveApiKey,
+          "X-RapidAPI-Host": "kanjialive-api.p.rapidapi.com",
+        },
+      }
+    );
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+function isKanji(char) {
+  return /\p{Script=Han}/u.test(char);
+}
+
 function getClosestClientRect(elem, x, y) {
   const rects = elem.getClientRects();
   if (rects.length === 1) return rects[0];
@@ -366,13 +398,25 @@ export class Popup {
     this.#outerStyle.pointerEvents = "";
     this.#outerStyle.userSelect = "";
   }
-  render() {
+  async render() {
     if (this.#data === undefined) return;
     const card = this.#data.token.card;
-    console.log(card);
     const url = `https://jpdb.io/vocabulary/${card.vid}/${encodeURIComponent(
       card.spelling
     )}/${encodeURIComponent(card.reading)}`;
+
+    // Get character meanings
+    const characterMeanings = await Promise.all(
+      card.spelling.split("").map(async (char) => {
+        if (isKanji(char)) {
+          const charDetails = await getKanjiDetails(char);
+          return charDetails ? charDetails.kanji.meaning.english : null;
+        } else {
+          // The character is not a kanji, so we don't fetch its meaning
+          return null;
+        }
+      })
+    );
     // Group meanings by part of speech
     const groupedMeanings = [];
     let lastPOS = [];
@@ -425,6 +469,19 @@ export class Popup {
           card.frequencyRank ? `Top ${card.frequencyRank}` : ""
         ),
         card.pitchAccent.map((pitch) => renderPitch(card.reading, pitch))
+      ),
+      jsxCreateElement(
+        "div",
+        { class: "kanji-meanings" },
+        characterMeanings
+          .filter((meaning) => meaning && meaning.trim() !== "")
+          .map((meaning, index) =>
+            jsxCreateElement(
+              "span",
+              { class: "kanji-meaning" },
+              `${card.spelling[index]}: ${meaning}`
+            )
+          )
       ),
       ...groupedMeanings.flatMap((meanings) => [
         jsxCreateElement(
