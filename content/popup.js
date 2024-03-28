@@ -128,15 +128,16 @@ async function getKanjiDetails(char) {
 
   try {
     const response = await fetch(
-      `https://kanjialive-api.p.rapidapi.com/api/public/kanji/${encodeURIComponent(
-        char
-      )}`,
-      {
-        headers: {
-          "X-RapidAPI-Key": kanjiAliveApiKey,
-          "X-RapidAPI-Host": "kanjialive-api.p.rapidapi.com",
-        },
-      }
+      // `https://kanjialive-api.p.rapidapi.com/api/public/kanji/${encodeURIComponent(
+      //   char
+      // )}`
+      `https://kanjiapi.dev/v1/kanji/${encodeURIComponent(char)}`
+      // {
+      //   headers: {
+      //     "X-RapidAPI-Key": kanjiAliveApiKey,
+      //     "X-RapidAPI-Host": "kanjialive-api.p.rapidapi.com",
+      //   },
+      // }
     );
     return await response.json();
   } catch (error) {
@@ -405,12 +406,17 @@ export class Popup {
       card.spelling
     )}/${encodeURIComponent(card.reading)}`;
 
-    // Get character meanings
-    const characterMeanings = await Promise.all(
+    // Get character Details
+    const characterDetails = await Promise.all(
       card.spelling.split("").map(async (char) => {
         if (isKanji(char)) {
           const charDetails = await getKanjiDetails(char);
-          return charDetails ? charDetails.kanji.meaning.english : null;
+          // return charDetails ? charDetails?.kanji?.meaning?.english : null;
+          return {
+            meanings: charDetails?.meanings?.join("; ") || null,
+            kunReadings: charDetails?.kun_readings?.join("; ") || null,
+            onReadings: charDetails?.on_readings?.join("; ") || null,
+          };
         } else {
           // The character is not a kanji, so we don't fetch its meaning
           return null;
@@ -473,13 +479,19 @@ export class Popup {
       jsxCreateElement(
         "div",
         { class: "kanji-meanings" },
-        characterMeanings
-          .filter((meaning) => meaning && meaning.trim() !== "")
-          .map((meaning, index) =>
+        characterDetails
+          .filter(
+            (details) =>
+              details &&
+              (details.meanings || details.kunReadings || details.onReadings)
+          )
+          .map((details, index) =>
             jsxCreateElement(
               "span",
               { class: "kanji-meaning" },
-              `${card.spelling[index]}: ${meaning}`
+              `${card.spelling[index]}: ${details.meanings || ""} ${
+                details.kunReadings ? `| [kun: ${details.kunReadings}]` : ""
+              } ${details.onReadings ? `| [on: ${details.onReadings}]` : ""}`
             )
           )
       ),
