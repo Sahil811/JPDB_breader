@@ -119,12 +119,12 @@ const PARTS_OF_SPEECH = {
 };
 
 async function getKanjiDetails(char) {
-  const kanjiAliveApiKey = config.kanjiAliveApiKey;
+  // const kanjiAliveApiKey = config.kanjiAliveApiKey;
 
-  if (!kanjiAliveApiKey) {
-    // Skip the API call if the Kanji Alive API key is not provided
-    return null;
-  }
+  // if (!kanjiAliveApiKey) {
+  //   // Skip the API call if the Kanji Alive API key is not provided
+  //   return null;
+  // }
 
   try {
     const response = await fetch(
