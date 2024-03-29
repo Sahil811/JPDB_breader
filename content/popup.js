@@ -413,6 +413,7 @@ export class Popup {
           const charDetails = await getKanjiDetails(char);
           // return charDetails ? charDetails?.kanji?.meaning?.english : null;
           return {
+            kanji: charDetails?.kanji,
             meanings: charDetails?.meanings?.join("; ") || null,
             kunReadings: charDetails?.kun_readings?.join("; ") || null,
             onReadings: charDetails?.on_readings?.join("; ") || null,
@@ -489,7 +490,7 @@ export class Popup {
             jsxCreateElement(
               "span",
               { class: "kanji-meaning" },
-              `${card.spelling[index]}: ${details.meanings || ""} ${
+              `${details.kanji}: ${details.meanings || ""} ${
                 details.kunReadings ? `| [kun: ${details.kunReadings}]` : ""
               } ${details.onReadings ? `| [on: ${details.onReadings}]` : ""}`
             )
