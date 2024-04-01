@@ -3,7 +3,7 @@ export const CURRENT_SCHEMA_VERSION = 1;
 export const defaultConfig = {
   schemaVersion: CURRENT_SCHEMA_VERSION,
   apiToken: null,
-  kanjiAliveApiKey: null,
+  showKanji: true,
   miningDeckId: null,
   forqDeckId: "forq",
   blacklistDeckId: "blacklist",

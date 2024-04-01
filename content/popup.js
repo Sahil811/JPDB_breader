@@ -119,25 +119,15 @@ const PARTS_OF_SPEECH = {
 };
 
 async function getKanjiDetails(char) {
-  // const kanjiAliveApiKey = config.kanjiAliveApiKey;
+  const showKanji = config.showKanji;
 
-  // if (!kanjiAliveApiKey) {
-  //   // Skip the API call if the Kanji Alive API key is not provided
-  //   return null;
-  // }
+  if (!showKanji) {
+    return null;
+  }
 
   try {
     const response = await fetch(
-      // `https://kanjialive-api.p.rapidapi.com/api/public/kanji/${encodeURIComponent(
-      //   char
-      // )}`
       `https://kanjiapi.dev/v1/kanji/${encodeURIComponent(char)}`
-      // {
-      //   headers: {
-      //     "X-RapidAPI-Key": kanjiAliveApiKey,
-      //     "X-RapidAPI-Host": "kanjialive-api.p.rapidapi.com",
-      //   },
-      // }
     );
     return await response.json();
   } catch (error) {
