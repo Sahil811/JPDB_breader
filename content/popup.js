@@ -443,14 +443,15 @@ export class Popup {
         { id: "header" },
         jsxCreateElement(
           "a",
-          { lang: "ja", href: url, target: "_blank" },
+          //   { lang: "ja", href: url, target: "_blank" }
+          { lang: "ja", href: url, openInPopup: true },
           jsxCreateElement("span", { class: "spelling" }, card.spelling),
           jsxCreateElement(
-            "span",
-            { class: "reading" },
-            card.spelling !== card.reading ? `(${card.reading})` : ""
+              "span",
+              { class: "reading" },
+              card.spelling !== card.reading ? `(${card.reading})` : ""
           )
-        ),
+      ),
         jsxCreateElement(
           "div",
           { class: "state" },
