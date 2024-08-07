@@ -480,9 +480,10 @@ export class Popup {
             jsxCreateElement(
               "span",
               { class: "kanji-meaning" },
-              `${details.kanji}: ${details.meanings || ""} ${
-                details.kunReadings ? `| [kun: ${details.kunReadings}]` : ""
-              } ${details.onReadings ? `| [on: ${details.onReadings}]` : ""}`
+              `${details.kanji}: ${details.meanings || ""}`
+              // ${
+              //   details.kunReadings ? `| [kun: ${details.kunReadings}]` : ""
+              // } ${details.onReadings ? `| [on: ${details.onReadings}]` : ""}
             )
           )
       ),
