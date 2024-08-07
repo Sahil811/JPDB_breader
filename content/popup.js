@@ -444,14 +444,14 @@ export class Popup {
         jsxCreateElement(
           "a",
           //   { lang: "ja", href: url, target: "_blank" }
-          { lang: "ja", href: url, openInPopup: true },
+          { lang: "ja", href: url, openInIframe: true },
           jsxCreateElement("span", { class: "spelling" }, card.spelling),
           jsxCreateElement(
-              "span",
-              { class: "reading" },
-              card.spelling !== card.reading ? `(${card.reading})` : ""
+            "span",
+            { class: "reading" },
+            card.spelling !== card.reading ? `(${card.reading})` : ""
           )
-      ),
+        ),
         jsxCreateElement(
           "div",
           { class: "state" },
@@ -481,9 +481,10 @@ export class Popup {
             jsxCreateElement(
               "span",
               { class: "kanji-meaning" },
-              `${details.kanji}: ${details.meanings || ""} ${
-                details.kunReadings ? `| [kun: ${details.kunReadings}]` : ""
-              } ${details.onReadings ? `| [on: ${details.onReadings}]` : ""}`
+              `${details.kanji}: ${details.meanings || ""}`
+              // ${details.kunReadings ? `| [kun: ${details.kunReadings}]` : ""} ${
+              //   details.onReadings ? `| [on: ${details.onReadings}]` : ""
+              // }
             )
           )
       ),
