@@ -91,80 +91,171 @@ function wrap(node, wrapper) {
     wrapper.append(node);
 }
 export const reverseIndex = new Map();
-export function applyTokens(fragments, tokens) {
-    // console.log('Applying results:', fragments, tokens);
+export function applyTokens(fragments, tokens) {    
     let fragmentIndex = 0;
     let curOffset = 0;
     let fragment = fragments[fragmentIndex];
     const text = fragments.map(x => x.node.data).join('');
+
     for (const token of tokens) {
         if (!fragment)
             return;
-        // console.log('at', curOffset, 'fragment', fragment, 'token', token);
+
         // Wrap all unparsed fragments that appear before the token
         while (curOffset < token.start) {
             if (fragment.end > token.start) {
-                // Only the beginning of the node is unparsed. Split it.
                 splitFragment(fragments, fragmentIndex, token.start);
             }
-            // console.log('Unparsed original:', fragment.node.data);
             wrap(fragment.node, jsxCreateElement("span", { class: 'jpdb-word unparsed' }));
             curOffset += fragment.length;
             fragment = fragments[++fragmentIndex];
             if (!fragment)
                 return;
         }
+
         // Accumulate fragments until we have enough to fit the current token
         while (curOffset < token.end) {
             if (fragment.end > token.end) {
-                // Only the beginning of the node is part of the token. Split it.
                 splitFragment(fragments, fragmentIndex, token.end);
             }
-            // console.log('Part of token:', fragment.node.data);
+
+            // Create the wrapper for the word with reading and meaning
             const className = `jpdb-word ${token.card.state.join(' ')}`;
-            const wrapper = (token.rubies.length > 0 && !fragment.hasRuby ? (jsxCreateElement("ruby", { class: className, onmouseenter: onWordHoverStart, onmouseleave: onWordHoverStop })) : (jsxCreateElement("span", { class: className, onmouseenter: onWordHoverStart, onmouseleave: onWordHoverStop })));
+            const wrapper = (token.rubies.length > 0 && !fragment.hasRuby
+                ? jsxCreateElement("ruby", { class: className, onmouseenter: onWordHoverStart, onmouseleave: onWordHoverStop })
+                : jsxCreateElement("span", { class: className, onmouseenter: onWordHoverStart, onmouseleave: onWordHoverStop })
+            );
+
+            // Add tooltip for word meaning (first glossary meaning)
+            const meaning = token?.card?.meanings[0]?.glosses[0] || '';  // Assuming meanings is an array of meanings
+            const doNotShowMeaningFor = ["never-forget",  "known",  "blacklisted",  "learning"]
+            if (meaning && !doNotShowMeaningFor.includes(token.card.state.join(' '))) {
+                insertAfter(jsxCreateElement("ruby", { class: 'jpdb-furi' }, meaning), fragment.node);
+            }
+
             const idx = reverseIndex.get(`${token.card.vid}/${token.card.sid}`);
             if (idx === undefined) {
                 reverseIndex.set(`${token.card.vid}/${token.card.sid}`, { className, elements: [wrapper] });
-            }
-            else {
+            } else {
                 idx.elements.push(wrapper);
             }
+
             wrapper.jpdbData = {
                 token,
                 context: text,
                 contextOffset: curOffset,
             };
             wrap(fragment.node, wrapper);
+
+            // Process rubies for furigana
             if (!fragment.hasRuby) {
                 for (const ruby of token.rubies) {
                     if (ruby.start >= fragment.start && ruby.end <= fragment.end) {
-                        // Ruby is contained in fragment
                         if (ruby.start > fragment.start) {
                             splitFragment(fragments, fragmentIndex, ruby.start);
                             insertAfter(jsxCreateElement("rt", null), fragment.node);
-                            fragment = fragment = fragments[++fragmentIndex];
+                            fragment = fragments[++fragmentIndex];
                         }
                         if (ruby.end < fragment.end) {
                             splitFragment(fragments, fragmentIndex, ruby.end);
                             insertAfter(jsxCreateElement("rt", { class: 'jpdb-furi' }, ruby.text), fragment.node);
-                            fragment = fragment = fragments[++fragmentIndex];
-                        }
-                        else {
+                            fragment = fragments[++fragmentIndex];
+                        } else {
                             insertAfter(jsxCreateElement("rt", { class: 'jpdb-furi' }, ruby.text), fragment.node);
+                              // Add the meaning below the word
                         }
                     }
                 }
             }
+
             curOffset = fragment.end;
             fragment = fragments[++fragmentIndex];
             if (!fragment)
                 break;
         }
     }
+
     // Wrap any left-over fragments in unparsed wrappers
     for (const fragment of fragments.slice(fragmentIndex)) {
-        // console.log('Unparsed original:', fragment.node.data);
         wrap(fragment.node, jsxCreateElement("span", { class: 'jpdb-word unparsed' }));
     }
 }
+
+// export function applyTokens(fragments, tokens) {
+//     console.log('Applying results:', fragments, tokens);
+//     // console.log('Applying results:', fragments, tokens);
+//     let fragmentIndex = 0;
+//     let curOffset = 0;
+//     let fragment = fragments[fragmentIndex];
+//     const text = fragments.map(x => x.node.data).join('');
+//     for (const token of tokens) {
+//         if (!fragment)
+//             return;
+//         // console.log('at', curOffset, 'fragment', fragment, 'token', token);
+//         // Wrap all unparsed fragments that appear before the token
+//         while (curOffset < token.start) {
+//             if (fragment.end > token.start) {
+//                 // Only the beginning of the node is unparsed. Split it.
+//                 splitFragment(fragments, fragmentIndex, token.start);
+//             }
+//             // console.log('Unparsed original:', fragment.node.data);
+//             wrap(fragment.node, jsxCreateElement("span", { class: 'jpdb-word unparsed' }));
+//             curOffset += fragment.length;
+//             fragment = fragments[++fragmentIndex];
+//             if (!fragment)
+//                 return;
+//         }
+//         // Accumulate fragments until we have enough to fit the current token
+//         while (curOffset < token.end) {
+//             if (fragment.end > token.end) {
+//                 // Only the beginning of the node is part of the token. Split it.
+//                 splitFragment(fragments, fragmentIndex, token.end);
+//             }
+//             // console.log('Part of token:', fragment.node.data);
+//             const className = `jpdb-word ${token.card.state.join(' ')}`;
+//             const wrapper = (token.rubies.length > 0 && !fragment.hasRuby ? (jsxCreateElement("ruby", { class: className, onmouseenter: onWordHoverStart, onmouseleave: onWordHoverStop })) : (jsxCreateElement("span", { class: className, onmouseenter: onWordHoverStart, onmouseleave: onWordHoverStop })));
+//             const idx = reverseIndex.get(`${token.card.vid}/${token.card.sid}`);
+//             if (idx === undefined) {
+//                 reverseIndex.set(`${token.card.vid}/${token.card.sid}`, { className, elements: [wrapper] });
+//             }
+//             else {
+//                 idx.elements.push(wrapper);
+//             }
+//             wrapper.jpdbData = {
+//                 token,
+//                 context: text,
+//                 contextOffset: curOffset,
+//             };
+//             wrap(fragment.node, wrapper);
+//             if (!fragment.hasRuby) {
+//                 for (const ruby of token.rubies) {
+//                     if (ruby.start >= fragment.start && ruby.end <= fragment.end) {
+//                         // Ruby is contained in fragment
+//                         if (ruby.start > fragment.start) {
+//                             splitFragment(fragments, fragmentIndex, ruby.start);
+//                             insertAfter(jsxCreateElement("rt", null), fragment.node);
+//                             fragment = fragment = fragments[++fragmentIndex];
+//                         }
+//                         if (ruby.end < fragment.end) {
+//                             splitFragment(fragments, fragmentIndex, ruby.end);
+//                             insertAfter(jsxCreateElement("rt", { class: 'jpdb-furi' }, ruby.text), fragment.node);
+//                             fragment = fragment = fragments[++fragmentIndex];
+//                         }
+//                         else {
+//                             insertAfter(jsxCreateElement("rt", { class: 'jpdb-furi' }, ruby.text), fragment.node);
+//                         }
+//                     }
+//                 }
+//             }
+//             curOffset = fragment.end;
+//             fragment = fragments[++fragmentIndex];
+//             if (!fragment)
+//                 break;
+//         }
+//     }
+//     // Wrap any left-over fragments in unparsed wrappers
+//     for (const fragment of fragments.slice(fragmentIndex)) {
+//         // console.log('Unparsed original:', fragment.node.data);
+//         wrap(fragment.node, jsxCreateElement("span", { class: 'jpdb-word unparsed' }));
+//     }
+// }
