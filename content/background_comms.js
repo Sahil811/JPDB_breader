@@ -65,7 +65,6 @@ port.onDisconnect.addListener(() => {
     console.error('disconnect:', port);
 });
 port.onMessage.addListener((message, port) => {
-    console.log('message:', message, port);
     switch (message.type) {
         case 'success':
             {

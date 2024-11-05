@@ -118,23 +118,79 @@ const PARTS_OF_SPEECH = {
   // 'unc': '', // Not used in jpdb: empty list instead. JMDict: "unclassified"
 };
 
-async function getKanjiDetails(char) {
+// Load kanji meanings from JSON file
+const loadKanjiMeanings = async () => {
+  try {
+    // Log the attempted URL for debugging
+    const resourceUrl = chrome.runtime.getURL('kanji_meanings.json');
+
+    // Check if the file exists first
+    if (!resourceUrl) {
+      throw new Error('Could not generate URL for kanji_meanings.json');
+    }
+
+    const response = await fetch(resourceUrl);
+    
+    // Detailed error logging
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}, Text: ${await response.text()}`);
+    }
+
+    const data = await response.json();
+    
+    // Validate the data structure
+    if (!Array.isArray(data) && typeof data !== 'object') {
+      throw new Error('Invalid data format: Expected array or object');
+    }
+
+    return data;
+  } catch (error) {
+    // Enhanced error logging
+    console.error('Failed to load kanji meanings:', {
+      error: error.message,
+      stack: error.stack,
+      resourceUrl: chrome.runtime.getURL('kanji_meanings.json')
+    });
+
+    // You might want to throw the error instead of returning empty array
+    // depending on how critical this data is for your extension
+    throw new Error(`Failed to load kanji meanings: ${error.message}`);
+  }
+};
+
+
+// Helper function to get kanji details from local JSON data
+const getKanjiFromJSON = (kanjiMeanings, char) => {
+  const entry = kanjiMeanings.find(entry => entry.kanji === char);
+  return entry ? { kanji: entry.kanji, meaning: entry.meaning } : null;
+};
+
+// Function to fetch kanji details, with fallback to JSON data
+async function getKanjiDetails(char, kanjiMeanings) {
+  // Assuming you have a config object available
   const showKanji = config.showKanji;
 
   if (!showKanji) {
     return null;
   }
 
+  // Check if kanji meaning exists in JSON
+  const localKanji = getKanjiFromJSON(kanjiMeanings, char);
+  if (localKanji) {
+    return localKanji; // Return both kanji and meaning
+  }
+
+  // If not found in JSON, fetch from API
   try {
-    const response = await fetch(
-      `https://kanjiapi.dev/v1/kanji/${encodeURIComponent(char)}`
-    );
+    const response = await fetch(`https://kanjiapi.dev/v1/kanji/${encodeURIComponent(char)}`);
     return await response.json();
   } catch (error) {
-    console.error(error);
-    return null;
+    return null; // Handle error without logging
   }
 }
+
+// Example usage
+const kanjiMeanings = await loadKanjiMeanings()
 
 function isKanji(char) {
   return /\p{Script=Han}/u.test(char);
@@ -396,21 +452,21 @@ export class Popup {
       card.spelling
     )}/${encodeURIComponent(card.reading)}`;
 
-    // Get character Details
+    // Get character details with local JSON check
     const characterDetails = await Promise.all(
       card.spelling.split("").map(async (char) => {
         if (isKanji(char)) {
-          const charDetails = await getKanjiDetails(char);
-          // return charDetails ? charDetails?.kanji?.meaning?.english : null;
-          return {
-            kanji: charDetails?.kanji,
-            meanings: charDetails?.meanings?.join("; ") || null,
-            kunReadings: charDetails?.kun_readings?.join("; ") || null,
-            onReadings: charDetails?.on_readings?.join("; ") || null,
-          };
+          const charDetails = await getKanjiDetails(char, kanjiMeanings);
+          return charDetails
+            ? {
+                kanji: charDetails.kanji,
+                meanings: charDetails.meaning || charDetails.meanings.join(", ") || null,
+                kunReadings: charDetails.kun_readings?.join("; ") || null,
+                onReadings: charDetails.on_readings?.join("; ") || null,
+              }
+            : null;
         } else {
-          // The character is not a kanji, so we don't fetch its meaning
-          return null;
+          return null; // Not a kanji character
         }
       })
     );

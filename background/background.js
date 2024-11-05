@@ -189,7 +189,6 @@ const messageHandlers = {
     },
 };
 async function onPortMessage(message, port) {
-    console.log('message:', message, port);
     try {
         await messageHandlers[message.type](message, port);
     }

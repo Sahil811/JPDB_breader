@@ -95,7 +95,8 @@
     "util.js",
     "jsx.js",
     "common.css",
-    "themes.css"
+    "themes.css",
+    "kanji_meanings.json"
   ],
   "permissions": [
     "tabs",
