@@ -451,6 +451,7 @@ export class Popup {
     const url = `https://jpdb.io/vocabulary/${card.vid}/${encodeURIComponent(
       card.spelling
     )}/${encodeURIComponent(card.reading)}`;
+    const kanjiUrl = (kanji) => `https://jpdb.io/kanji/${encodeURIComponent(kanji)}`;
 
     // Get character details with local JSON check
     const characterDetails = await Promise.all(
@@ -532,14 +533,21 @@ export class Popup {
               details &&
               (details.meanings || details.kunReadings || details.onReadings)
           )
-          .map((details, index) =>
+          .map((details) =>
             jsxCreateElement(
-              "span",
-              { class: "kanji-meaning" },
-              `${details.kanji}: ${details.meanings || ""}`
-              // ${
-              //   details.kunReadings ? `| [kun: ${details.kunReadings}]` : ""
-              // } ${details.onReadings ? `| [on: ${details.onReadings}]` : ""}
+              "a",
+              { 
+                lang: "ja",
+                href: kanjiUrl(details.kanji), 
+                target: "_blank",
+                style: { 
+                  textDecoration: "none", 
+                  color: "inherit", 
+                  cursor: "pointer"
+                } 
+              },
+              jsxCreateElement("span", { class: "" }, details.kanji || ""),
+              jsxCreateElement("span", { class: "reading" },details.meanings || "")
             )
           )
       ),

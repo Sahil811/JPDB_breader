@@ -238,9 +238,24 @@ button.easy {
   margin-bottom: 1em;
 }
 
+.kanji-meanings a {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.kanji-meanings a:link,
+.kanji-meanings a:visited,
+.kanji-meanings a:hover,
+.kanji-meanings a:active {
+  color: inherit;
+  text-decoration: none;
+}
+
 .kanji-meaning {
   background-color: var(--color-background-alt);
   padding: 0.25em 0.5em;
   border-radius: var(--border-radius);
   font-size: 0.9em;
 }
+
