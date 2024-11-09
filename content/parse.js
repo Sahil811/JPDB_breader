@@ -127,11 +127,11 @@ export function applyTokens(fragments, tokens) {
             );
 
             // Add tooltip for word meaning (first glossary meaning)
-            const meaning = token?.card?.meanings[0]?.glosses[0] || '';  // Assuming meanings is an array of meanings
-            const doNotShowMeaningFor = ["never-forget",  "known",  "blacklisted",  "learning"]
-            if (meaning && !doNotShowMeaningFor.includes(token.card.state.join(' '))) {
-                insertAfter(jsxCreateElement("ruby", { class: 'jpdb-furi english-meaning' }, meaning), fragment.node);
-            }
+            // const meaning = token?.card?.meanings[0]?.glosses[0] || '';  // Assuming meanings is an array of meanings
+            // const doNotShowMeaningFor = ["never-forget",  "known",  "blacklisted",  "learning"]
+            // if (meaning && !doNotShowMeaningFor.includes(token.card.state.join(' '))) {
+            //     insertAfter(jsxCreateElement("ruby", { class: 'jpdb-furi english-meaning' }, meaning), fragment.node);
+            // }
 
             const idx = reverseIndex.get(`${token.card.vid}/${token.card.sid}`);
             if (idx === undefined) {
