@@ -234,7 +234,7 @@ button.easy {
 .kanji-meanings {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5em;
+  gap: 1.5em;
   margin-bottom: 1em;
 }
 

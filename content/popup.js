@@ -454,23 +454,22 @@ export class Popup {
     const kanjiUrl = (kanji) => `https://jpdb.io/kanji/${encodeURIComponent(kanji)}`;
 
     // Get character details with local JSON check
-    const characterDetails = await Promise.all(
-      card.spelling.split("").map(async (char) => {
-        if (isKanji(char)) {
+    let characterDetails = (
+      await Promise.all(
+        [...card.spelling].filter(isKanji).map(async (char) => {
           const charDetails = await getKanjiDetails(char, kanjiMeanings);
           return charDetails
             ? {
                 kanji: charDetails.kanji,
-                meanings: charDetails.meaning || charDetails.meanings.join(", ") || null,
-                kunReadings: charDetails.kun_readings?.join("; ") || null,
-                onReadings: charDetails.on_readings?.join("; ") || null,
+                meanings: charDetails.meaning || charDetails.meanings.join(", "),
               }
             : null;
-        } else {
-          return null; // Not a kanji character
-        }
-      })
-    );
+        })
+      )
+    ).filter(Boolean);
+    
+    characterDetails = characterDetails.length ? characterDetails : null;
+
     // Group meanings by part of speech
     const groupedMeanings = [];
     let lastPOS = [];
@@ -524,33 +523,59 @@ export class Popup {
         ),
         card.pitchAccent.map((pitch) => renderPitch(card.reading, pitch))
       ),
-      jsxCreateElement(
-        "div",
-        { class: "kanji-meanings" },
-        characterDetails
-          .filter(
-            (details) =>
-              details &&
-              (details.meanings || details.kunReadings || details.onReadings)
-          )
-          .map((details) =>
-            jsxCreateElement(
-              "a",
-              { 
-                lang: "ja",
-                href: kanjiUrl(details.kanji), 
-                target: "_blank",
-                style: { 
-                  textDecoration: "none", 
-                  color: "inherit", 
-                  cursor: "pointer"
-                } 
-              },
-              jsxCreateElement("span", { class: "" }, details.kanji || ""),
-              jsxCreateElement("span", { class: "reading" },details.meanings || "")
-            )
-          )
-      ),
+      characterDetails
+      ? jsxCreateElement(
+          "div",
+          { class: "kanji-meanings" },
+          characterDetails
+            .filter((details) => details && details.meanings)
+            .map((details) => {
+              if (!details || !details.kanji) return null;
+    
+              return jsxCreateElement(
+                "div",
+                {
+                  class: "kanji-item",
+                  style: { display: "inline-flex", alignItems: "center", gap: "8px" },
+                },
+                // Link for kanji
+                jsxCreateElement(
+                  "a",
+                  {
+                    lang: "ja",
+                    href: kanjiUrl(details.kanji),
+                    target: "_blank",
+                    style: {
+                      textDecoration: "none",
+                      color: "inherit",
+                      cursor: "pointer",
+                      display: details.kanji ? "inline" : "none",
+                      userSelect: "none", // for touch devices
+                    },
+                  },
+                  jsxCreateElement("span", {}, `${details.kanji}:`)
+                ),
+                jsxCreateElement("span", {}, " \u00A0"),                
+                // Link for meanings
+                jsxCreateElement(
+                  "a",
+                  {
+                    href: `https://kanji.koohii.com/study/kanji/${details.kanji}`,
+                    target: "_blank",
+                    style: {
+                      textDecoration: "none",
+                      color: "inherit",
+                      cursor: "pointer",
+                      display: details.meanings ? "inline" : "none",
+                      userSelect: "none", // for touch devices
+                    },
+                  },
+                  jsxCreateElement("span", { class: "reading" }, details.meanings)
+                )
+              );
+            })
+        )
+      : "",
       ...groupedMeanings.flatMap((meanings) => [
         jsxCreateElement(
           "h2",
