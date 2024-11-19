@@ -498,8 +498,6 @@ export class Popup {
       hindiMeaning = dictionary.search(this.#data.token.card.spelling);
     }
 
-    console.log(hindiMeaning);
-
     const MEANINGS_PER_SET = 3;
 
     const createMeaningChunks = (meanings, chunkSize = MEANINGS_PER_SET) => {
