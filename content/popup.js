@@ -8,6 +8,7 @@ import {
 } from "./background_comms.js";
 import { Dialog } from "./dialog.js";
 import { getSentences } from "./word.js";
+import { JapaneseDictionary } from "../dictionary.js";
 const PARTS_OF_SPEECH = {
   n: "Noun",
   pn: "Pronoun",
@@ -118,38 +119,54 @@ const PARTS_OF_SPEECH = {
   // 'unc': '', // Not used in jpdb: empty list instead. JMDict: "unclassified"
 };
 
+const dictionary = new JapaneseDictionary();
+let dictionaryLoaded = false;
+
+const loadDictionary = async () => {
+  if (!config.showHindi) return;
+  if (dictionaryLoaded) return;
+  try {
+    await dictionary.loadDictionary();
+    dictionaryLoaded = true;
+  } catch (error) {
+    console.error("Failed to load dictionary:", error);
+  }
+};
+
 // Load kanji meanings from JSON file
 const loadKanjiMeanings = async () => {
   try {
     // Log the attempted URL for debugging
-    const resourceUrl = chrome.runtime.getURL('kanji_meanings.json');
+    const resourceUrl = chrome.runtime.getURL("kanji_meanings.json");
 
     // Check if the file exists first
     if (!resourceUrl) {
-      throw new Error('Could not generate URL for kanji_meanings.json');
+      throw new Error("Could not generate URL for kanji_meanings.json");
     }
 
     const response = await fetch(resourceUrl);
-    
+
     // Detailed error logging
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}, Text: ${await response.text()}`);
+      throw new Error(
+        `HTTP error! Status: ${response.status}, Text: ${await response.text()}`
+      );
     }
 
     const data = await response.json();
-    
+
     // Validate the data structure
-    if (!Array.isArray(data) && typeof data !== 'object') {
-      throw new Error('Invalid data format: Expected array or object');
+    if (!Array.isArray(data) && typeof data !== "object") {
+      throw new Error("Invalid data format: Expected array or object");
     }
 
     return data;
   } catch (error) {
     // Enhanced error logging
-    console.error('Failed to load kanji meanings:', {
+    console.error("Failed to load kanji meanings:", {
       error: error.message,
       stack: error.stack,
-      resourceUrl: chrome.runtime.getURL('kanji_meanings.json')
+      resourceUrl: chrome.runtime.getURL("kanji_meanings.json"),
     });
 
     // You might want to throw the error instead of returning empty array
@@ -158,10 +175,9 @@ const loadKanjiMeanings = async () => {
   }
 };
 
-
 // Helper function to get kanji details from local JSON data
 const getKanjiFromJSON = (kanjiMeanings, char) => {
-  const entry = kanjiMeanings.find(entry => entry.kanji === char);
+  const entry = kanjiMeanings.find((entry) => entry.kanji === char);
   return entry ? { kanji: entry.kanji, meaning: entry.meaning } : null;
 };
 
@@ -182,7 +198,9 @@ async function getKanjiDetails(char, kanjiMeanings) {
 
   // If not found in JSON, fetch from API
   try {
-    const response = await fetch(`https://kanjiapi.dev/v1/kanji/${encodeURIComponent(char)}`);
+    const response = await fetch(
+      `https://kanjiapi.dev/v1/kanji/${encodeURIComponent(char)}`
+    );
     return await response.json();
   } catch (error) {
     return null; // Handle error without logging
@@ -190,7 +208,7 @@ async function getKanjiDetails(char, kanjiMeanings) {
 }
 
 // Example usage
-const kanjiMeanings = await loadKanjiMeanings()
+const kanjiMeanings = await loadKanjiMeanings();
 
 function isKanji(char) {
   return /\p{Script=Han}/u.test(char);
@@ -451,7 +469,8 @@ export class Popup {
     const url = `https://jpdb.io/vocabulary/${card.vid}/${encodeURIComponent(
       card.spelling
     )}/${encodeURIComponent(card.reading)}`;
-    const kanjiUrl = (kanji) => `https://jpdb.io/kanji/${encodeURIComponent(kanji)}`;
+    const kanjiUrl = (kanji) =>
+      `https://jpdb.io/kanji/${encodeURIComponent(kanji)}`;
 
     // Get character details with local JSON check
     let characterDetails = (
@@ -461,14 +480,111 @@ export class Popup {
           return charDetails
             ? {
                 kanji: charDetails.kanji,
-                meanings: charDetails.meaning || charDetails.meanings.join(", "),
+                meanings:
+                  charDetails.meaning || charDetails.meanings.join(", "),
               }
             : null;
         })
       )
     ).filter(Boolean);
-    
+
     characterDetails = characterDetails.length ? characterDetails : null;
+
+    let hindiMeaning = null;
+    if (config.showHindi) {
+      if (!dictionaryLoaded) {
+        await loadDictionary();
+      }
+      hindiMeaning = dictionary.search(this.#data.token.card.spelling);
+    }
+
+    console.log(hindiMeaning);
+
+    const MEANINGS_PER_SET = 3;
+
+    const createMeaningChunks = (meanings, chunkSize = MEANINGS_PER_SET) => {
+      // Filter out non-string values and empty strings
+      const validMeanings = meanings.filter(
+        (meaning) => typeof meaning === "string" && meaning.trim().length > 0
+      );
+
+      return validMeanings.reduce((chunks, meaning, index) => {
+        const chunkIndex = Math.floor(index / chunkSize);
+        if (!chunks[chunkIndex]) chunks[chunkIndex] = [];
+        chunks[chunkIndex].push(meaning);
+        return chunks;
+      }, []);
+    };
+
+    const renderHindiMeanings = (meanings) => {
+      if (!meanings?.length) return "";
+
+      const uniqueMeanings = [...new Set(meanings)].filter(
+        (meaning) => typeof meaning === "string" && meaning.trim().length > 0
+      );
+
+      const meaningChunks = createMeaningChunks(uniqueMeanings);
+
+      if (!meaningChunks.length) return "";
+
+      const hasMoreMeanings = meaningChunks.length > 1;
+
+      return jsxCreateElement(
+        "div",
+        { class: "hindi-meanings" },
+        jsxCreateElement("h2", null, "Hindi Meaning"),
+        jsxCreateElement(
+          "div",
+          { class: "meaning-list" },
+          [
+            jsxCreateElement("div", { class: "meaning-set" }, [
+              jsxCreateElement("span", { class: "set-number" }, "1. "),
+              jsxCreateElement(
+                "span",
+                { class: "primary-meanings" },
+                meaningChunks[0].join("; ")
+              ),
+              ...(hasMoreMeanings
+                ? [
+                    jsxCreateElement(
+                      "button",
+                      {
+                        class: "toggle-more",
+                        onclick: (e) => {
+                          const container = e.target.closest(".hindi-meanings");
+                          const moreMeanings =
+                            container.querySelector(".more-meanings");
+                          const isExpanded =
+                            moreMeanings.classList.toggle("expanded");
+                          e.target.textContent = isExpanded ? "▼" : "▶";
+                        },
+                      },
+                      "▶"
+                    ),
+                  ]
+                : []),
+            ]),
+            hasMoreMeanings &&
+              jsxCreateElement(
+                "div",
+                { class: "more-meanings" },
+                meaningChunks
+                  .slice(1)
+                  .map((chunk, index) =>
+                    jsxCreateElement("div", { class: "meaning-set" }, [
+                      jsxCreateElement(
+                        "span",
+                        { class: "set-number" },
+                        `${index + 2}. `
+                      ),
+                      chunk.join("; "),
+                    ])
+                  )
+              ),
+          ].filter(Boolean)
+        )
+      );
+    };
 
     // Group meanings by part of speech
     const groupedMeanings = [];
@@ -524,58 +640,69 @@ export class Popup {
         card.pitchAccent.map((pitch) => renderPitch(card.reading, pitch))
       ),
       characterDetails
-      ? jsxCreateElement(
-          "div",
-          { class: "kanji-meanings" },
-          characterDetails
-            .filter((details) => details && details.meanings)
-            .map((details) => {
-              if (!details || !details.kanji) return null;
-    
-              return jsxCreateElement(
-                "div",
-                {
-                  class: "kanji-item",
-                  style: { display: "inline-flex", alignItems: "center", gap: "8px" },
-                },
-                // Link for kanji
-                jsxCreateElement(
-                  "a",
+        ? jsxCreateElement(
+            "div",
+            { class: "kanji-meanings" },
+            characterDetails
+              .filter((details) => details && details.meanings)
+              .map((details) => {
+                if (!details || !details.kanji) return null;
+
+                return jsxCreateElement(
+                  "div",
                   {
-                    lang: "ja",
-                    href: kanjiUrl(details.kanji),
-                    target: "_blank",
+                    class: "kanji-item",
                     style: {
-                      textDecoration: "none",
-                      color: "inherit",
-                      cursor: "pointer",
-                      display: details.kanji ? "inline" : "none",
-                      userSelect: "none", // for touch devices
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
                     },
                   },
-                  jsxCreateElement("span", {}, `${details.kanji}:`)
-                ),
-                jsxCreateElement("span", {}, " \u00A0"),                
-                // Link for meanings
-                jsxCreateElement(
-                  "a",
-                  {
-                    href: `https://kanji.koohii.com/study/kanji/${details.kanji}`,
-                    target: "_blank",
-                    style: {
-                      textDecoration: "none",
-                      color: "inherit",
-                      cursor: "pointer",
-                      display: details.meanings ? "inline" : "none",
-                      userSelect: "none", // for touch devices
+                  // Link for kanji
+                  jsxCreateElement(
+                    "a",
+                    {
+                      lang: "ja",
+                      href: kanjiUrl(details.kanji),
+                      target: "_blank",
+                      style: {
+                        textDecoration: "none",
+                        color: "inherit",
+                        cursor: "pointer",
+                        display: details.kanji ? "inline" : "none",
+                        userSelect: "none", // for touch devices
+                      },
                     },
-                  },
-                  jsxCreateElement("span", { class: "reading" }, details.meanings)
-                )
-              );
-            })
-        )
-      : "",
+                    jsxCreateElement("span", {}, `${details.kanji}:`)
+                  ),
+                  jsxCreateElement("span", {}, " \u00A0"),
+                  // Link for meanings
+                  jsxCreateElement(
+                    "a",
+                    {
+                      href: `https://kanji.koohii.com/study/kanji/${details.kanji}`,
+                      target: "_blank",
+                      style: {
+                        textDecoration: "none",
+                        color: "inherit",
+                        cursor: "pointer",
+                        display: details.meanings ? "inline" : "none",
+                        userSelect: "none", // for touch devices
+                      },
+                    },
+                    jsxCreateElement(
+                      "span",
+                      { class: "reading" },
+                      details.meanings
+                    )
+                  )
+                );
+              })
+          )
+        : "",
+      hindiMeaning?.meaning?.length
+        ? renderHindiMeanings(hindiMeaning.meaning)
+        : "",
       ...groupedMeanings.flatMap((meanings) => [
         jsxCreateElement(
           "h2",
