@@ -258,3 +258,56 @@ button.easy {
   border-radius: var(--border-radius);
   font-size: 0.9em;
 }
+
+.hindi-meanings {
+  margin: 0.5em 0;
+  padding: 0.5em 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.hindi-meanings h2 {
+  font-size: 0.8em;
+  margin: 0 0 0.3em 0;
+  color: var(--text-color-secondary);
+}
+
+.meaning-list {
+  font-size: 0.95em;
+  line-height: 1.4;
+  margin-left: 0.5em;
+}
+
+.meaning-set {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.3em;
+}
+
+.set-number {
+  color: var(--text-color-secondary);
+  margin-right: 0.3em;
+  flex-shrink: 0;
+}
+
+.toggle-more {
+  background: none;
+  border: none;
+  color: var(--text-color-secondary);
+  padding: 0 0.3em;
+  cursor: pointer;
+  font-size: 0.8em;
+  margin-left: 0.5em;
+}
+
+.toggle-more:hover {
+  color: var(--text-color);
+}
+
+.more-meanings {
+  display: none;
+  margin-top: 0.2em;
+}
+
+.more-meanings.expanded {
+  display: block;
+}
