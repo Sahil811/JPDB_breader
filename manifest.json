@@ -73,6 +73,11 @@
       "matches": ["*://bunpro.jp/*"],
       "js": ["integrations/bunpro.js"],
       "css": ["content/word.css"]
+    },
+    {
+      "matches": ["*://www.nhk.or.jp/*", "*://www3.nhk.or.jp/*"],
+      "js": ["integrations/parse_selection.js"],
+      "css": ["content/word.css"]
     }
   ],
   "background": {
@@ -98,7 +103,8 @@
     "themes.css",
     "kanji_meanings.json",
     "japanese_dictionary_hindi.json",
-    "dictionary.js"
+    "dictionary.js",
+    "integrations/parse_selection.js"
   ],
   "permissions": [
     "tabs",
@@ -117,6 +123,8 @@
     "*://ja.m.wikipedia.org/*",
     "*://app.readwok.com/*",
     "*://*.youtube.com/*",
-    "*://bunpro.jp/*"
+    "*://bunpro.jp/*",
+    "*://www.nhk.or.jp/*",
+    "*://www3.nhk.or.jp/*"
   ]
 }
