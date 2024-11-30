@@ -311,3 +311,49 @@ button.easy {
 .more-meanings.expanded {
   display: block;
 }
+
+.immersion-example {
+  margin-top: 1em;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1em;
+}
+
+.example-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.example-sentence {
+  font-size: 1.1em;
+  color: var(--text-color);
+}
+
+.example-translation {
+  font-size: 0.9em;
+  color: var(--text-color-secondary);
+}
+
+.example-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+  margin-top: 0.5em;
+}
+
+.example-nav button {
+  padding: 0.2em 0.5em;
+}
+
+.example-nav button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.immersion-kit-button {
+  background-color: yellow;
+  color: black;
+  border-radius: 4px;
+  cursor: pointer;
+}

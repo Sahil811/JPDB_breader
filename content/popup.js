@@ -314,6 +314,158 @@ function renderPitch(reading, pitch) {
     return jsxCreateElement("span", null, "Error: invalid pitch");
   }
 }
+
+class ImmersionKit {
+  constructor(vocabSection) {
+    this.examples = [];
+    this.currentIndex = 0;
+    this.isExpanded = false;
+    this.lastWord = null;
+    this.vocabSection = vocabSection;
+  }
+
+  async fetchExamples(word) {
+    try {
+      this.lastWord = word;
+
+      const response = await fetch(
+        `https://api.immersionkit.com/look_up_dictionary?keyword=${encodeURIComponent(
+          word
+        )}&sort=shortness`
+      );
+      const data = await response.json();
+      if (data?.data?.[0]?.examples) {
+        if (this.lastWord === word) {
+          this.examples = data.data[0].examples;
+          this.currentIndex = 0;
+          return true;
+        }
+      }
+      return false;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  navigate(direction) {
+    const newIndex = this.currentIndex + direction;
+    if (newIndex >= 0 && newIndex < this.examples.length) {
+      this.currentIndex = newIndex;
+      this.updateDisplay();
+      const example = this.examples[this.currentIndex];
+      if (example?.sound_url) {
+        this.playAudio(example.sound_url);
+      }
+    }
+  }
+
+  // Display update method
+  updateDisplay() {
+    const example = this.examples[this.currentIndex];
+    if (!example) return;
+
+    const newExample = this.renderExample();
+    if (!newExample) return;
+
+    const container = this.vocabSection.querySelector(".immersion-example");
+
+    if (container) {
+      container.replaceWith(newExample);
+    } else {
+      this.vocabSection.appendChild(newExample);
+    }
+  }
+
+  // Audio playback method
+  async playAudio(url) {
+    if (!url) return;
+
+    try {
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+      const audioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+      const source = audioContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(audioContext.destination);
+      source.start();
+    } catch (error) {
+      console.error("Error playing audio:", error);
+    }
+  }
+
+  renderExample() {
+    if (!this.examples.length) return null;
+
+    const example = this.examples[this.currentIndex];
+    if (!example) return null;
+
+    return jsxCreateElement(
+      "div",
+      { class: "immersion-example" },
+      jsxCreateElement(
+        "div",
+        { class: "example-content" },
+        // Image
+        example.image_url &&
+          jsxCreateElement("img", {
+            src: example.image_url,
+            alt: "Example image",
+            style: { maxWidth: "100%", cursor: "pointer" },
+            onclick: () => this.playAudio(example.sound_url),
+          }),
+        // Japanese sentence
+        jsxCreateElement(
+          "div",
+          { class: "example-sentence" },
+          example.sentence
+        ),
+        // English translation
+        jsxCreateElement(
+          "div",
+          { class: "example-translation" },
+          example.translation
+        ),
+        // Navigation
+        jsxCreateElement(
+          "div",
+          { class: "example-nav" },
+          jsxCreateElement(
+            "button",
+            {
+              disabled: this.currentIndex === 0,
+              onclick: (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.navigate(-1);
+              },
+            },
+            "←"
+          ),
+          jsxCreateElement(
+            "span",
+            null,
+            `${this.currentIndex + 1}/${this.examples.length}`
+          ),
+          jsxCreateElement(
+            "button",
+            {
+              disabled: this.currentIndex === this.examples.length - 1,
+              onclick: (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.navigate(1);
+              },
+            },
+            "→"
+          )
+        )
+      )
+    );
+  }
+}
 export class Popup {
   #demoMode;
   #element;
@@ -428,6 +580,14 @@ export class Popup {
                     await requestReview(this.#data.token.card, "easy"),
             },
             "Easy"
+          ),
+          jsxCreateElement(
+            "button",
+            {
+              class: "immersion-kit-button",
+              onclick: async () => await this.toggleImmersionKit(),
+            },
+            "Examples"
           )
         ),
         (this.#vocabSection = jsxCreateElement("section", {
@@ -436,7 +596,50 @@ export class Popup {
       )
     );
     this.#outerStyle = this.#element.style;
+    this.immersionKit = new ImmersionKit(this.#vocabSection);
   }
+
+  async toggleImmersionKit() {
+    const currentWord = this.#data.token.card.spelling;
+
+    // Toggle visibility first
+    const exampleSection =
+      this.#vocabSection.querySelector(".immersion-example");
+    if (exampleSection) {
+      if (this.immersionKit.isExpanded) {
+        exampleSection.style.display = "none";
+        this.immersionKit.isExpanded = false;
+        return;
+      } else {
+        exampleSection.style.display = "block";
+      }
+    }
+
+    // Check if we need to fetch new examples
+    if (!exampleSection || this.immersionKit.lastWord !== currentWord) {
+      // Clear old examples and fetch new ones
+      this.immersionKit.examples = [];
+      this.immersionKit.currentIndex = 0;
+      const success = await this.immersionKit.fetchExamples(currentWord);
+      if (!success) return;
+
+      // Create new example section if it doesn't exist
+      const example = this.immersionKit.renderExample();
+      if (example) {
+        if (exampleSection) {
+          exampleSection.replaceWith(example);
+        } else {
+          this.#vocabSection.appendChild(example);
+        }
+        await this.immersionKit.playAudio(
+          this.immersionKit.examples[0].sound_url
+        );
+      }
+    }
+
+    this.immersionKit.isExpanded = true;
+  }
+
   fadeIn() {
     // Necessary because in settings page, config is undefined
     // TODO is this still true? ~hmry(2023-08-08)
