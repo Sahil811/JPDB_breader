@@ -500,6 +500,24 @@ export class Popup {
       onwheel: (event) => {
         event.stopPropagation();
       },
+      ontouchstart: (event) => {
+        // Only prevent default if we're not touching an interactive element
+        if (!event.target.closest('button, a, [role="button"]')) {
+          event.preventDefault();
+        }
+        event.stopPropagation();
+      },
+      ontouchmove: (event) => {
+        // Only prevent default if we're not in a scrollable area
+        const target = event.target;
+        const element = target.closest('[style*="overflow"]') || target;
+        const canScroll = element.scrollHeight > element.clientHeight;
+
+        if (!canScroll) {
+          event.preventDefault();
+        }
+        event.stopPropagation();
+      },
       style: `all:initial;z-index:2147483647;${
         demoMode
           ? ""

@@ -312,6 +312,24 @@ button.easy {
   display: block;
 }
 
+article {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+  margin: 0;
+  padding: 1em;
+  max-width: 24em;
+  max-height: 40vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* Add this */
+  touch-action: pan-y; /* Add this */
+  background-color: var(--color-background);
+  border-radius: var(--border-radius);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  box-shadow: 5px 5px 15px 0px rgba(0, 0, 0, 0.5);
+}
+
 .immersion-example {
   margin-top: 1em;
   border-top: 1px solid var(--border-color);
