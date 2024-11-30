@@ -334,7 +334,7 @@ button.easy {
   color: var(--text-color-secondary);
 }
 
-.example-nav {
+.immersion-example .example-nav {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -342,11 +342,23 @@ button.easy {
   margin-top: 0.5em;
 }
 
-.example-nav button {
+.immersion-example .example-nav button {
   padding: 0.2em 0.5em;
+  background-color: #4a4a4a; /* medium gray */
+  color: white;
 }
 
-.example-nav button:disabled {
+.immersion-example .example-nav button:hover {
+  background-color: #5a5a5a; /* lighter gray */
+  color: white;
+}
+
+.immersion-example .example-nav button:active {
+  background-color: #3a3a3a; /* darker gray */
+  color: white;
+}
+
+.immersion-example .example-nav button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
