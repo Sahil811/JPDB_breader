@@ -501,21 +501,25 @@ export class Popup {
         event.stopPropagation();
       },
       ontouchstart: (event) => {
-        // Only prevent default if we're not touching an interactive element
-        if (!event.target.closest('button, a, [role="button"]')) {
-          event.preventDefault();
-        }
+        // Don't prevent default here to allow scrolling inside popup
         event.stopPropagation();
       },
       ontouchmove: (event) => {
-        // Only prevent default if we're not in a scrollable area
-        const target = event.target;
-        const element = target.closest('[style*="overflow"]') || target;
-        const canScroll = element.scrollHeight > element.clientHeight;
-
-        if (!canScroll) {
-          event.preventDefault();
+        // Check if we're scrolling inside the popup
+        let target = event.target;
+        while (target && target !== this.#element) {
+          if (target.scrollHeight > target.clientHeight) {
+            // Allow natural scrolling behavior inside scrollable elements
+            event.stopPropagation();
+            return;
+          }
+          target = target.parentElement;
         }
+        // Prevent background page scroll
+        event.preventDefault();
+        event.stopPropagation();
+      },
+      ontouchend: (event) => {
         event.stopPropagation();
       },
       style: `all:initial;z-index:2147483647;${
