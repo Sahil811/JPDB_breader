@@ -408,26 +408,6 @@ class ImmersionKit {
       jsxCreateElement(
         "div",
         { class: "example-content" },
-        // Image
-        example.image_url &&
-          jsxCreateElement("img", {
-            src: example.image_url,
-            alt: "Example image",
-            style: { maxWidth: "100%", cursor: "pointer" },
-            onclick: () => this.playAudio(example.sound_url),
-          }),
-        // Japanese sentence
-        jsxCreateElement(
-          "div",
-          { class: "example-sentence" },
-          example.sentence
-        ),
-        // English translation
-        jsxCreateElement(
-          "div",
-          { class: "example-translation" },
-          example.translation
-        ),
         // Navigation
         jsxCreateElement(
           "div",
@@ -461,6 +441,26 @@ class ImmersionKit {
             },
             "→"
           )
+        ),
+        // Image
+        example.image_url &&
+          jsxCreateElement("img", {
+            src: example.image_url,
+            alt: "Example image",
+            style: { maxWidth: "100%", cursor: "pointer" },
+            onclick: () => this.playAudio(example.sound_url),
+          }),
+        // Japanese sentence
+        jsxCreateElement(
+          "div",
+          { class: "example-sentence" },
+          example.sentence
+        ),
+        // English translation
+        jsxCreateElement(
+          "div",
+          { class: "example-translation" },
+          example.translation
         )
       )
     );
