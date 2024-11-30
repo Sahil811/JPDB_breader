@@ -507,14 +507,30 @@ export class Popup {
       ontouchmove: (event) => {
         // Check if we're scrolling inside the popup
         let target = event.target;
+        let scrollableParentFound = false;
+
+        // Look for scrollable parent elements
         while (target && target !== this.#element) {
-          if (target.scrollHeight > target.clientHeight) {
-            // Allow natural scrolling behavior inside scrollable elements
-            event.stopPropagation();
-            return;
+          const style = window.getComputedStyle(target);
+          const isScrollable =
+            (target.scrollHeight > target.clientHeight &&
+              (style.overflowY === "auto" || style.overflowY === "scroll")) ||
+            (target.scrollWidth > target.clientWidth &&
+              (style.overflowX === "auto" || style.overflowX === "scroll"));
+
+          if (isScrollable) {
+            scrollableParentFound = true;
+            break;
           }
           target = target.parentElement;
         }
+
+        // If we're inside the popup, allow scrolling
+        if (target && (target === this.#element || scrollableParentFound)) {
+          event.stopPropagation();
+          return;
+        }
+
         // Prevent background page scroll
         event.preventDefault();
         event.stopPropagation();
