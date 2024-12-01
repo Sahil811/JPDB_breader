@@ -324,23 +324,61 @@ class ImmersionKit {
     this.vocabSection = vocabSection;
   }
 
+  async tryFetch(word, useFullParams = false) {
+    const baseUrl = `https://api.immersionkit.com/look_up_dictionary?keyword=${encodeURIComponent(
+      word
+    )}`;
+    const fullUrl = `${baseUrl}&tags=&jlpt=&wk=&sort=shortness&decks=`;
+
+    const response = await fetch(useFullParams ? fullUrl : baseUrl);
+    const data = await response.json();
+
+    if (data?.data?.[0]?.examples?.length > 0) {
+      this.examples = data.data[0].examples;
+      this.currentIndex = 0;
+      return true;
+    }
+
+    return false;
+  }
+
   async fetchExamples(word) {
     try {
       this.lastWord = word;
 
-      const response = await fetch(
-        `https://api.immersionkit.com/look_up_dictionary?keyword=${encodeURIComponent(
-          word
-        )}&sort=shortness`
-      );
-      const data = await response.json();
-      if (data?.data?.[0]?.examples) {
-        if (this.lastWord === word) {
-          this.examples = data.data[0].examples;
-          this.currentIndex = 0;
-          return true;
+      // Try the full word with both URL types
+      if ((await this.tryFetch(word)) || (await this.tryFetch(word, true))) {
+        return true;
+      }
+
+      // If no examples found, split by particles and try again
+      const particles = ["を", "に", "が", "へ", "と", "で"];
+      for (const particle of particles) {
+        if (word.includes(particle)) {
+          // Try the part before the particle
+          const beforeParticle = word.split(particle)[0];
+          if (beforeParticle) {
+            if (
+              (await this.tryFetch(beforeParticle)) ||
+              (await this.tryFetch(beforeParticle, true))
+            ) {
+              return true;
+            }
+          }
+
+          // Try the part after the particle
+          const afterParticle = word.split(particle)[1];
+          if (afterParticle) {
+            if (
+              (await this.tryFetch(afterParticle)) ||
+              (await this.tryFetch(afterParticle, true))
+            ) {
+              return true;
+            }
+          }
         }
       }
+
       return false;
     } catch (error) {
       return false;
