@@ -327,8 +327,8 @@ class ImmersionKit {
   async tryFetch(word, useFullParams = false) {
     const baseUrl = `https://api.immersionkit.com/look_up_dictionary?keyword=${encodeURIComponent(
       word
-    )}`;
-    const fullUrl = `${baseUrl}&tags=&jlpt=&wk=&sort=shortness&decks=`;
+    )}&sort=shortness`;
+    const fullUrl = `${baseUrl}&tags=&jlpt=&wk=&decks=`;
 
     const response = await fetch(useFullParams ? fullUrl : baseUrl);
     const data = await response.json();
