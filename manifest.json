@@ -75,7 +75,11 @@
       "css": ["content/word.css"]
     },
     {
-      "matches": ["*://www.nhk.or.jp/*", "*://www3.nhk.or.jp/*"],
+      "matches": [
+        "*://www.nhk.or.jp/*",
+        "*://www3.nhk.or.jp/*",
+        "*://jpdb.io/*"
+      ],
       "js": ["integrations/parse_selection.js"],
       "css": ["content/word.css"]
     }
@@ -125,6 +129,7 @@
     "*://*.youtube.com/*",
     "*://bunpro.jp/*",
     "*://www.nhk.or.jp/*",
-    "*://www3.nhk.or.jp/*"
+    "*://www3.nhk.or.jp/*",
+    "*://jpdb.io/*"
   ]
 }
