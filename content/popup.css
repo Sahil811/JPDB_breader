@@ -371,3 +371,41 @@ button.easy {
   border-radius: 4px;
   cursor: pointer;
 }
+
+.image-audio-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.example-image {
+  max-width: 100%;
+  display: block;
+  border-radius: 8px;
+}
+
+.audio-button {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  padding: 5px 10px;
+  opacity: 0; /* Initially hidden */
+  transition: opacity 0.3s ease; /* Smooth transition for hover effect */
+}
+
+/* Show the button on hover over the container */
+.image-audio-container:hover .audio-button {
+  opacity: 1;
+}
+
+/* If there's no image, make the button always visible */
+.image-audio-container:not(:has(.example-image)) .audio-button {
+  opacity: 1;
+  display: block;
+}

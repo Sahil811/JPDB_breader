@@ -418,6 +418,12 @@ class ImmersionKit {
   async playAudio(url) {
     if (!url) return;
 
+    // Stop any currently playing audio
+    if (this.currentAudio) {
+      this.currentAudio.stop(); // Use stop() instead of pause()
+      this.currentAudio = null;
+    }
+
     try {
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
@@ -425,10 +431,15 @@ class ImmersionKit {
         window.webkitAudioContext)();
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
-      const source = audioContext.createBufferSource();
-      source.buffer = audioBuffer;
-      source.connect(audioContext.destination);
-      source.start();
+      this.currentAudio = audioContext.createBufferSource();
+      this.currentAudio.buffer = audioBuffer;
+      this.currentAudio.connect(audioContext.destination);
+      this.currentAudio.start();
+
+      // Set currentAudio to null when the audio finishes playing
+      this.currentAudio.onended = () => {
+        this.currentAudio = null;
+      };
     } catch (error) {
       console.error("Error playing audio:", error);
     }
@@ -480,14 +491,33 @@ class ImmersionKit {
             "→"
           )
         ),
-        // Image
-        example.image_url &&
-          jsxCreateElement("img", {
-            src: example.image_url,
-            alt: "Example image",
-            style: { maxWidth: "100%", cursor: "pointer" },
-            onclick: () => this.playAudio(example.sound_url),
-          }),
+        // Image and Audio Button Container
+        jsxCreateElement(
+          "div",
+          {
+            class: "image-audio-container",
+          },
+          // Image
+          example.image_url &&
+            jsxCreateElement("img", {
+              src: example.image_url,
+              alt: "Example image",
+              class: "example-image",
+            }),
+          // Audio Button
+          jsxCreateElement(
+            "button",
+            {
+              class: "audio-button",
+              onclick: (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.playAudio(example.sound_url);
+              },
+            },
+            "🔊"
+          )
+        ),
         // Japanese sentence
         jsxCreateElement(
           "div",
