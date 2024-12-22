@@ -30,11 +30,8 @@
 
   function isSpecificSite() {
     const currentURL = window.location.href;
-    return (
-      currentURL.includes("ankiuser.net") ||
-      currentURL.includes("ankiweb.net") ||
-      currentURL.includes("jpdb.io")
-    );
+    const specificSites = ["ankiuser.net", "ankiweb.net", "jpdb.io"];
+    return specificSites.some((site) => currentURL.includes(site));
   }
 
   async function handleParse() {
