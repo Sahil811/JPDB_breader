@@ -78,7 +78,8 @@
       "matches": [
         "*://www.nhk.or.jp/*",
         "*://www3.nhk.or.jp/*",
-        "*://jpdb.io/*"
+        "*://jpdb.io/*",
+        "*://ankiuser.net/*"
       ],
       "js": ["integrations/parse_selection.js"],
       "css": ["content/word.css"]
@@ -130,6 +131,7 @@
     "*://bunpro.jp/*",
     "*://www.nhk.or.jp/*",
     "*://www3.nhk.or.jp/*",
-    "*://jpdb.io/*"
+    "*://jpdb.io/*",
+    "*://ankiuser.net/*"
   ]
 }
