@@ -503,6 +503,11 @@ class ImmersionKit {
               src: example.image_url,
               alt: "Example image",
               class: "example-image",
+              onclick: (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.playAudio(example.sound_url);
+              },
             }),
           // Audio Button
           jsxCreateElement(
