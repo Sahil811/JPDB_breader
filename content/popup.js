@@ -211,7 +211,7 @@ async function getKanjiDetails(char, kanjiMeanings) {
 const kanjiMeanings = await loadKanjiMeanings();
 
 function isKanji(char) {
-  return /\p{Script=Han}/u.test(char);
+  return /\p{Script=Han}/u.test(char) && char !== "々";
 }
 
 function getClosestClientRect(elem, x, y) {
