@@ -13,17 +13,17 @@
   // --- Constants and Helpers ---
   const SPECIFIC_SITES = ["ankiuser.net", "ankiweb.net", "jpdb.io"];
   const isAsbSubtitlesAdded = ["miruro.tv/watch", "*hianime.to/watch*", "youtube.com/watch", "animesugetv.to/watch"];
-  const DEBOUNCE_DELAY = 250; // Delay for debouncing parse requests
+  const DEBOUNCE_DELAY = 250;
+  
+  // Subtitle class selectors
+  const SUBTITLE_SELECTORS = '.asbplayer-subtitles, .asbplayer-fullscreen-subtitles';
 
-  // Function to check if the current site is in the specific list
   const isSpecificSite = () =>
     SPECIFIC_SITES.some((site) => window.location.href.includes(site));
 
-  // Function to check if current site needs subtitle parsing
   const isSubtitleSite = () =>
     isAsbSubtitlesAdded.some(site => window.location.href.includes(site));
 
-  // Debounce function to limit parse calls
   const debounce = (func, delay) => {
     let debounceTimer;
     return (...args) => {
@@ -46,9 +46,10 @@
     }
   };
 
-  // Parse specific element
   const parseElement = async (element) => {
     try {
+      if (!element || !element.textContent.trim()) return;
+      
       const paragraphs = paragraphsInNode(element);
       if (paragraphs.length === 0) return;
 
@@ -60,40 +61,37 @@
     }
   };
 
-  // Debounced parsing function
   const debouncedParse = debounce(handleParsing, DEBOUNCE_DELAY);
 
   // --- Subtitle Observer Setup ---
   const setupSubtitleObserver = () => {
-    // Keep track of observed elements to avoid duplicate observers
     const observedElements = new Set();
     
-    // Create a mutation observer that will never disconnect
     const perpetualObserver = new MutationObserver((mutations) => {
-      // Look for subtitle elements that we haven't observed yet
-      document.querySelectorAll('.asbplayer-subtitles').forEach(subtitlesElement => {
+      // Look for both normal and fullscreen subtitle elements
+      document.querySelectorAll(SUBTITLE_SELECTORS).forEach(subtitlesElement => {
         if (!observedElements.has(subtitlesElement)) {
           observedElements.add(subtitlesElement);
           
-          // Create observer for this specific subtitle element
           const textObserver = new MutationObserver(() => {
-            parseElement(subtitlesElement);
+            if (subtitlesElement.textContent.trim()) {
+              parseElement(subtitlesElement);
+            }
           });
 
-          // Observe text changes
           textObserver.observe(subtitlesElement, {
             characterData: true,
             childList: true,
             subtree: true
           });
 
-          // Initial parse
-          parseElement(subtitlesElement);
+          if (subtitlesElement.textContent.trim()) {
+            parseElement(subtitlesElement);
+          }
         }
       });
     });
 
-    // Start observing the entire document and never stop
     perpetualObserver.observe(document, {
       childList: true,
       subtree: true
@@ -116,16 +114,13 @@
   });
 
   // --- Event Handling ---
-  // Setup subtitle observer if needed
   if (isSubtitleSite()) {
     setupSubtitleObserver();
   }
 
-  // Initial parse (excluding specific sites)
   if (!isSpecificSite()) {
     debouncedParse();
   } else {
-    // Specific site handling: initial parse with delay, and debounced click/touch handling
     setTimeout(debouncedParse, 1000);
 
     const eventHandler = () => debouncedParse();
