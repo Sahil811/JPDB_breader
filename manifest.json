@@ -79,7 +79,11 @@
         "*://www.nhk.or.jp/*",
         "*://www3.nhk.or.jp/*",
         "*://jpdb.io/*",
-        "*://ankiuser.net/*"
+        "*://ankiuser.net/*",
+        "*://www.miruro.tv/watch/*",
+        "*://hianime.to/watch/*",
+        "*://www.youtube.com/watch/*",
+        "*://animesugetv.to/watch/*"
       ],
       "js": ["integrations/parse_selection.js"],
       "css": ["content/word.css"]
@@ -132,6 +136,10 @@
     "*://www.nhk.or.jp/*",
     "*://www3.nhk.or.jp/*",
     "*://jpdb.io/*",
-    "*://ankiuser.net/*"
+    "*://ankiuser.net/*",
+    "*://www.miruro.tv/watch/*",
+    "*://hianime.to/watch/*",
+    "*://www.youtube.com/watch/*",
+    "*://animesugetv.to/watch/*"
   ]
 }
