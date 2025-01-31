@@ -14,6 +14,7 @@
   const SPECIFIC_SITES = ["ankiuser.net", "ankiweb.net", "jpdb.io", "anime"];
   const isAsbSubtitlesAdded = ["miruro.tv/watch", "*hianime.to/watch*", "youtube.com/watch", "animesugetv.to/watch"];
   const DEBOUNCE_DELAY = 250;
+  const PARSE_TIMEOUT = 5000;
   
   // Subtitle class selectors
   const SUBTITLE_SELECTORS = '.asbplayer-subtitles, .asbplayer-fullscreen-subtitles';
@@ -38,9 +39,24 @@
       const paragraphs = paragraphsInNode(document.body);
       if (paragraphs.length === 0) return;
 
-      const [batches, applied] = parseParagraphs(paragraphs);
-      requestParse(batches);
-      await Promise.allSettled(applied);
+      // Use a Set to prevent duplicate parsing
+      const uniqueParagraphs = [...new Set(paragraphs)];
+
+      const [batches, applied] = parseParagraphs(uniqueParagraphs);
+      
+      // Limit concurrent parsing to prevent overwhelming system
+      const parseBatch = async () => {
+        requestParse(batches);
+        await Promise.allSettled(applied);
+      };
+
+      // Use Promise.race to add timeout protection
+      await Promise.race([
+        parseBatch(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Parsing timeout')), PARSE_TIMEOUT)
+        )
+      ]);
     } catch (error) {
       showError(error);
     }
@@ -53,9 +69,16 @@
       const paragraphs = paragraphsInNode(element);
       if (paragraphs.length === 0) return;
 
-      const [batches, applied] = parseParagraphs(paragraphs);
-      requestParse(batches);
-      await Promise.allSettled(applied);
+      // Prevent repeated parsing of same content
+      const uniqueParagraphs = [...new Set(paragraphs)];
+      const [batches, applied] = parseParagraphs(uniqueParagraphs);
+      
+      // Add a simple parsing flag to prevent re-parsing
+      if (!element.dataset.parsed) {
+        requestParse(batches);
+        await Promise.allSettled(applied);
+        element.dataset.parsed = 'true';
+      }
     } catch (error) {
       showError(error);
     }
@@ -65,16 +88,17 @@
 
   // --- Subtitle Observer Setup ---
   const setupSubtitleObserver = () => {
-    const observedElements = new Set();
+    const observedElements = new WeakSet();
     
-    const perpetualObserver = new MutationObserver((mutations) => {
-      // Look for both normal and fullscreen subtitle elements
+    const perpetualObserver = new MutationObserver(() => {
       document.querySelectorAll(SUBTITLE_SELECTORS).forEach(subtitlesElement => {
         if (!observedElements.has(subtitlesElement)) {
           observedElements.add(subtitlesElement);
           
-          const textObserver = new MutationObserver(() => {
-            if (subtitlesElement.textContent.trim()) {
+          const textObserver = new MutationObserver((mutations) => {
+            // Only parse if content has significantly changed
+            if (subtitlesElement.textContent.trim() && 
+                mutations.some(m => m.addedNodes.length > 0 || m.removedNodes.length > 0)) {
               parseElement(subtitlesElement);
             }
           });
@@ -85,6 +109,7 @@
             subtree: true
           });
 
+          // Initial parse with safeguard
           if (subtitlesElement.textContent.trim()) {
             parseElement(subtitlesElement);
           }
