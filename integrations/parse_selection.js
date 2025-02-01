@@ -39,18 +39,14 @@
       const paragraphs = paragraphsInNode(document.body);
       if (paragraphs.length === 0) return;
 
-      // Use a Set to prevent duplicate parsing
       const uniqueParagraphs = [...new Set(paragraphs)];
-
       const [batches, applied] = parseParagraphs(uniqueParagraphs);
       
-      // Limit concurrent parsing to prevent overwhelming system
       const parseBatch = async () => {
         requestParse(batches);
         await Promise.allSettled(applied);
       };
 
-      // Use Promise.race to add timeout protection
       await Promise.race([
         parseBatch(),
         new Promise((_, reject) => 
@@ -69,16 +65,18 @@
       const paragraphs = paragraphsInNode(element);
       if (paragraphs.length === 0) return;
 
-      // Prevent repeated parsing of same content
+      // Store current text to compare changes
+      const currentText = element.textContent.trim();
+      if (element.dataset.lastParsedText === currentText) return;
+
       const uniqueParagraphs = [...new Set(paragraphs)];
       const [batches, applied] = parseParagraphs(uniqueParagraphs);
       
-      // Add a simple parsing flag to prevent re-parsing
-      if (!element.dataset.parsed) {
-        requestParse(batches);
-        await Promise.allSettled(applied);
-        element.dataset.parsed = 'true';
-      }
+      requestParse(batches);
+      await Promise.allSettled(applied);
+      
+      // Update the last parsed text
+      element.dataset.lastParsedText = currentText;
     } catch (error) {
       showError(error);
     }
@@ -96,9 +94,8 @@
           observedElements.add(subtitlesElement);
           
           const textObserver = new MutationObserver((mutations) => {
-            // Only parse if content has significantly changed
-            if (subtitlesElement.textContent.trim() && 
-                mutations.some(m => m.addedNodes.length > 0 || m.removedNodes.length > 0)) {
+            const currentText = subtitlesElement.textContent.trim();
+            if (currentText && currentText !== subtitlesElement.dataset.lastParsedText) {
               parseElement(subtitlesElement);
             }
           });
@@ -109,7 +106,7 @@
             subtree: true
           });
 
-          // Initial parse with safeguard
+          // Initial parse
           if (subtitlesElement.textContent.trim()) {
             parseElement(subtitlesElement);
           }
