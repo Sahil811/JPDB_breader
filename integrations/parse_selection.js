@@ -11,8 +11,8 @@
   const { showError } = await $import("/content/toast.js");
 
   // --- Constants and Helpers ---
-  const SPECIFIC_SITES = ["ankiuser.net", "ankiweb.net", "jpdb.io", "anime"];
-  const isAsbSubtitlesAdded = ["miruro.tv/watch", "*hianime.to/watch*", "youtube.com/watch", "animesugetv.to/watch"];
+  const SPECIFIC_SITES = ["ankiuser.net", "ankiweb.net", "jpdb.io"];
+  const isAsbSubtitlesAdded = ["miruro.tv/watch", "*hianime.to/watch*", "youtube.com/watch", "animesugetv.to/watch", "netflix", "anime"];
   const DEBOUNCE_DELAY = 250;
   const PARSE_TIMEOUT = 5000;
   
