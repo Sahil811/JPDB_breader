@@ -699,6 +699,18 @@ export class Popup {
               onclick: async () => await this.toggleImmersionKit(),
             },
             "Examples"
+          ),
+          jsxCreateElement(
+            "button",
+            {
+              class: "explain-button",
+              onclick: (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                this.explainWord(this.#data.token.card.spelling, this.#data.token.card.meanings);
+              },
+            },
+            "ℹ️"
           )
         ),
         (this.#vocabSection = jsxCreateElement("section", {
@@ -1162,4 +1174,123 @@ export class Popup {
   updateStyle(newCSS = config.customPopupCSS) {
     this.#customStyle.textContent = newCSS;
   }
+
+  async explainWord(word, meanings) {
+    const definition = meanings
+      .map((meaning) => meaning.glosses.join("; "))
+      .join("; ");
+    const prompt = `Could you explain why the Japanese word ${word} is defined as ${definition}? Please provide an etymological breakdown by analyzing its individual kanji components. How do these meanings combine to form the overall definition of the word?`;
+
+    try {
+      const response = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-preview-02-05:generateContent?key=AIzaSyBlMemI4PGGUlJijDoK6p24k4P_scuJuuc",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: "user",
+                parts: [{ text: prompt }],
+              },
+            ],
+          }),
+        }
+      );
+
+      const data = await response.json();
+      const explanation = data.candidates[0].content.parts[0].text;
+
+      if (!window.explanationPopup) {
+        window.explanationPopup = new ExplanationPopup();
+        document.body.append(window.explanationPopup.element);
+      }
+      window.explanationPopup.show(explanation);
+    } catch (error) {
+      console.error("Error fetching explanation:", error);
+      alert("Failed to get explanation from Gemini API.");
+    }
+  }
 }
+
+class ExplanationPopup {
+  constructor() {
+    this.element = jsxCreateElement("div", {
+      id: "jpdb-explanation-popup",
+      style: `all:initial;z-index:2147483647;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);`,
+    });
+    const shadow = this.element.attachShadow({ mode: "closed" });
+    shadow.append(
+      jsxCreateElement("link", {
+        rel: "stylesheet",
+        href: browser.runtime.getURL("/themes.css"),
+      }),
+      jsxCreateElement("link", {
+        rel: "stylesheet",
+        href: browser.runtime.getURL("/content/popup.css"),
+      }),
+      jsxCreateElement(
+        "article",
+        {
+          style: `width: 80vw; height: 80vh; overflow: auto;`,
+        },
+        (this.content = jsxCreateElement("div", { class: "explanation-content" }))
+      )
+    );
+  }
+
+  formatExplanation(text) {
+    // Replace newlines with <br> for paragraph breaks.
+    let formattedText = text.replace(/\n/g, "<br>");
+
+    // Wrap bullet point lists.
+    formattedText = formattedText.replace(/(\*   .*?)<br>(?!\*)/gs, (match, p1) => {
+      const items = p1.split("<br>*   ").filter(item => item.trim() !== "");
+      if (items.length > 0) {
+        const listItems = items.map(item => `<li>${item.replace("*   ", "").trim()}</li>`).join('');
+        return `<ul>${listItems}</ul>`;
+      }
+      return "";
+    });
+
+    // Bold numbered headings and titles.
+    formattedText = formattedText.replace(/^(\d+\..*):<br>/gm, '<strong>$1</strong>:<br>');
+    formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    // Italicize romaji (in parentheses)
+      formattedText = formattedText.replace(/\(([a-zA-Zō]+)\)/g, '<em>($1)</em>');
+
+      // Italicize romaji
+      formattedText = formattedText.replace(/([A-Za-z]+ō)/g, '<em>$1</em>');
+
+
+    return formattedText;
+  }
+
+  show(explanation) {
+    this.content.innerHTML = this.formatExplanation(explanation);
+    this.element.style.opacity = "1";
+    this.element.style.visibility = "visible";
+  }
+
+  hide() {
+    this.element.style.opacity = "0";
+    this.element.style.visibility = "hidden";
+  }
+}
+
+document.addEventListener("click", (event) => {
+  const explanationPopup = document.getElementById("jpdb-explanation-popup");
+  const parentPopup = document.getElementById("jpdb-popup");
+  
+  if (event.target === parentPopup) {
+      window.explanationPopup.hide();
+      return;
+  }
+  
+  if (explanationPopup && !explanationPopup.contains(event.target)) {
+      window.explanationPopup.hide();
+  }
+});

@@ -409,3 +409,13 @@ button.easy {
   opacity: 1;
   display: block;
 }
+
+.explain-button {
+  margin-left: 0.5em;
+  padding: 0.1em 0.3em;
+  font-size: 1em; /* Adjust as needed */
+  background-color: transparent;
+  color: var(--color-text);
+  border: 1px solid lightskyblue;
+  border-radius: var(--border-radius);
+}
