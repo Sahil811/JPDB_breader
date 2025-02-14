@@ -26,6 +26,7 @@ export const defaultConfig = {
   hardKey: null,
   goodKey: null,
   easyKey: null,
+  geminiApiKey: null,
 };
 function localStorageGet(key, fallback = null) {
   const data = localStorage.getItem(key);

@@ -707,7 +707,10 @@ export class Popup {
               onclick: (event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                this.explainWord(this.#data.token.card.spelling, this.#data.token.card.meanings);
+                this.explainWord(
+                  this.#data.token.card.spelling,
+                  this.#data.token.card.meanings
+                );
               },
             },
             "ℹ️"
@@ -1176,6 +1179,19 @@ export class Popup {
   }
 
   async explainWord(word, meanings) {
+    if (!config.geminiApiKey) {
+      alert("Please set your Gemini API key in the extension settings first.");
+      return;
+    }
+
+    if (!window.explanationPopup) {
+      window.explanationPopup = new ExplanationPopup();
+      document.body.append(window.explanationPopup.element);
+    }
+
+    // Show loading state
+    window.explanationPopup.showLoading();
+
     const definition = meanings
       .map((meaning) => meaning.glosses.join("; "))
       .join("; ");
@@ -1183,12 +1199,9 @@ export class Popup {
 
     try {
       const response = await fetch(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-preview-02-05:generateContent?key=AIzaSyBlMemI4PGGUlJijDoK6p24k4P_scuJuuc",
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-preview-02-05:generateContent?key=${config.geminiApiKey}`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
           body: JSON.stringify({
             contents: [
               {
@@ -1200,17 +1213,19 @@ export class Popup {
         }
       );
 
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
       const data = await response.json();
       const explanation = data.candidates[0].content.parts[0].text;
-
-      if (!window.explanationPopup) {
-        window.explanationPopup = new ExplanationPopup();
-        document.body.append(window.explanationPopup.element);
-      }
       window.explanationPopup.show(explanation);
     } catch (error) {
       console.error("Error fetching explanation:", error);
-      alert("Failed to get explanation from Gemini API.");
+      alert(
+        "Failed to get explanation. Please check your API key and try again."
+      );
+      window.explanationPopup.hide();
     }
   }
 }
@@ -1222,6 +1237,43 @@ class ExplanationPopup {
       style: `all:initial;z-index:2147483647;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);`,
     });
     const shadow = this.element.attachShadow({ mode: "closed" });
+
+    // Add loading spinner styles
+    const styles = jsxCreateElement(
+      "style",
+      null,
+      `
+      .loader {
+        width: 48px;
+        height: 48px;
+        border: 5px solid #FFF;
+        border-bottom-color: transparent;
+        border-radius: 50%;
+        display: inline-block;
+        box-sizing: border-box;
+        animation: rotation 1s linear infinite;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      @keyframes rotation {
+        0% {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+        100% {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
+
+      .loading {
+        min-height: 200px;
+        position: relative;
+      }
+    `
+    );
+
     shadow.append(
       jsxCreateElement("link", {
         rel: "stylesheet",
@@ -1231,14 +1283,29 @@ class ExplanationPopup {
         rel: "stylesheet",
         href: browser.runtime.getURL("/content/popup.css"),
       }),
+      styles,
       jsxCreateElement(
         "article",
         {
           style: `width: 80vw; height: 80vh; overflow: auto;`,
         },
-        (this.content = jsxCreateElement("div", { class: "explanation-content" }))
+        (this.content = jsxCreateElement("div", {
+          class: "explanation-content",
+        }))
       )
     );
+  }
+
+  showLoading() {
+    this.content.replaceChildren(
+      jsxCreateElement(
+        "div",
+        { class: "loading" },
+        jsxCreateElement("span", { class: "loader" })
+      )
+    );
+    this.element.style.opacity = "1";
+    this.element.style.visibility = "visible";
   }
 
   formatExplanation(text) {
@@ -1246,25 +1313,35 @@ class ExplanationPopup {
     let formattedText = text.replace(/\n/g, "<br>");
 
     // Wrap bullet point lists.
-    formattedText = formattedText.replace(/(\*   .*?)<br>(?!\*)/gs, (match, p1) => {
-      const items = p1.split("<br>*   ").filter(item => item.trim() !== "");
-      if (items.length > 0) {
-        const listItems = items.map(item => `<li>${item.replace("*   ", "").trim()}</li>`).join('');
-        return `<ul>${listItems}</ul>`;
+    formattedText = formattedText.replace(
+      /(\*   .*?)<br>(?!\*)/gs,
+      (match, p1) => {
+        const items = p1.split("<br>*   ").filter((item) => item.trim() !== "");
+        if (items.length > 0) {
+          const listItems = items
+            .map((item) => `<li>${item.replace("*   ", "").trim()}</li>`)
+            .join("");
+          return `<ul>${listItems}</ul>`;
+        }
+        return "";
       }
-      return "";
-    });
+    );
 
     // Bold numbered headings and titles.
-    formattedText = formattedText.replace(/^(\d+\..*):<br>/gm, '<strong>$1</strong>:<br>');
-    formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    formattedText = formattedText.replace(
+      /^(\d+\..*):<br>/gm,
+      "<strong>$1</strong>:<br>"
+    );
+    formattedText = formattedText.replace(
+      /\*\*(.*?)\*\*/g,
+      "<strong>$1</strong>"
+    );
 
     // Italicize romaji (in parentheses)
-      formattedText = formattedText.replace(/\(([a-zA-Zō]+)\)/g, '<em>($1)</em>');
+    formattedText = formattedText.replace(/\(([a-zA-Zō]+)\)/g, "<em>($1)</em>");
 
-      // Italicize romaji
-      formattedText = formattedText.replace(/([A-Za-z]+ō)/g, '<em>$1</em>');
-
+    // Italicize romaji
+    formattedText = formattedText.replace(/([A-Za-z]+ō)/g, "<em>$1</em>");
 
     return formattedText;
   }
@@ -1284,13 +1361,13 @@ class ExplanationPopup {
 document.addEventListener("click", (event) => {
   const explanationPopup = document.getElementById("jpdb-explanation-popup");
   const parentPopup = document.getElementById("jpdb-popup");
-  
+
   if (event.target === parentPopup) {
-      window.explanationPopup.hide();
-      return;
+    window.explanationPopup.hide();
+    return;
   }
-  
+
   if (explanationPopup && !explanationPopup.contains(event.target)) {
-      window.explanationPopup.hide();
+    window.explanationPopup.hide();
   }
 });
