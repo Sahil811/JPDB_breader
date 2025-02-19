@@ -322,6 +322,10 @@ class ImmersionKit {
     this.isExpanded = false;
     this.lastWord = null;
     this.vocabSection = vocabSection;
+    // Flag to indicate if the Play-All sequence is active
+    this.isPlayingAll = false;
+    // For audio playback via playAudio method
+    this.currentAudio = null;
   }
 
   async tryFetch(word, useFullParams = false) {
@@ -397,30 +401,13 @@ class ImmersionKit {
     }
   }
 
-  // Display update method
-  updateDisplay() {
-    const example = this.examples[this.currentIndex];
-    if (!example) return;
-
-    const newExample = this.renderExample();
-    if (!newExample) return;
-
-    const container = this.vocabSection.querySelector(".immersion-example");
-
-    if (container) {
-      container.replaceWith(newExample);
-    } else {
-      this.vocabSection.appendChild(newExample);
-    }
-  }
-
-  // Audio playback method
+  // Existing audio playback method (manual play)
   async playAudio(url) {
     if (!url) return;
 
     // Stop any currently playing audio
     if (this.currentAudio) {
-      this.currentAudio.stop(); // Use stop() instead of pause()
+      this.currentAudio.stop();
       this.currentAudio = null;
     }
 
@@ -436,7 +423,7 @@ class ImmersionKit {
       this.currentAudio.connect(audioContext.destination);
       this.currentAudio.start();
 
-      // Set currentAudio to null when the audio finishes playing
+      // When audio ends, clear the currentAudio
       this.currentAudio.onended = () => {
         this.currentAudio = null;
       };
@@ -445,6 +432,85 @@ class ImmersionKit {
     }
   }
 
+  // New helper method: plays audio and returns a promise that resolves when playback ends
+  async playAudioPromise(url) {
+    if (!url) return;
+    if (this.currentAudio) {
+      this.currentAudio.stop();
+      this.currentAudio = null;
+    }
+    try {
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+      const audioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      return new Promise((resolve) => {
+        this.currentAudio = audioContext.createBufferSource();
+        this.currentAudio.buffer = audioBuffer;
+        this.currentAudio.connect(audioContext.destination);
+        this.currentAudio.start();
+        this.currentAudio.onended = () => {
+          this.currentAudio = null;
+          resolve();
+        };
+      });
+    } catch (error) {
+      console.error("Error playing audio:", error);
+    }
+  }
+
+  // New method: plays all examples sequentially, pausing briefly between them.
+  // If the container is removed from the DOM, the sequence stops.
+  // After finishing, it resets to start from the first example.
+  async playAllSequence() {
+    if (this.isPlayingAll) return; // Prevent multiple simultaneous sequences
+    this.isPlayingAll = true;
+    // Loop from the current index to the end
+    for (let i = this.currentIndex; i < this.examples.length; i++) {
+      // Check if the immersion example container is still present in the DOM.
+      const container = this.vocabSection.querySelector(".immersion-example");
+      if (!container) {
+        // If not, cancel the play-all sequence.
+        this.isPlayingAll = false;
+        break;
+      }
+      if (!this.isPlayingAll) break; // Allow external cancellation
+      this.currentIndex = i;
+      this.updateDisplay(); // Update UI to reflect the current example
+      const example = this.examples[i];
+      if (example.sound_url) {
+        await this.playAudioPromise(example.sound_url);
+      } else {
+        // If no audio, wait 1 second
+        await new Promise((res) => setTimeout(res, 1000));
+      }
+      // Brief pause between examples (e.g. 500ms)
+      await new Promise((res) => setTimeout(res, 500));
+    }
+    // Reset to start from the first example when sequence finishes
+    this.currentIndex = 0;
+    this.isPlayingAll = false;
+    this.updateDisplay();
+  }
+
+  // Display update method
+  updateDisplay() {
+    const example = this.examples[this.currentIndex];
+    if (!example) return;
+
+    const newExample = this.renderExample();
+    if (!newExample) return;
+
+    const container = this.vocabSection.querySelector(".immersion-example");
+    if (container) {
+      container.replaceWith(newExample);
+    } else {
+      this.vocabSection.appendChild(newExample);
+    }
+  }
+
+  // Render method: existing buttons remain unchanged; a new "Play All" button is added in the same row as the navigation buttons.
   renderExample() {
     if (!this.examples.length) return null;
 
@@ -457,10 +523,13 @@ class ImmersionKit {
       jsxCreateElement(
         "div",
         { class: "example-content" },
-        // Navigation
+        // Navigation row with Prev, Index, Next, and Play-All buttons
         jsxCreateElement(
           "div",
-          { class: "example-nav" },
+          {
+            class: "example-nav",
+            style: "display: flex; align-items: center; gap: 8px;",
+          },
           jsxCreateElement(
             "button",
             {
@@ -489,13 +558,35 @@ class ImmersionKit {
               },
             },
             "→"
+          ),
+          // Play All button as an icon, aligned to the right
+          jsxCreateElement(
+            "button",
+            {
+              class: "play-all-button",
+              style:
+                "margin-left: auto; padding: 4px 8px; font-size: 16px; cursor: pointer;",
+              onclick: (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Toggle Play-All: if already playing, cancel; otherwise, start the sequence.
+                if (this.isPlayingAll) {
+                  this.isPlayingAll = false;
+                } else {
+                  this.playAllSequence();
+                }
+              },
+            },
+            this.isPlayingAll ? "⏹️" : "▶️"
           )
         ),
-        // Image and Audio Button Container
+        // Image and Audio Button Container with fixed dimensions
         jsxCreateElement(
           "div",
           {
             class: "image-audio-container",
+            style:
+              "min-height: 200px; width: 100%; background: #222; display: flex; align-items: center; justify-content: center; position: relative;",
           },
           // Image
           example.image_url &&
@@ -503,6 +594,7 @@ class ImmersionKit {
               src: example.image_url,
               alt: "Example image",
               class: "example-image",
+              style: "max-width: 100%; max-height: 200px; display: block;",
               onclick: (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -514,6 +606,7 @@ class ImmersionKit {
             "button",
             {
               class: "audio-button",
+              style: "position: absolute; bottom: 8px; right: 8px; padding: 4px;",
               onclick: (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -539,6 +632,7 @@ class ImmersionKit {
     );
   }
 }
+
 export class Popup {
   #demoMode;
   #element;
