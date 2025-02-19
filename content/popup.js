@@ -389,15 +389,15 @@ class ImmersionKit {
     }
   }
 
+  // Updated navigate() method for cyclic navigation:
+  // It wraps the current index using modular arithmetic.
   navigate(direction) {
-    const newIndex = this.currentIndex + direction;
-    if (newIndex >= 0 && newIndex < this.examples.length) {
-      this.currentIndex = newIndex;
-      this.updateDisplay();
-      const example = this.examples[this.currentIndex];
-      if (example?.sound_url) {
-        this.playAudio(example.sound_url);
-      }
+    this.currentIndex =
+      (this.currentIndex + direction + this.examples.length) % this.examples.length;
+    this.updateDisplay();
+    const example = this.examples[this.currentIndex];
+    if (example?.sound_url) {
+      this.playAudio(example.sound_url);
     }
   }
 
@@ -533,7 +533,7 @@ class ImmersionKit {
           jsxCreateElement(
             "button",
             {
-              disabled: this.currentIndex === 0,
+              // Removed disabled attribute for cyclic navigation
               onclick: (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -550,7 +550,7 @@ class ImmersionKit {
           jsxCreateElement(
             "button",
             {
-              disabled: this.currentIndex === this.examples.length - 1,
+              // Removed disabled attribute for cyclic navigation
               onclick: (e) => {
                 e.preventDefault();
                 e.stopPropagation();
