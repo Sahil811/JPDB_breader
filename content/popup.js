@@ -797,6 +797,24 @@ export class Popup {
           jsxCreateElement(
             "button",
             {
+              class: "button youglish-button",
+              onclick: (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const word = this.#data.token.card.spelling;
+                window.open(
+                  `https://youglish.com/pronounce/${encodeURIComponent(
+                    word
+                  )}/japanese`,
+                  "_blank"
+                );
+              },
+            },
+            "YouGlish"
+          ),
+          jsxCreateElement(
+            "button",
+            {
               class: "explain-button",
               onclick: (event) => {
                 event.preventDefault();

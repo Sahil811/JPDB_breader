@@ -419,3 +419,9 @@ button.easy {
   border: 1px solid lightskyblue;
   border-radius: var(--border-radius);
 }
+
+.youglish-button {
+  background-color: transparent;
+  color: var(--color-text);
+  border: 1px solid lightskyblue;
+}
