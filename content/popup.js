@@ -326,6 +326,16 @@ class ImmersionKit {
     this.isPlayingAll = false;
     // For audio playback via playAudio method
     this.currentAudio = null;
+    this.currentRequest = null; // Track current API request
+    this.currentWord = null; // Track current word being displayed
+  }
+
+  // Cancel any pending request
+  cancelCurrentRequest() {
+    if (this.currentRequest) {
+      this.currentRequest.aborted = true;
+      this.currentRequest = null;
+    }
   }
 
   async tryFetch(word, useFullParams = false) {
@@ -347,42 +357,82 @@ class ImmersionKit {
   }
 
   async fetchExamples(word) {
-    try {
-      this.lastWord = word;
+    // Don't fetch if same word
+    if (word === this.currentWord) return true;
 
-      // Try the full word with both URL types
-      if ((await this.tryFetch(word)) || (await this.tryFetch(word, true))) {
-        return true;
+    // Cancel any pending request
+    this.cancelCurrentRequest();
+
+    try {
+      // Create new request state
+      this.currentRequest = { aborted: false };
+      const thisRequest = this.currentRequest;
+      this.currentWord = word;
+
+      // Try the full word first
+      if (
+        (await this.tryFetchWithAbort(word, false, thisRequest)) ||
+        (await this.tryFetchWithAbort(word, true, thisRequest))
+      ) {
+        return !thisRequest.aborted;
       }
 
-      // If no examples found, split by particles and try again
+      // If no examples found, try with particles
       const particles = ["を", "に", "が", "へ", "と", "で"];
       for (const particle of particles) {
-        if (word.includes(particle)) {
-          // Try the part before the particle
-          const beforeParticle = word.split(particle)[0];
-          if (beforeParticle) {
-            if (
-              (await this.tryFetch(beforeParticle)) ||
-              (await this.tryFetch(beforeParticle, true))
-            ) {
-              return true;
-            }
+        if (word.includes(particle) && !thisRequest.aborted) {
+          const [before, after] = word.split(particle);
+
+          if (
+            (before &&
+              (await this.tryFetchWithAbort(before, false, thisRequest))) ||
+            (await this.tryFetchWithAbort(before, true, thisRequest))
+          ) {
+            return !thisRequest.aborted;
           }
 
-          // Try the part after the particle
-          const afterParticle = word.split(particle)[1];
-          if (afterParticle) {
-            if (
-              (await this.tryFetch(afterParticle)) ||
-              (await this.tryFetch(afterParticle, true))
-            ) {
-              return true;
-            }
+          if (
+            (after &&
+              (await this.tryFetchWithAbort(after, false, thisRequest))) ||
+            (await this.tryFetchWithAbort(after, true, thisRequest))
+          ) {
+            return !thisRequest.aborted;
           }
         }
       }
 
+      return false;
+    } catch (error) {
+      return false;
+    } finally {
+      // Clear request if it's still the current one
+      if (this.currentRequest && !this.currentRequest.aborted) {
+        this.currentRequest = null;
+      }
+    }
+  }
+
+  async tryFetchWithAbort(word, useFullParams, request) {
+    if (request.aborted) return false;
+
+    const baseUrl = `https://api.immersionkit.com/look_up_dictionary?keyword=${encodeURIComponent(
+      word
+    )}&sort=shortness`;
+    const fullUrl = `${baseUrl}&tags=&jlpt=&wk=&decks=`;
+    const url = useFullParams ? fullUrl : baseUrl;
+
+    try {
+      const response = await fetch(url);
+      if (request.aborted) return false;
+
+      const data = await response.json();
+      if (request.aborted) return false;
+
+      if (data?.data?.[0]?.examples?.length > 0) {
+        this.examples = data.data[0].examples;
+        this.currentIndex = 0;
+        return true;
+      }
       return false;
     } catch (error) {
       return false;
@@ -393,7 +443,8 @@ class ImmersionKit {
   // It wraps the current index using modular arithmetic.
   navigate(direction) {
     this.currentIndex =
-      (this.currentIndex + direction + this.examples.length) % this.examples.length;
+      (this.currentIndex + direction + this.examples.length) %
+      this.examples.length;
     this.updateDisplay();
     const example = this.examples[this.currentIndex];
     if (example?.sound_url) {
@@ -606,7 +657,8 @@ class ImmersionKit {
             "button",
             {
               class: "audio-button",
-              style: "position: absolute; bottom: 8px; right: 8px; padding: 4px;",
+              style:
+                "position: absolute; bottom: 8px; right: 8px; padding: 4px;",
               onclick: (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -803,9 +855,9 @@ export class Popup {
                 event.stopPropagation();
                 const word = this.#data.token.card.spelling;
                 window.open(
-                  `https://youglish.com/pronounce/${encodeURIComponent(
+                  `https://sentencesearch.neocities.org/#${encodeURIComponent(
                     word
-                  )}/japanese`,
+                  )}`,
                   "_blank"
                 );
               },
@@ -837,41 +889,47 @@ export class Popup {
     this.immersionKit = new ImmersionKit(this.#vocabSection);
   }
 
+  // Add debouncer property
+  #pendingExampleLoad = null;
+
   async toggleImmersionKit() {
     const currentWord = this.#data.token.card.spelling;
 
-    // Toggle visibility first
-    const exampleSection =
-      this.#vocabSection.querySelector(".immersion-example");
-    if (exampleSection) {
-      if (this.immersionKit.isExpanded) {
-        exampleSection.style.display = "none";
-        this.immersionKit.isExpanded = false;
-        return;
-      } else {
-        exampleSection.style.display = "block";
-      }
+    // Remove all existing example sections first
+    const existingExamples =
+      this.#vocabSection.querySelectorAll(".immersion-example");
+    existingExamples.forEach((example) => example.remove());
+
+    // Cancel any pending audio
+    if (this.immersionKit.currentAudio) {
+      this.immersionKit.currentAudio.stop();
+      this.immersionKit.currentAudio = null;
     }
 
+    // Reset play-all state
+    this.immersionKit.isPlayingAll = false;
+
     // Check if we need to fetch new examples
-    if (!exampleSection || this.immersionKit.lastWord !== currentWord) {
+    if (this.immersionKit.lastWord !== currentWord) {
       // Clear old examples and fetch new ones
       this.immersionKit.examples = [];
       this.immersionKit.currentIndex = 0;
       const success = await this.immersionKit.fetchExamples(currentWord);
       if (!success) return;
 
-      // Create new example section if it doesn't exist
+      // Create new example section
       const example = this.immersionKit.renderExample();
       if (example) {
-        if (exampleSection) {
-          exampleSection.replaceWith(example);
-        } else {
-          this.#vocabSection.appendChild(example);
-        }
+        this.#vocabSection.appendChild(example);
         await this.immersionKit.playAudio(
           this.immersionKit.examples[0].sound_url
         );
+      }
+    } else {
+      // Re-render existing examples if we're toggling visibility
+      const example = this.immersionKit.renderExample();
+      if (example) {
+        this.#vocabSection.appendChild(example);
       }
     }
 
@@ -1237,6 +1295,30 @@ export class Popup {
     }
     return false;
   }
+  async showExamplesAutomatically() {
+    // Cancel any pending loads
+    if (this.#pendingExampleLoad) {
+      clearTimeout(this.#pendingExampleLoad);
+    }
+
+    // Cancel any pending requests
+    if (this.immersionKit) {
+      this.immersionKit.cancelCurrentRequest();
+    }
+
+    if (config.showExamplesAutomatically) {
+      // Debounce the example loading by 300ms
+      this.#pendingExampleLoad = setTimeout(async () => {
+        // Remove any existing examples before loading new ones
+        const existingExamples =
+          this.#vocabSection.querySelectorAll(".immersion-example");
+        existingExamples.forEach((example) => example.remove());
+
+        await this.toggleImmersionKit();
+      }, 300);
+    }
+  }
+
   showForWord(word, mouseX = 0, mouseY = 0) {
     const data = word.jpdbData;
     this.setData(data); // Because we need the dimensions of the popup with the new data
@@ -1285,6 +1367,7 @@ export class Popup {
     }
     this.#outerStyle.transform = `translate(${popupLeft}px,${popupTop}px)`;
     this.fadeIn();
+    this.showExamplesAutomatically();
   }
   updateStyle(newCSS = config.customPopupCSS) {
     this.#customStyle.textContent = newCSS;
