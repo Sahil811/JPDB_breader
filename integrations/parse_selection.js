@@ -15,7 +15,7 @@
     "ankiuser.net",
     "ankiweb.net",
     "jpdb.io",
-    "mokuro/visual_novel.html",
+    "mokuro/visual_novel",
   ];
   const isAsbSubtitlesAdded = [
     "miruro.tv/watch",
