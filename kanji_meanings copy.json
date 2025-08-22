@@ -1,1695 +1,2118 @@
 [
   {
     "kanji": "人",
-    "meaning": "person"
+    "meaning": "person",
+    "rtk": "A person is like a walking stick - two legs that balance and support the body as it moves through life."
   },
   {
     "kanji": "言",
-    "meaning": "say"
+    "meaning": "say",
+    "rtk": "Words (horizontal lines) come out of the mouth (box) when you say something. The dot represents the tongue that helps form speech."
   },
   {
     "kanji": "見",
-    "meaning": "see"
+    "meaning": "see",
+    "rtk": "An eye with legs - you need to move around to see different things. The eye sits on top of walking legs."
   },
   {
     "kanji": "一",
-    "meaning": "one"
+    "meaning": "one",
+    "rtk": "One is simply one horizontal line - the most basic counting mark, like a tally mark or a single stroke."
   },
   {
     "kanji": "出",
-    "meaning": "exit"
+    "meaning": "exit",
+    "rtk": "A mountain (bottom part) with something sprouting out the top - like a plant exiting from the earth through a mountain crack."
   },
   {
     "kanji": "気",
-    "meaning": "state of mind"
+    "meaning": "state of mind",
+    "rtk": "Steam (top wavy lines) rising from rice cooking - your state of mind is like invisible steam that reveals your inner feelings."
   },
   {
     "kanji": "思",
-    "meaning": "think (that something is true)"
+    "meaning": "think (that something is true)",
+    "rtk": "A rice field (top) over a heart (bottom) - when you think deeply, you cultivate thoughts in your heart like growing rice."
   },
   {
     "kanji": "手",
-    "meaning": "hand"
+    "meaning": "hand",
+    "rtk": "A hand with fingers spread out - you can see the thumb on the left and three fingers extending to the right."
   },
   {
     "kanji": "何",
-    "meaning": "what"
+    "meaning": "what",
+    "rtk": "A person standing next to something that looks like a question mark - when you don't know what something is, you stand and wonder."
   },
   {
     "kanji": "分",
-    "meaning": "part"
+    "meaning": "part",
+    "rtk": "Eight (top) being cut by a sword (bottom line) - dividing eight into parts with a blade."
   },
   {
     "kanji": "大",
-    "meaning": "large"
+    "meaning": "large",
+    "rtk": "A person stretching their arms and legs as wide as possible to show how large something is - spreading out to demonstrate size."
   },
   {
     "kanji": "私",
-    "meaning": "private"
+    "meaning": "private",
+    "rtk": "A grain of rice (left) that belongs to me (right part) - my private grain that I keep for myself."
   },
   {
     "kanji": "上",
-    "meaning": "above"
+    "meaning": "above",
+    "rtk": "A horizontal line with a vertical line pointing upward - an arrow pointing to what's above."
   },
   {
     "kanji": "前",
-    "meaning": "in front of"
+    "meaning": "in front of",
+    "rtk": "A sheep (top curved part) standing in front of a cliff (vertical lines) with its legs (bottom horizontal lines) planted firmly."
   },
   {
     "kanji": "間",
-    "meaning": "interval"
+    "meaning": "interval",
+    "rtk": "A gate (outer frame) with the sun peeking through - the interval of sunlight coming through the gate opening."
   },
   {
     "kanji": "女",
-    "meaning": "woman"
+    "meaning": "woman",
+    "rtk": "A woman sitting gracefully with her legs crossed, like a traditional Japanese woman in kimono."
   },
   {
     "kanji": "事",
-    "meaning": "occurence"
+    "meaning": "occurence",
+    "rtk": "A hand holding a brush (vertical line with horizontal strokes) to write down events as they occur - recording occurrences."
   },
   {
     "kanji": "今",
-    "meaning": "now"
+    "meaning": "now",
+    "rtk": "A roof (top) over the present moment - what's happening right now under this roof at this very instant."
   },
   {
     "kanji": "子",
-    "meaning": "child"
+    "meaning": "child",
+    "rtk": "A child with a big head (top horizontal line), tiny body, and arms outstretched like they're learning to balance."
   },
   {
     "kanji": "中",
-    "meaning": "in"
+    "meaning": "in",
+    "rtk": "A box with a line going through the middle - something is piercing through and staying in the center."
   },
   {
     "kanji": "自",
-    "meaning": "self"
+    "meaning": "self",
+    "rtk": "A nose in profile - you point to your own nose when referring to yourself in Japanese culture."
   },
   {
     "kanji": "目",
-    "meaning": "eye"
+    "meaning": "eye",
+    "rtk": "An eye rotated 90 degrees - you can see the pupil (middle line) and the eye socket (outer rectangle)."
   },
   {
     "kanji": "生",
-    "meaning": "life"
+    "meaning": "life",
+    "rtk": "A plant sprouting from the ground - new life emerging with a stem and leaves reaching toward the sky."
   },
   {
     "kanji": "日",
-    "meaning": "sun"
+    "meaning": "sun",
+    "rtk": "The sun with a sunspot in the middle - a rectangle representing the solar disc with a line through its center."
   },
   {
     "kanji": "時",
-    "meaning": "time"
+    "meaning": "time",
+    "rtk": "The sun (left) next to a temple (right) - time is measured by the sun's position relative to the temple."
   },
   {
     "kanji": "行",
-    "meaning": "go"
+    "meaning": "go",
+    "rtk": "A crossroads where paths intersect - you go by choosing which direction to take at the intersection."
   },
   {
     "kanji": "方",
-    "meaning": "way"
+    "meaning": "way",
+    "rtk": "A flag on a pole pointing in a direction - showing the way or method to go somewhere."
   },
   {
     "kanji": "来",
-    "meaning": "come"
+    "meaning": "come",
+    "rtk": "A tree (vertical line) with branches and roots - something that has come and established itself firmly in place."
   },
   {
     "kanji": "様",
-    "meaning": "-sama"
+    "meaning": "-sama",
+    "rtk": "A tree (left) next to a sheep in a water basin (right) - a formal arrangement showing respect, like the honorific -sama."
   },
   {
     "kanji": "本",
-    "meaning": "book"
+    "meaning": "book",
+    "rtk": "A tree with a horizontal line through its trunk - marking the tree to show it's the source of paper for books."
   },
   {
     "kanji": "話",
-    "meaning": "to speak"
+    "meaning": "to speak",
+    "rtk": "Words (left) coming from a tongue (right curved part) - using your tongue to speak words."
   },
   {
     "kanji": "力",
-    "meaning": "power"
+    "meaning": "power",
+    "rtk": "A muscular arm flexing - showing strength and power through the curved muscle."
   },
   {
     "kanji": "体",
-    "meaning": "body"
+    "meaning": "body",
+    "rtk": "A person (left) standing next to their foundation/roots (right) - the body as the foundation of a person."
   },
   {
     "kanji": "入",
-    "meaning": "enter"
+    "meaning": "enter",
+    "rtk": "An arrowhead pointing inward - showing the direction to enter through an opening."
   },
   {
     "kanji": "者",
-    "meaning": "someone"
+    "meaning": "someone",
+    "rtk": "An old man (top part looks like hair) sitting above a cooking fire - an elder, someone with wisdom and experience."
   },
   {
     "kanji": "下",
-    "meaning": "below"
+    "meaning": "below",
+    "rtk": "A horizontal line with a vertical line pointing downward - an arrow pointing to what's below."
   },
   {
     "kanji": "先",
-    "meaning": "before (timewise)"
+    "meaning": "before (timewise)",
+    "rtk": "A person with long legs (bottom) taking big steps ahead - going before others in time or space."
   },
   {
     "kanji": "当",
-    "meaning": "hit (the target)"
+    "meaning": "hit (the target)",
+    "rtk": "A small rice paddy (top) being struck by something from above - hitting the target perfectly."
   },
   {
     "kanji": "感",
-    "meaning": "feelings"
+    "meaning": "feelings",
+    "rtk": "All (top) hearts (bottom) - when all your hearts are involved, you have deep feelings."
   },
   {
     "kanji": "合",
-    "meaning": "come together"
+    "meaning": "come together",
+    "rtk": "A person (top triangle) sitting down to join others (bottom) - coming together in unity."
   },
   {
     "kanji": "後",
-    "meaning": "after"
+    "meaning": "after",
+    "rtk": "A person walking (left) followed by footsteps (right) - what comes after the person has passed."
   },
   {
     "kanji": "顔",
-    "meaning": "face"
+    "meaning": "face",
+    "rtk": "A complex arrangement like facial features - eyes, nose, mouth all arranged together to make a face."
   },
   {
     "kanji": "無",
-    "meaning": "nothing"
+    "meaning": "nothing",
+    "rtk": "A person dancing wildly with fire - when you have nothing left, you dance with abandon around the flames."
   },
   {
     "kanji": "部",
-    "meaning": "section"
+    "meaning": "section",
+    "rtk": "A village (right) with a mouth/opening (left bottom) - each section of the village has its own entrance."
   },
   {
     "kanji": "動",
-    "meaning": "move"
+    "meaning": "move",
+    "rtk": "Heavy (left) force (right) - it takes heavy force to make something move from rest."
   },
   {
     "kanji": "少",
-    "meaning": "few"
+    "meaning": "few",
+    "rtk": "Small (main part) with even fewer dots - just a few small marks to represent scarcity."
   },
   {
     "kanji": "持",
-    "meaning": "have"
+    "meaning": "have",
+    "rtk": "A hand (left) grasping a temple (right) - you have something when you can hold onto it firmly."
   },
   {
     "kanji": "知",
-    "meaning": "know"
+    "meaning": "know",
+    "rtk": "An arrow (left) piercing through a mouth (right) - knowledge pierces through and comes out as speech."
   },
   {
     "kanji": "物",
-    "meaning": "thing"
+    "meaning": "thing",
+    "rtk": "A cow (left) being something special (right flourish) - a thing of value, like a prized cow with decorations."
   },
   {
     "kanji": "心",
-    "meaning": "heart"
+    "meaning": "heart",
+    "rtk": "A heart with its chambers and vessels - you can see the different parts of the heart organ."
   },
   {
     "kanji": "意",
-    "meaning": "idea"
+    "meaning": "idea",
+    "rtk": "Sound (top) coming from the heart (bottom) - ideas are sounds that come from your heart."
   },
   {
     "kanji": "度",
-    "meaning": "degrees"
+    "meaning": "degrees",
+    "rtk": "A building (outer frame) with measurement marks (inner strokes) - measuring degrees like temperature in a building."
   },
   {
     "kanji": "聞",
-    "meaning": "hear"
+    "meaning": "hear",
+    "rtk": "An ear (right side) at a gate (left frame) - positioning your ear at the gate to hear what's beyond."
   },
   {
     "kanji": "立",
-    "meaning": "standing up"
+    "meaning": "standing up",
+    "rtk": "A person standing upright on the ground - legs firmly planted, body erect and standing."
   },
   {
     "kanji": "全",
-    "meaning": "whole"
+    "meaning": "whole",
+    "rtk": "A person (top) covering everything under a roof (bottom) - the whole person sheltered completely."
   },
   {
     "kanji": "理",
-    "meaning": "logic"
+    "meaning": "logic",
+    "rtk": "A king (left) organizing village (right) - logic is the king's way of organizing and ruling systematically."
   },
   {
     "kanji": "二",
-    "meaning": "two"
+    "meaning": "two",
+    "rtk": "Two horizontal lines stacked - the second tally mark, representing the number two."
   },
   {
     "kanji": "声",
-    "meaning": "voice"
+    "meaning": "voice",
+    "rtk": "A sound (top part) coming from an ear (bottom) - your voice is the sound that others hear with their ears."
   },
   {
     "kanji": "場",
-    "meaning": "location"
+    "meaning": "location",
+    "rtk": "Earth/ground (left) where the sun shines (right) - a location is a place on earth where the sun can reach."
   },
   {
     "kanji": "身",
-    "meaning": "one's body"
+    "meaning": "one's body",
+    "rtk": "A person bending forward - showing their body in profile, the physical form of oneself."
   },
   {
     "kanji": "会",
-    "meaning": "meeting"
+    "meaning": "meeting",
+    "rtk": "People gathering under a roof with a person speaking (top triangle) - a meeting where someone addresses the group."
   },
   {
     "kanji": "向",
-    "meaning": "direction"
+    "meaning": "direction",
+    "rtk": "A house with a large window - the direction the house faces, where the window looks out."
   },
   {
     "kanji": "同",
-    "meaning": "same"
+    "meaning": "same",
+    "rtk": "A box with identical contents (inner lines) - everything inside is the same."
   },
   {
     "kanji": "取",
-    "meaning": "take"
+    "meaning": "take",
+    "rtk": "An ear (left) being grabbed by a hand (right) - taking hold of someone by the ear."
   },
   {
     "kanji": "笑",
-    "meaning": "laugh"
+    "meaning": "laugh",
+    "rtk": "Bamboo (top) swaying like someone doubling over (bottom) - laughing so hard you bend like bamboo in wind."
   },
   {
     "kanji": "的",
-    "meaning": "target"
+    "meaning": "target",
+    "rtk": "White (left) mark on earth (right) - a white target painted on the ground for aiming practice."
   },
   {
     "kanji": "戦",
-    "meaning": "war"
+    "meaning": "war",
+    "rtk": "A single warrior (left) fighting with a spear (right) - one person engaged in the action of war."
   },
   {
     "kanji": "通",
-    "meaning": "pass through"
+    "meaning": "pass through",
+    "rtk": "Walking (bottom) along a road (top and middle) - passing through by following the path with your feet."
   },
   {
     "kanji": "最",
-    "meaning": "utmost"
+    "meaning": "utmost",
+    "rtk": "The sun (top part) taking the ear (bottom) - the utmost attention, like the sun commanding your ear completely."
   },
   {
     "kanji": "長",
-    "meaning": "long"
+    "meaning": "long",
+    "rtk": "Long hair flowing in the wind - the character itself is drawn long and flowing to show length."
   },
   {
     "kanji": "不",
-    "meaning": "negative"
+    "meaning": "negative",
+    "rtk": "A bird with clipped wings that cannot fly - the negative of a bird's natural ability."
   },
   {
     "kanji": "地",
-    "meaning": "ground"
+    "meaning": "ground",
+    "rtk": "Earth (left radical) where things grow and exist (right part) - the ground as the foundation of earth."
   },
   {
     "kanji": "口",
-    "meaning": "mouth"
+    "meaning": "mouth",
+    "rtk": "A square opening - the mouth as a rectangular opening in the face for eating and speaking."
   },
   {
     "kanji": "変",
-    "meaning": "change"
+    "meaning": "change",
+    "rtk": "Threading (top) through a complex system (bottom) - change happens by threading new patterns through existing structures."
   },
   {
     "kanji": "考",
-    "meaning": "think (about something)"
+    "meaning": "think (about something)",
+    "rtk": "An old man (top) bending over to examine something closely - thinking deeply requires the wisdom of age."
   },
   {
     "kanji": "実",
-    "meaning": "real"
+    "meaning": "real",
+    "rtk": "A house (top) with its contents/people (bottom) - what's real is what actually exists inside, not just the shell."
   },
   {
     "kanji": "年",
-    "meaning": "year"
+    "meaning": "year",
+    "rtk": "A person (top stroke) carrying grain (bottom part) - marking years by harvest cycles and grain storage."
   },
   {
     "kanji": "回",
-    "meaning": "going around"
+    "meaning": "going around",
+    "rtk": "Something enclosed going in circles - like a wheel or ring that goes around and around."
   },
   {
     "kanji": "達",
-    "meaning": "accomplished"
+    "meaning": "accomplished",
+    "rtk": "Walking (bottom) along a complex path (top) - becoming accomplished requires navigating difficult roads."
   },
   {
     "kanji": "家",
-    "meaning": "house"
+    "meaning": "house",
+    "rtk": "A pig (bottom) under a roof (top) - a house is where you keep your livestock safe and sheltered."
   },
   {
     "kanji": "葉",
-    "meaning": "leaf"
+    "meaning": "leaf",
+    "rtk": "Grass/plants (top) with a generation symbol (bottom) - leaves represent the new generation of plant growth."
   },
   {
     "kanji": "味",
-    "meaning": "flavor"
+    "meaning": "flavor",
+    "rtk": "A mouth (left) experiencing something not yet fully developed (right) - tasting flavor as it develops on your tongue."
   },
   {
     "kanji": "食",
-    "meaning": "eat"
+    "meaning": "eat",
+    "rtk": "A person (top angle) bending over a bowl of rice (bottom) - the act of eating from a bowl."
   },
   {
     "kanji": "王",
-    "meaning": "king"
+    "meaning": "king",
+    "rtk": "Three horizontal lines connected by one vertical line - the king connects heaven, earth, and humanity."
   },
   {
     "kanji": "面",
-    "meaning": "surface"
+    "meaning": "surface",
+    "rtk": "A flat face with features (inner lines) - the surface of a face showing its contours and features."
   },
   {
     "kanji": "男",
-    "meaning": "man"
+    "meaning": "man",
+    "rtk": "A rice field (top) being worked by strength (bottom) - a man using his power to work the fields."
   },
   {
     "kanji": "情",
-    "meaning": "emotion"
+    "meaning": "emotion",
+    "rtk": "A heart (left) expressing feelings that are blue/green (right) - emotions colored by the heart's feelings."
   },
   {
     "kanji": "作",
-    "meaning": "make"
+    "meaning": "make",
+    "rtk": "A person (left) working with tools (right) - making something by combining human effort with implements."
   },
   {
     "kanji": "悪",
-    "meaning": "bad"
+    "meaning": "bad",
+    "rtk": "Something inferior (top) affecting the heart (bottom) - when bad things reach your heart, they cause pain."
   },
   {
     "kanji": "外",
-    "meaning": "outside"
+    "meaning": "outside",
+    "rtk": "Evening (left) divination (right) - reading the future outside under the evening sky."
   },
   {
     "kanji": "使",
-    "meaning": "use (something physical)"
+    "meaning": "use (something physical)",
+    "rtk": "A person (left) with an official assignment (right) - using someone for a specific task or purpose."
   },
   {
     "kanji": "付",
-    "meaning": "attach"
+    "meaning": "attach",
+    "rtk": "A person (left) next to someone (right) - attaching yourself to stay close to another person."
   },
   {
     "kanji": "小",
-    "meaning": "small"
+    "meaning": "small",
+    "rtk": "Tiny dots or marks - something so small it's barely visible, like small particles."
   },
   {
     "kanji": "切",
-    "meaning": "cut"
+    "meaning": "cut",
+    "rtk": "Seven (left) being sliced by a sword (right) - cutting the number seven in half with a blade."
   },
   {
     "kanji": "強",
-    "meaning": "strong"
+    "meaning": "strong",
+    "rtk": "A bow (left) drawn with great force (right curves) - strength shown through the power needed to draw a bow."
   },
   {
     "kanji": "確",
-    "meaning": "certain"
+    "meaning": "certain",
+    "rtk": "A stone (left) that makes a clear sound (right) when struck - certainty like the reliable sound of stone."
   },
   {
     "kanji": "性",
-    "meaning": "nature (of a person)"
+    "meaning": "nature (of a person)",
+    "rtk": "A heart (left) being born/generated (right) - your nature comes from what's generated in your heart."
   },
   {
     "kanji": "明",
-    "meaning": "bright"
+    "meaning": "bright",
+    "rtk": "The sun (left) and moon (right) together - maximum brightness when both celestial lights shine."
   },
   {
     "kanji": "対",
-    "meaning": "opposite"
+    "meaning": "opposite",
+    "rtk": "A pair standing opposite each other - two things facing each other in opposition."
   },
   {
     "kanji": "国",
-    "meaning": "country"
+    "meaning": "country",
+    "rtk": "A boundary (outer frame) protecting the jewels/treasures (inner part) - a country protects its valuable contents."
   },
   {
     "kanji": "所",
-    "meaning": "place"
+    "meaning": "place",
+    "rtk": "A door (left) leading to a specific location (right) - a place you can enter through its entrance."
   },
   {
     "kanji": "死",
-    "meaning": "death"
+    "meaning": "death",
+    "rtk": "A person (left) lying down with bones (right) exposed - death as the end of life leaving only bones."
   },
   {
     "kanji": "世",
-    "meaning": "world"
+    "meaning": "world",
+    "rtk": "Three connected horizontal lines - representing the three worlds (heaven, earth, underworld) linked together."
   },
   {
     "kanji": "相",
-    "meaning": "towards each other"
+    "meaning": "towards each other",
+    "rtk": "A tree (left) and an eye (right) - looking at each other like a tree and observer facing one another."
   },
   {
     "kanji": "真",
-    "meaning": "truth"
+    "meaning": "truth",
+    "rtk": "Ten (top) eyes (bottom part) - truth is seen when ten eyes all witness the same thing."
   },
   {
     "kanji": "君",
-    "meaning": "young master"
+    "meaning": "young master",
+    "rtk": "A mouth (bottom) giving orders from above (top strokes) - a young master speaking commands."
   },
   {
     "kanji": "学",
-    "meaning": "study"
+    "meaning": "study",
+    "rtk": "A child (bottom) under a roof learning (top crossed lines) - studying takes place when children learn under shelter."
   },
   {
     "kanji": "屋",
-    "meaning": "roof"
+    "meaning": "roof",
+    "rtk": "A building structure (outer frame) with support beams (inner lines) - the roof as the covering structure."
   },
   {
     "kanji": "神",
-    "meaning": "god"
+    "meaning": "god",
+    "rtk": "An altar (left) where divine revelations (right) appear - god manifesting through sacred signs at the altar."
   },
   {
     "kanji": "着",
-    "meaning": "wear"
+    "meaning": "wear",
+    "rtk": "A sheep (top) with wool covering (bottom) - wearing wool clothing like a sheep wears its natural coat."
   },
   {
     "kanji": "開",
-    "meaning": "open"
+    "meaning": "open",
+    "rtk": "A gate (outer frame) with hands (inner part) pulling it open - opening requires effort to pull the gates apart."
   },
   {
     "kanji": "引",
-    "meaning": "pull"
+    "meaning": "pull",
+    "rtk": "A bow (left curved line) being drawn back (right vertical line) - pulling the bowstring to create tension."
   },
   {
     "kanji": "返",
-    "meaning": "return something"
+    "meaning": "return something",
+    "rtk": "Walking (bottom) back along the same path (top) - returning by retracing your steps."
   },
   {
     "kanji": "然",
-    "meaning": "sort of thing"
+    "meaning": "sort of thing",
+    "rtk": "A dog (right) by a fire (left bottom) with meat cooking (left top) - that sort of thing you'd expect around a campfire."
   },
   {
     "kanji": "界",
-    "meaning": "realm"
+    "meaning": "realm",
+    "rtk": "A rice field (bottom) bounded by borders (top) - each realm has its defined agricultural territory."
   },
   {
     "kanji": "足",
-    "meaning": "foot"
+    "meaning": "foot",
+    "rtk": "A leg with a knee (top part) and foot (bottom part) - the complete lower limb for walking."
   },
   {
     "kanji": "待",
-    "meaning": "wait"
+    "meaning": "wait",
+    "rtk": "A person (left) standing by a temple (right) - waiting patiently at the temple for something to happen."
   },
   {
     "kanji": "頭",
-    "meaning": "head"
+    "meaning": "head",
+    "rtk": "Beans/thoughts (left) contained in a container (right) - the head as a container for your thoughts."
   },
   {
     "kanji": "近",
-    "meaning": "near"
+    "meaning": "near",
+    "rtk": "Walking (bottom) with an axe (top) close at hand - staying near your tools while traveling."
   },
   {
     "kanji": "名",
-    "meaning": "name"
+    "meaning": "name",
+    "rtk": "Evening (top) when you call out (bottom mouth) - calling someone's name in the evening darkness."
   },
   {
     "kanji": "好",
-    "meaning": "liked"
+    "meaning": "liked",
+    "rtk": "A woman (left) with a child (right) - the natural liking between mother and child."
   },
   {
     "kanji": "以",
-    "meaning": "by means of"
+    "meaning": "by means of",
+    "rtk": "A person (left) using something (right) as a tool - accomplishing tasks by means of instruments."
   },
   {
     "kanji": "音",
-    "meaning": "sound"
+    "meaning": "sound",
+    "rtk": "Standing (top line) and hearing vibrations (bottom part) - sound as vibrations that you can stand and perceive."
   },
   {
     "kanji": "用",
-    "meaning": "used for"
+    "meaning": "used for",
+    "rtk": "A fence with a gate opening - something used for containing and controlling access."
   },
   {
     "kanji": "結",
-    "meaning": "tied together"
+    "meaning": "tied together",
+    "rtk": "Thread (left) making knots (right) - tying threads together with knots to bind things."
   },
   {
     "kanji": "仕",
-    "meaning": "serve"
+    "meaning": "serve",
+    "rtk": "A person (left) working for a master (right) - serving by doing work for someone in authority."
   },
   {
     "kanji": "法",
-    "meaning": "law"
+    "meaning": "law",
+    "rtk": "Water (left) flowing in prescribed channels (right) - law as the prescribed way things should flow."
   },
   {
     "kanji": "落",
-    "meaning": "fall down"
+    "meaning": "fall down",
+    "rtk": "Grass/plants (top) dropping water droplets (bottom) - things falling down like water from plants."
   },
   {
     "kanji": "高",
-    "meaning": "high"
+    "meaning": "high",
+    "rtk": "A tall building (structure) reaching up high - height represented by a towering structure."
   },
   {
     "kanji": "直",
-    "meaning": "straight"
+    "meaning": "straight",
+    "rtk": "Ten (top) eyes (bottom part) looking in a straight line - directness like ten eyes all focused straight ahead."
   },
   {
     "kanji": "内",
-    "meaning": "inside"
+    "meaning": "inside",
+    "rtk": "A person entering through an entrance - going inside through the doorway."
   },
   {
     "kanji": "空",
-    "meaning": "empty air"
+    "meaning": "empty air",
+    "rtk": "A cave (top) with nothing but air (bottom) inside - empty space filled only with air."
   },
   {
     "kanji": "解",
-    "meaning": "unravel"
+    "meaning": "unravel",
+    "rtk": "Using an ox (left) and a knife (right) to break apart and unravel tough materials."
   },
   {
     "kanji": "問",
-    "meaning": "question"
+    "meaning": "question",
+    "rtk": "A mouth (inner square) within a gate (outer frame) - asking questions at the entrance before being allowed inside."
   },
   {
     "kanji": "発",
-    "meaning": "let out"
+    "meaning": "let out",
+    "rtk": "Legs (bottom) launching from a starting point (top) - letting out energy to propel forward."
   },
   {
     "kanji": "色",
-    "meaning": "color"
+    "meaning": "color",
+    "rtk": "A person (top angle) bending over something colorful (bottom part) - examining different colors closely."
   },
   {
     "kanji": "教",
-    "meaning": "teach"
+    "meaning": "teach",
+    "rtk": "A child (right) learning numbers/counting (left) - teaching involves showing children how to count and calculate."
   },
   {
     "kanji": "決",
-    "meaning": "decide"
+    "meaning": "decide",
+    "rtk": "Water (left) being cut/divided by a blade (right) - deciding by cutting through like water being split."
   },
   {
     "kanji": "現",
-    "meaning": "right now"
+    "meaning": "right now",
+    "rtk": "A king (left) appearing at this very moment (right) - the king's presence right now in the present."
   },
   {
     "kanji": "士",
-    "meaning": "professional"
+    "meaning": "professional",
+    "rtk": "A samurai warrior standing at attention - a professional soldier with discipline and skill."
   },
   {
     "kanji": "続",
-    "meaning": "continue"
+    "meaning": "continue",
+    "rtk": "Thread (left) being sold/passed along (right) - continuing like thread being continuously spun and passed on."
   },
   {
     "kanji": "覚",
-    "meaning": "awareness"
+    "meaning": "awareness",
+    "rtk": "Learning (top) with your eyes (bottom) - awareness comes from learning to see with understanding."
   },
   {
     "kanji": "良",
-    "meaning": "good"
+    "meaning": "good",
+    "rtk": "A good arrangement - well-organized strokes that create harmony and balance, representing goodness."
   },
   {
     "kanji": "能",
-    "meaning": "ability"
+    "meaning": "ability",
+    "rtk": "A complex arrangement showing skill - the ability to coordinate many different elements into working order."
   },
   {
     "kanji": "指",
-    "meaning": "finger"
+    "meaning": "finger",
+    "rtk": "A hand (left) with one digit extended (right) - pointing with your finger to indicate direction."
   },
   {
     "kanji": "三",
-    "meaning": "three"
+    "meaning": "three",
+    "rtk": "Three horizontal lines stacked - the third tally mark, representing the number three."
   },
   {
     "kanji": "正",
-    "meaning": "correct"
+    "meaning": "correct",
+    "rtk": "One (top line) perfectly positioned over a base (bottom) - correctness as perfect alignment and balance."
   },
   {
     "kanji": "白",
-    "meaning": "white"
+    "meaning": "white",
+    "rtk": "The sun (with a line through it) shining pure white light - white as the color of pure sunlight."
   },
   {
     "kanji": "数",
-    "meaning": "number"
+    "meaning": "number",
+    "rtk": "A woman (right) counting rice grains (left) - keeping track of numbers by counting quantities."
   },
   {
     "kanji": "視",
-    "meaning": "look at"
+    "meaning": "look at",
+    "rtk": "Showing (left) something to the eye (right) - looking at something by directing your vision toward it."
   },
   {
     "kanji": "要",
-    "meaning": "needed"
+    "meaning": "needed",
+    "rtk": "A woman's (bottom) waist (top) - the essential part that's needed to hold everything together."
   },
   {
     "kanji": "受",
-    "meaning": "receive"
+    "meaning": "receive",
+    "rtk": "Hands (top and bottom) passing something between them - receiving by taking what's being offered."
   },
   {
     "kanji": "張",
-    "meaning": "lengthen"
+    "meaning": "lengthen",
+    "rtk": "A bow (left) being stretched to its full extent (right) - lengthening by pulling and extending."
   },
   {
     "kanji": "信",
-    "meaning": "belief"
+    "meaning": "belief",
+    "rtk": "A person (left) speaking words (right) - belief based on trusting what someone tells you."
   },
   {
     "kanji": "愛",
-    "meaning": "love"
+    "meaning": "love",
+    "rtk": "A heart (middle) embraced by caring arms (outer strokes) - love as the heart surrounded by affection."
   },
   {
     "kanji": "別",
-    "meaning": "separate"
+    "meaning": "separate",
+    "rtk": "A mouth (right) and a sword (left) - separating by cutting apart with a blade."
   },
   {
     "kanji": "初",
-    "meaning": "first time"
+    "meaning": "first time",
+    "rtk": "Clothes (left) being cut for the first time (right sword) - the first time fabric is cut to make garments."
   },
   {
     "kanji": "表",
-    "meaning": "front side"
+    "meaning": "front side",
+    "rtk": "Clothes (top) showing on the outside surface (bottom) - the front side that's visible to others."
   },
   {
     "kanji": "道",
-    "meaning": "roadway"
+    "meaning": "roadway",
+    "rtk": "Walking (bottom) along a path with guidance (top) - following the roadway that leads somewhere."
   },
   {
     "kanji": "飛",
-    "meaning": "fly"
+    "meaning": "fly",
+    "rtk": "Wings (outer strokes) lifting a bird's body (inner part) into flight - flying through the air with wings."
   },
   {
     "kanji": "殺",
-    "meaning": "kill"
+    "meaning": "kill",
+    "rtk": "A tree (left) being struck with a weapon (right) - killing by delivering a fatal blow."
   },
   {
     "kanji": "連",
-    "meaning": "take along"
+    "meaning": "take along",
+    "rtk": "Walking (bottom) while pulling a cart (top) - taking things along by pulling them behind you."
   },
   {
     "kanji": "止",
-    "meaning": "stop"
+    "meaning": "stop",
+    "rtk": "A foot (the shape) that has stopped moving - coming to a halt and staying in place."
   },
   {
     "kanji": "十",
-    "meaning": "ten"
+    "meaning": "ten",
+    "rtk": "A cross made of two lines - representing the ten fingers when you cross your hands."
   },
   {
     "kanji": "必",
-    "meaning": "certainly"
+    "meaning": "certainly",
+    "rtk": "A heart (bottom) with something essential (top) - certainty comes from what the heart knows is necessary."
   },
   {
     "kanji": "早",
-    "meaning": "early"
+    "meaning": "early",
+    "rtk": "The sun (top) appearing above the horizon (bottom line) - early morning when the sun first rises."
   },
   {
     "kanji": "元",
-    "meaning": "origin"
+    "meaning": "origin",
+    "rtk": "Two (top lines) coming from one source (bottom) - the origin as the single point from which everything begins."
   },
   {
     "kanji": "残",
-    "meaning": "left behind"
+    "meaning": "left behind",
+    "rtk": "Bones (left) remaining after death (right) - what's left behind when everything else is gone."
   },
   {
     "kanji": "定",
-    "meaning": "define"
+    "meaning": "define",
+    "rtk": "A house (top) with everything in its proper place (bottom) - defining by establishing fixed positions."
   },
   {
     "kanji": "終",
-    "meaning": "end"
+    "meaning": "end",
+    "rtk": "Thread (left) being cut to finish (right) - the end when you cut the thread to complete your work."
   },
   {
     "kanji": "可",
-    "meaning": "can do"
+    "meaning": "can do",
+    "rtk": "A mouth (right) saying yes (left hook) - expressing that something can be done."
   },
   {
     "kanji": "夫",
-    "meaning": "husband"
+    "meaning": "husband",
+    "rtk": "A large (big person) man with responsibility - the husband as the large figure who provides for the family."
   },
   {
     "kanji": "関",
-    "meaning": "connected to"
+    "meaning": "connected to",
+    "rtk": "A gate (outer frame) with barriers inside - connection through controlled access points."
   },
   {
     "kanji": "金",
-    "meaning": "gold"
+    "meaning": "gold",
+    "rtk": "A king (top) sitting on treasure buried in the earth (bottom) - gold as the king of precious metals."
   },
   {
     "kanji": "多",
-    "meaning": "many"
+    "meaning": "many",
+    "rtk": "Two moons (evening repeated) - many nights, representing abundance and quantity."
   },
   {
     "kanji": "呼",
-    "meaning": "call"
+    "meaning": "call",
+    "rtk": "A mouth (left) making sounds that summon others (right) - calling out to get someone's attention."
   },
   {
     "kanji": "代",
-    "meaning": "substitute"
+    "meaning": "substitute",
+    "rtk": "A person (left) taking the place of another (right) - substituting one person for another in their role."
   },
   {
     "kanji": "姿",
-    "meaning": "figure"
+    "meaning": "figure",
+    "rtk": "A woman (bottom) in a particular pose or stance (top) - the figure as the shape of someone's posture."
   },
   {
     "kanji": "始",
-    "meaning": "begin"
+    "meaning": "begin",
+    "rtk": "A woman (left) starting something new (right) - beginning like a woman starting a new phase of life."
   },
   {
     "kanji": "父",
-    "meaning": "father"
+    "meaning": "father",
+    "rtk": "A hand holding an axe - the father as the one who works with tools to provide for the family."
   },
   {
     "kanji": "機",
-    "meaning": "machine"
+    "meaning": "machine",
+    "rtk": "Wood/tree (left) with complex mechanical parts (right) - a machine made from wood and intricate components."
   },
   {
     "kanji": "主",
-    "meaning": "(one's) master"
+    "meaning": "(one's) master",
+    "rtk": "A king (three horizontal lines) with a dot of authority - the master as one who has the dot of power."
   },
   {
     "kanji": "書",
-    "meaning": "write"
+    "meaning": "write",
+    "rtk": "A hand holding a brush (various strokes) over paper - writing by moving the brush across the surface."
   },
   {
     "kanji": "歩",
-    "meaning": "walk"
+    "meaning": "walk",
+    "rtk": "Two feet (top and bottom parts) taking steps - walking by alternating your feet in rhythm."
   },
   {
     "kanji": "楽",
-    "meaning": "comfort"
+    "meaning": "comfort",
+    "rtk": "A tree (top part) providing shade and rest (bottom) - comfort like relaxing under a tree's shelter."
   },
   {
     "kanji": "勝",
-    "meaning": "win"
+    "meaning": "win",
+    "rtk": "A moon (left) overcoming force (right) - winning like the moon's gentle power overcoming strength."
   },
   {
     "kanji": "重",
-    "meaning": "heavy"
+    "meaning": "heavy",
+    "rtk": "A person carrying a heavy load on their back - the weight pressing down on someone walking."
   },
   {
     "kanji": "帰",
-    "meaning": "return home"
+    "meaning": "return home",
+    "rtk": "Brooms (left) sweeping toward home (right) - returning home to clean and restore order."
   },
   {
     "kanji": "命",
-    "meaning": "continued existence"
+    "meaning": "continued existence",
+    "rtk": "A mouth (right) giving orders for life (left) - continued existence through commands that sustain life."
   },
   {
     "kanji": "光",
-    "meaning": "ray"
+    "meaning": "ray",
+    "rtk": "Fire (bottom) with a person (top) - rays of light emanating from a fire with someone nearby."
   },
   {
     "kanji": "族",
-    "meaning": "tribe"
+    "meaning": "tribe",
+    "rtk": "A flag (left) marking where the clan (right) gathers - the tribe identified by their banner."
   },
   {
     "kanji": "息",
-    "meaning": "breath"
+    "meaning": "breath",
+    "rtk": "Self/nose (top) with heart (bottom) - breathing through your nose from your heart's rhythm."
   },
   {
     "kanji": "配",
-    "meaning": "hand out"
+    "meaning": "hand out",
+    "rtk": "Wine/liquid (left) being distributed in portions (right) - handing out drinks to everyone."
   },
   {
     "kanji": "風",
-    "meaning": "wind"
+    "meaning": "wind",
+    "rtk": "Air moving (outer frame) with internal currents (inner strokes) - wind as moving air with direction."
   },
   {
     "kanji": "起",
-    "meaning": "to occur"
+    "meaning": "to occur",
+    "rtk": "Walking/movement (left) beginning to happen (right) - something occurring as movement starts."
   },
   {
     "kanji": "他",
-    "meaning": "other"
+    "meaning": "other",
+    "rtk": "A person (left) pointing to someone else (right) - indicating the other person, not yourself."
   },
   {
     "kanji": "流",
-    "meaning": "current (in a fluid)"
+    "meaning": "current (in a fluid)",
+    "rtk": "Water (left) moving in a stream (right flowing strokes) - current as the flow of water."
   },
   {
     "kanji": "線",
-    "meaning": "line"
+    "meaning": "line",
+    "rtk": "Thread (left) stretched straight (right) - a line formed by pulling thread taut."
   },
   {
     "kanji": "想",
-    "meaning": "heartfelt thought"
+    "meaning": "heartfelt thought",
+    "rtk": "A tree (top) growing from the heart (bottom) - heartfelt thoughts like a tree growing from deep roots."
   },
   {
     "kanji": "水",
-    "meaning": "water"
+    "meaning": "water",
+    "rtk": "A flowing stream with ripples - water moving and creating waves as it flows."
   },
   {
     "kanji": "応",
-    "meaning": "respond with action"
+    "meaning": "respond with action",
+    "rtk": "A heart (bottom) with wings (top) - responding by letting your heart take flight into action."
   },
   {
     "kanji": "美",
-    "meaning": "beauty"
+    "meaning": "beauty",
+    "rtk": "A sheep (top) that is large (bottom) - beauty like a well-formed, healthy sheep."
   },
   {
     "kanji": "化",
-    "meaning": "transformation"
+    "meaning": "transformation",
+    "rtk": "A person (left) changing form (right) - transformation as a person shifting into something different."
   },
   {
     "kanji": "状",
-    "meaning": "condition"
+    "meaning": "condition",
+    "rtk": "A dog (left) in a particular state (right) - the condition or state that something is currently in."
   },
   {
     "kanji": "過",
-    "meaning": "surpass something"
+    "meaning": "surpass something",
+    "rtk": "Walking (bottom) beyond a bone/obstacle (top) - surpassing by walking past what blocks your way."
   },
   {
     "kanji": "次",
-    "meaning": "next"
+    "meaning": "next",
+    "rtk": "Two (left) following in sequence (right) - the next thing coming after the current one."
   },
   {
     "kanji": "得",
-    "meaning": "gain"
+    "meaning": "gain",
+    "rtk": "Walking (left) toward something valuable (right) - gaining by moving toward what you want to obtain."
   },
   {
     "kanji": "我",
-    "meaning": "me (old fashioned)"
+    "meaning": "me (old fashioned)",
+    "rtk": "A hand (left) holding a spear (right) - the old-fashioned warrior's way of saying 'I am here.'"
   },
   {
     "kanji": "置",
-    "meaning": "put down"
+    "meaning": "put down",
+    "rtk": "A net (top) being placed on the ground (bottom) - putting down by setting something in position."
   },
   {
     "kanji": "在",
-    "meaning": "presence"
+    "meaning": "presence",
+    "rtk": "Standing (left) on solid ground (right) - presence as being firmly positioned in a place."
   },
   {
     "kanji": "親",
-    "meaning": "parent"
+    "meaning": "parent",
+    "rtk": "Standing (left) close to see and care for others (right) - parents as those who stand close to watch over children."
   },
   {
     "kanji": "安",
-    "meaning": "peace of mind"
+    "meaning": "peace of mind",
+    "rtk": "A woman (bottom) safe under a roof (top) - peace of mind when women are protected and secure."
   },
   {
     "kanji": "放",
-    "meaning": "release"
+    "meaning": "release",
+    "rtk": "A direction (left) with force/movement (right) - releasing by applying force in a specific direction."
   },
   {
     "kanji": "調",
-    "meaning": "tone"
+    "meaning": "tone",
+    "rtk": "Words (left) with proper rhythm (right) - tone as the musical quality of speech."
   },
   {
     "kanji": "背",
-    "meaning": "back of the body"
+    "meaning": "back of the body",
+    "rtk": "A person's flesh (bottom) with the spine (top) - the back as the rear part of the body."
   },
   {
     "kanji": "絶",
-    "meaning": "cut off"
+    "meaning": "cut off",
+    "rtk": "Thread (left) being severed completely (right) - cutting off by breaking the connection entirely."
   },
   {
     "kanji": "室",
-    "meaning": "room"
+    "meaning": "room",
+    "rtk": "A house (top) with an enclosed space (bottom) - a room as the enclosed area within a building."
   },
   {
     "kanji": "失",
-    "meaning": "permanent loss"
+    "meaning": "permanent loss",
+    "rtk": "A person (left) dropping something (right) that cannot be recovered - permanent loss through carelessness."
   },
   {
     "kanji": "伝",
-    "meaning": "transmit"
+    "meaning": "transmit",
+    "rtk": "A person (left) passing along information (right) - transmitting by carrying messages between people."
   },
   {
     "kanji": "反",
-    "meaning": "be against"
+    "meaning": "be against",
+    "rtk": "A hand pushing back against something - being against by pushing in the opposite direction."
   },
   {
     "kanji": "首",
-    "meaning": "neck"
+    "meaning": "neck",
+    "rtk": "The head (top part) connected to the body (bottom) - the neck as the connection between head and body."
   },
   {
     "kanji": "母",
-    "meaning": "mother"
+    "meaning": "mother",
+    "rtk": "A woman with nurturing breasts - the mother as the one who feeds and nurtures children."
   },
   {
     "kanji": "貴",
-    "meaning": "noble"
+    "meaning": "noble",
+    "rtk": "Something precious (top) made of valuable materials (bottom) - noble like costly, precious things."
   },
   {
     "kanji": "成",
-    "meaning": "become"
+    "meaning": "become",
+    "rtk": "A spear (left) completing its form (right) - becoming by reaching completion and fulfillment."
   },
   {
     "kanji": "天",
-    "meaning": "heaven"
+    "meaning": "heaven",
+    "rtk": "A great person (large) reaching toward the sky (top line) - heaven as the realm above us."
   },
   {
     "kanji": "夜",
-    "meaning": "night"
+    "meaning": "night",
+    "rtk": "A person (left) under the moon (right) - nighttime when people are under the moon's light."
   },
   {
     "kanji": "術",
-    "meaning": "technique"
+    "meaning": "technique",
+    "rtk": "Going (left) with a specific method (right) - technique as a skillful way of doing things."
   },
   {
     "kanji": "苦",
-    "meaning": "suffering"
+    "meaning": "suffering",
+    "rtk": "Grass/plants (top) growing in bitter conditions (bottom) - suffering like plants struggling in harsh soil."
   },
   {
     "kanji": "番",
-    "meaning": "place in a series"
+    "meaning": "place in a series",
+    "rtk": "Rice field (top) with animals (bottom) taking turns - a place in series like animals rotating in the field."
   },
   {
     "kanji": "員",
-    "meaning": "member"
+    "meaning": "member",
+    "rtk": "A mouth (bottom) inside a group (top) - a member as someone who has a voice within the organization."
   },
   {
     "kanji": "月",
-    "meaning": "moon"
+    "meaning": "moon",
+    "rtk": "A crescent moon shape - the curved form of the moon as it appears in the night sky."
   },
   {
     "kanji": "兄",
-    "meaning": "older brother"
+    "meaning": "older brother",
+    "rtk": "A person with long legs (showing maturity) - the older brother who has grown tall and strong."
   },
   {
     "kanji": "題",
-    "meaning": "topic"
+    "meaning": "topic",
+    "rtk": "A head (right) full of thoughts (left) - the topic as what occupies your mind and thoughts."
   },
   {
     "kanji": "消",
-    "meaning": "extinguish"
+    "meaning": "extinguish",
+    "rtk": "Water (left) putting out fire (right) - extinguishing by using water to eliminate flames."
   },
   {
     "kanji": "乗",
-    "meaning": "ride"
+    "meaning": "ride",
+    "rtk": "A person sitting on top of a tree - riding by mounting and sitting on something elevated."
   },
   {
     "kanji": "新",
-    "meaning": "new"
+    "meaning": "new",
+    "rtk": "A tree (left) with fresh growth (right) - something new like fresh branches on a tree."
   },
   {
     "kanji": "答",
-    "meaning": "answer"
+    "meaning": "answer",
+    "rtk": "Bamboo (top) bending to respond (bottom) - an answer that responds like bamboo bends to wind."
   },
   {
     "kanji": "存",
-    "meaning": "existence"
+    "meaning": "existence",
+    "rtk": "A child (top) remaining in being (bottom) - existence as continuing to be, like a child who persists."
   },
   {
     "kanji": "馬",
-    "meaning": "horse"
+    "meaning": "horse",
+    "rtk": "A horse with its mane flowing (top strokes) and four legs (bottom strokes) - the complete form of a horse."
   },
   {
     "kanji": "校",
-    "meaning": "school"
+    "meaning": "school",
+    "rtk": "A tree (left) where children gather to learn (right) - school as the place of learning like shade under a tree."
   },
   {
     "kanji": "集",
-    "meaning": "gather together"
+    "meaning": "gather together",
+    "rtk": "Birds (top) flocking to a tree (bottom) - gathering together like birds collecting in one place."
   },
   {
     "kanji": "梏",
-    "meaning": "manacles"
+    "meaning": "manacles",
+    "rtk": "Wood (left) restraining hands (right) - manacles as wooden restraints that bind the hands."
   },
   {
     "kanji": "果",
-    "meaning": "fruit"
+    "meaning": "fruit",
+    "rtk": "A tree (bottom) bearing its produce (top) - fruit as the result that grows on trees."
   },
   {
     "kanji": "態",
-    "meaning": "seems like"
+    "meaning": "seems like",
+    "rtk": "Energy/ability (top) showing through the heart (bottom) - something seems like what the heart's energy reveals."
   },
   {
     "kanji": "由",
-    "meaning": "reason"
+    "meaning": "reason",
+    "rtk": "Something growing from a source - reason as the root cause from which understanding grows."
   },
   {
     "kanji": "認",
-    "meaning": "admit"
+    "meaning": "admit",
+    "rtk": "Words (left) that acknowledge something (right) - admitting by speaking words that recognize the truth."
   },
   {
     "kanji": "特",
-    "meaning": "special"
+    "meaning": "special",
+    "rtk": "A cow (left) that is unique (right) - special like a cow that stands out from all the others."
   },
   {
     "kanji": "報",
-    "meaning": "report"
+    "meaning": "report",
+    "rtk": "Bringing back (left) information with your hands (right) - a report delivered by hand-carrying news."
   },
   {
     "kanji": "敵",
-    "meaning": "enemy"
+    "meaning": "enemy",
+    "rtk": "Attacking (right) with adequate force (left) - an enemy that requires proper force to defeat."
   },
   {
     "kanji": "黒",
-    "meaning": "black"
+    "meaning": "black",
+    "rtk": "Fire (bottom) producing soot and darkness (top dots) - black as the color of burned, sooty material."
   },
   {
     "kanji": "断",
-    "meaning": "be cut off"
+    "meaning": "be cut off",
+    "rtk": "Rice (left) being severed by an axe (right) - being cut off completely like grain severed from its stem."
   },
   {
     "kanji": "素",
-    "meaning": "elementary"
+    "meaning": "elementary",
+    "rtk": "Thread (top) in its basic form (bottom) - elementary like thread before it's woven into complex fabric."
   },
   {
     "kanji": "優",
-    "meaning": "gentle"
+    "meaning": "gentle",
+    "rtk": "A person (left) with a worried, gentle heart (right) - gentleness born from caring and concern."
   },
   {
     "kanji": "軍",
-    "meaning": "army"
+    "meaning": "army",
+    "rtk": "A vehicle/cart (bottom) carrying weapons (top) - an army as organized military force with equipment."
   },
   {
     "kanji": "業",
-    "meaning": "business"
+    "meaning": "business",
+    "rtk": "A complex structure with many parts working together - business as organized activity with multiple components."
   },
   {
     "kanji": "助",
-    "meaning": "help"
+    "meaning": "help",
+    "rtk": "Power/strength (right) being offered (left) - help as lending your strength to assist someone."
   },
   {
     "kanji": "進",
-    "meaning": "advance"
+    "meaning": "advance",
+    "rtk": "Walking (bottom) forward along a path (top) - advancing by moving ahead step by step."
   },
   {
     "kanji": "願",
-    "meaning": "wish"
+    "meaning": "wish",
+    "rtk": "A head (right) full of hopes (left) - a wish as something you think about and hope for."
   },
   {
     "kanji": "車",
-    "meaning": "vehicle"
+    "meaning": "vehicle",
+    "rtk": "A cart with wheels (outer frame) and an axle (center line) - a vehicle for transportation."
   },
   {
     "kanji": "血",
-    "meaning": "blood"
+    "meaning": "blood",
+    "rtk": "A bowl (outer shape) containing the life fluid (inner strokes) - blood as the liquid of life."
   },
   {
     "kanji": "守",
-    "meaning": "protect"
+    "meaning": "protect",
+    "rtk": "A house (top) being watched over (bottom) - protecting by keeping guard over what's valuable."
   },
   {
     "kanji": "文",
-    "meaning": "written sentence"
+    "meaning": "written sentence",
+    "rtk": "Crossed lines forming patterns - written sentences as patterns of crossed strokes making meaning."
   },
   {
     "kanji": "追",
-    "meaning": "follow"
+    "meaning": "follow",
+    "rtk": "Walking (bottom) after someone who's moving away (top) - following by walking behind someone."
   },
   {
     "kanji": "精",
-    "meaning": "spirit (of life)"
+    "meaning": "spirit (of life)",
+    "rtk": "Rice/grain (left) with pure essence (right) - spirit as the pure essence extracted from life's grain."
   },
   {
     "kanji": "構",
-    "meaning": "be concerned about"
+    "meaning": "be concerned about",
+    "rtk": "Wood/trees (left) being arranged with care (right) - being concerned by carefully organizing and structuring."
   },
   {
     "kanji": "囲",
-    "meaning": "surround"
+    "meaning": "surround",
+    "rtk": "An enclosure (outer frame) with something inside (inner part) - surrounding by creating a boundary around something."
   },
   {
     "kanji": "形",
-    "meaning": "shape"
+    "meaning": "shape",
+    "rtk": "Three (left) lines creating a form (right) - shape as the outline created by connected lines."
   },
   {
     "kanji": "姉",
-    "meaning": "older sister"
+    "meaning": "older sister",
+    "rtk": "A woman (left) with authority/market position (right) - older sister who has seniority and responsibility."
   },
   {
     "kanji": "転",
-    "meaning": "roll around"
+    "meaning": "roll around",
+    "rtk": "A vehicle (left) spinning and rotating (right) - rolling around like a cart turning in circles."
   },
   {
     "kanji": "走",
-    "meaning": "run"
+    "meaning": "run",
+    "rtk": "A person (top) with legs moving fast (bottom) - running with rapid leg movement."
   },
   {
     "kanji": "説",
-    "meaning": "theory"
+    "meaning": "theory",
+    "rtk": "Words (left) that explain and persuade (right) - a theory expressed through explanatory words."
   },
   {
     "kanji": "痛",
-    "meaning": "pain"
+    "meaning": "pain",
+    "rtk": "Sickness (outer frame) with suffering inside (inner strokes) - pain as the inner experience of illness."
   },
   {
     "kanji": "胸",
-    "meaning": "chest"
+    "meaning": "chest",
+    "rtk": "Flesh/body (left) with the heart area (right) - the chest as the part of the body containing vital organs."
   },
   {
     "kanji": "店",
-    "meaning": "shop"
+    "meaning": "shop",
+    "rtk": "A building (top) where goods are displayed (bottom) - a shop as a place for selling merchandise."
   },
   {
     "kanji": "負",
-    "meaning": "lose to (something)"
+    "meaning": "lose to (something)",
+    "rtk": "A person (top) being defeated by burden (bottom) - losing when the weight becomes too much to bear."
   },
   {
     "kanji": "赤",
-    "meaning": "red"
+    "meaning": "red",
+    "rtk": "A large fire burning brightly - red as the color of intense flames and burning."
   },
   {
     "kanji": "兵",
-    "meaning": "soldier"
+    "meaning": "soldier",
+    "rtk": "Hands (top) holding weapons (bottom) - a soldier as someone armed and ready for battle."
   },
   {
     "kanji": "座",
-    "meaning": "to sit"
+    "meaning": "to sit",
+    "rtk": "Two people (top) on the ground (bottom) - sitting as the position of people resting on the earth."
   },
   {
     "kanji": "遠",
-    "meaning": "far"
+    "meaning": "far",
+    "rtk": "Walking (bottom) a long distance (top complex path) - far as requiring extended travel to reach."
   },
   {
     "kanji": "段",
-    "meaning": "step"
+    "meaning": "step",
+    "rtk": "A staircase (right side) with levels (left) - steps as the individual levels for climbing."
   },
   {
     "kanji": "識",
-    "meaning": "be conscious of"
+    "meaning": "be conscious of",
+    "rtk": "Words/knowledge (left) entering awareness (right) - being conscious through words that bring understanding."
   },
   {
     "kanji": "備",
-    "meaning": "equip"
+    "meaning": "equip",
+    "rtk": "A person (left) getting ready with tools (right) - equipping by preparing yourself with necessary items."
   },
   {
     "kanji": "打",
-    "meaning": "strike"
+    "meaning": "strike",
+    "rtk": "A hand (left) hitting with force (right) - striking by using your hand to deliver a blow."
   },
   {
     "kanji": "加",
-    "meaning": "add"
+    "meaning": "add",
+    "rtk": "Strength/power (right) being applied to something (left) - adding by applying additional force or elements."
   },
   {
     "kanji": "点",
-    "meaning": "point"
+    "meaning": "point",
+    "rtk": "Black dots (top) marking a specific location (bottom) - a point as a marked spot or location."
   },
   {
     "kanji": "寄",
-    "meaning": "get near"
+    "meaning": "get near",
+    "rtk": "A house (top) with someone approaching (bottom) - getting near by moving closer to a dwelling."
   },
   {
     "kanji": "師",
-    "meaning": "mentor"
+    "meaning": "mentor",
+    "rtk": "A pile/mound (left) of wisdom next to a person (right) - a mentor as someone with accumulated knowledge."
   },
   {
     "kanji": "山",
-    "meaning": "mountain"
+    "meaning": "mountain",
+    "rtk": "Three peaks rising from the earth - a mountain with its characteristic pointed, elevated shape."
   },
   {
     "kanji": "限",
-    "meaning": "limit"
+    "meaning": "limit",
+    "rtk": "A hill/slope (left) with a boundary line (right) - limit as the boundary that restricts how far you can go."
   },
   {
     "kanji": "急",
-    "meaning": "hurry"
+    "meaning": "hurry",
+    "rtk": "A heart (bottom) with urgent pressure from above (top) - hurry as the heart racing under pressure."
   },
   {
     "kanji": "差",
-    "meaning": "difference"
+    "meaning": "difference",
+    "rtk": "Sheep (top) and a worker (bottom) - difference between different types or classes of beings."
   },
   {
     "kanji": "半",
-    "meaning": "half"
+    "meaning": "half",
+    "rtk": "Something divided down the middle by a line - half as one of two equal parts."
   },
   {
     "kanji": "常",
-    "meaning": "usual"
+    "meaning": "usual",
+    "rtk": "Clothes (top) worn regularly (bottom) - usual as what you normally wear or do every day."
   },
   {
     "kanji": "深",
-    "meaning": "deep"
+    "meaning": "deep",
+    "rtk": "Water (left) going down to great depths (right) - deep like water that extends far below the surface."
   },
   {
     "kanji": "予",
-    "meaning": "in advance"
+    "meaning": "in advance",
+    "rtk": "A fisherman's hook reaching ahead - in advance like a hook that goes out before catching the fish."
   },
   {
     "kanji": "両",
-    "meaning": "both"
+    "meaning": "both",
+    "rtk": "Two sides balanced equally - both as having two parts in balance with each other."
   },
   {
     "kanji": "広",
-    "meaning": "wide"
+    "meaning": "wide",
+    "rtk": "A building (outer frame) with lots of space inside (inner area) - wide as having extensive interior space."
   },
   {
     "kanji": "告",
-    "meaning": "reveal"
+    "meaning": "reveal",
+    "rtk": "A cow (top) speaking through a mouth (bottom) - revealing by speaking out like a cow lowing."
   },
   {
     "kanji": "周",
-    "meaning": "circumference"
+    "meaning": "circumference",
+    "rtk": "A boundary (outer frame) going all the way around (inner strokes) - circumference as the complete boundary."
   },
   {
     "kanji": "石",
-    "meaning": "stone"
+    "meaning": "stone",
+    "rtk": "A cliff (top) with a rock (bottom) - stone as the hard material that forms cliffs and rocks."
   },
   {
     "kanji": "花",
-    "meaning": "flower"
+    "meaning": "flower",
+    "rtk": "Grass/plants (top) with a person (bottom) admiring - flowers as the beautiful part of plants that people enjoy."
   },
   {
     "kanji": "運",
-    "meaning": "carry"
+    "meaning": "carry",
+    "rtk": "Walking (bottom) while moving something (top) - carrying by transporting while walking."
   },
   {
     "kanji": "件",
-    "meaning": "case"
+    "meaning": "case",
+    "rtk": "A person (left) involved in a matter (right) - a case as a situation involving specific people."
   },
   {
     "kanji": "程",
-    "meaning": "extent"
+    "meaning": "extent",
+    "rtk": "Grain/rice (left) measured to a degree (right) - extent as the measured amount or degree of something."
   },
   {
     "kanji": "任",
-    "meaning": "obligation"
+    "meaning": "obligation",
+    "rtk": "A person (left) carrying responsibility (right) - obligation as the duty a person must bear."
   },
   {
     "kanji": "供",
-    "meaning": "offer"
+    "meaning": "offer",
+    "rtk": "A person (left) presenting something respectfully (right) - offering by presenting with proper respect."
   },
   {
     "kanji": "望",
-    "meaning": "hope"
+    "meaning": "hope",
+    "rtk": "Looking (right) toward the moon (left) with longing - hope as gazing toward something distant you desire."
   },
   {
     "kanji": "格",
-    "meaning": "status"
+    "meaning": "status",
+    "rtk": "A tree (left) with its ranking/position (right) - status as your position like a tree's place in the forest."
   },
   {
     "kanji": "記",
-    "meaning": "regularly record"
+    "meaning": "regularly record",
+    "rtk": "Words (left) being written down consistently (right) - regularly recording by writing words systematically."
   },
   {
     "kanji": "服",
-    "meaning": "clothes"
+    "meaning": "clothes",
+    "rtk": "A moon (left) and flesh/body (right) - clothes as what covers the body like the moon covers the night."
   },
   {
     "kanji": "平",
-    "meaning": "flat"
+    "meaning": "flat",
+    "rtk": "A level surface with balance points - flat as having an even, level surface without bumps."
   },
   {
     "kanji": "険",
-    "meaning": "risky and steep"
+    "meaning": "risky and steep",
+    "rtk": "A hill/slope (left) that is dangerous (right) - risky and steep like a treacherous mountain path."
   },
   {
     "kanji": "約",
-    "meaning": "promise"
+    "meaning": "promise",
+    "rtk": "Thread (left) tied in a binding knot (right) - a promise as a binding agreement like tied thread."
   },
   {
     "kanji": "海",
-    "meaning": "sea"
+    "meaning": "sea",
+    "rtk": "Water (left) that is vast like a mother (right) - the sea as the mother of all waters."
   },
   {
     "kanji": "木",
-    "meaning": "tree"
+    "meaning": "tree",
+    "rtk": "A tree trunk with branches spreading out and roots going down - the basic form of a growing tree."
   },
   {
     "kanji": "活",
-    "meaning": "activity"
+    "meaning": "activity",
+    "rtk": "Water (left) with life and movement (right) - activity like the lively movement of flowing water."
   },
   {
     "kanji": "隊",
-    "meaning": "squad"
+    "meaning": "squad",
+    "rtk": "A hill/high place (left) where a team (right) is positioned - a squad stationed at an elevated position."
   },
   {
     "kanji": "期",
-    "meaning": "period (of time)"
+    "meaning": "period (of time)",
+    "rtk": "The moon (right) marking cycles (left) - a period of time measured by lunar cycles."
   },
   {
     "kanji": "電",
-    "meaning": "electric"
+    "meaning": "electric",
+    "rtk": "Rain (top) with lightning energy (bottom) - electric like the electrical power in thunderstorms."
   },
   {
     "kanji": "火",
-    "meaning": "fire"
+    "meaning": "fire",
+    "rtk": "Flames rising with sparks flying - fire as the dancing flames and glowing embers."
   },
   {
     "kanji": "勢",
-    "meaning": "vigor"
+    "meaning": "vigor",
+    "rtk": "A plant (top) growing with great strength (bottom) - vigor like the powerful growth of thriving plants."
   },
   {
     "kanji": "鳴",
-    "meaning": "to ring"
+    "meaning": "to ring",
+    "rtk": "A bird (right) with its mouth open (left) making sound - ringing like a bird calling out loudly."
   },
   {
     "kanji": "組",
-    "meaning": "organized group"
+    "meaning": "organized group",
+    "rtk": "Thread (left) woven together systematically (right) - an organized group like threads woven into fabric."
   },
   {
     "kanji": "単",
-    "meaning": "single"
+    "meaning": "single",
+    "rtk": "A single item standing alone - one thing by itself without others around it."
   },
   {
     "kanji": "四",
-    "meaning": "four"
+    "meaning": "four",
+    "rtk": "A box divided into four sections - the number four represented by four enclosed spaces."
   },
   {
     "kanji": "器",
-    "meaning": "instrument"
+    "meaning": "instrument",
+    "rtk": "Four mouths (corners) working together with a tool - an instrument that coordinates multiple functions."
   },
   {
     "kanji": "語",
-    "meaning": "language"
+    "meaning": "language",
+    "rtk": "Words (left) spoken by five mouths (right) - language as words shared among multiple speakers."
   },
   {
     "kanji": "選",
-    "meaning": "select"
+    "meaning": "select",
+    "rtk": "Walking (bottom) to choose from options (top) - selecting by moving toward your preferred choice."
   },
   {
     "kanji": "都",
-    "meaning": "metropolis"
+    "meaning": "metropolis",
+    "rtk": "A person (right) in a place with many buildings (left) - a metropolis as a city with dense population."
   },
   {
     "kanji": "野",
-    "meaning": "field"
+    "meaning": "field",
+    "rtk": "A village (right) surrounded by open land (left) - fields as the open areas around settlements."
   },
   {
     "kanji": "利",
-    "meaning": "profit"
+    "meaning": "profit",
+    "rtk": "Grain/rice (left) cut with a blade (right) - profit earned by harvesting crops with tools."
   },
   {
     "kanji": "完",
-    "meaning": "complete"
+    "meaning": "complete",
+    "rtk": "A house (top) with everything finished inside (bottom) - complete when all parts are finished."
   },
   {
     "kanji": "係",
-    "meaning": "be involved with"
+    "meaning": "be involved with",
+    "rtk": "A person (left) connected by threads (right) - being involved through connections that bind you to something."
   },
   {
     "kanji": "異",
-    "meaning": "different"
+    "meaning": "different",
+    "rtk": "A field (top) with something strange growing (bottom) - different like an unusual plant in a normal field."
   },
   {
     "kanji": "経",
-    "meaning": "Buddhist scripture"
+    "meaning": "Buddhist scripture",
+    "rtk": "Thread (left) woven with sacred patterns (right) - Buddhist scripture like sacred text woven with wisdom."
   },
   {
     "kanji": "料",
-    "meaning": "ingredients"
+    "meaning": "ingredients",
+    "rtk": "Rice/grain (left) being measured (right) - ingredients as measured amounts of grain and other materials."
   },
   {
     "kanji": "欲",
-    "meaning": "desire"
+    "meaning": "desire",
+    "rtk": "A valley (left) where someone is lacking/wanting (right) - desire as the wanting that comes from emptiness."
   },
   {
     "kanji": "第",
-    "meaning": "ordinal number"
+    "meaning": "ordinal number",
+    "rtk": "Bamboo (top) marked with sequence numbers (bottom) - ordinal numbers like marks on bamboo for counting order."
   },
   {
     "kanji": "肉",
-    "meaning": "meat"
+    "meaning": "meat",
+    "rtk": "Flesh inside a container - meat as the flesh part of animals used for food."
   },
   {
     "kanji": "満",
-    "meaning": "full"
+    "meaning": "full",
+    "rtk": "Water (left) completely filling a container (right) - full like water that reaches the brim."
   },
   {
     "kanji": "公",
-    "meaning": "public"
+    "meaning": "public",
+    "rtk": "Eight (top) people sharing one thing (bottom) - public as what belongs to everyone equally."
   },
   {
     "kanji": "再",
-    "meaning": "one more time"
+    "meaning": "one more time",
+    "rtk": "One (top) happening again (bottom repetition) - one more time as repetition of what happened before."
   },
   {
     "kanji": "団",
-    "meaning": "group"
+    "meaning": "group",
+    "rtk": "People enclosed together in a boundary - a group as people contained within defined limits."
   },
   {
     "kanji": "仲",
-    "meaning": "relationship"
+    "meaning": "relationship",
+    "rtk": "A person (left) in the middle (right) connecting others - relationship as the connection between people."
   },
   {
     "kanji": "礼",
-    "meaning": "polite"
+    "meaning": "polite",
+    "rtk": "Showing (left) proper respect with ceremony (right) - being polite through respectful ceremonial behavior."
   },
   {
     "kanji": "側",
-    "meaning": "side (of something)"
+    "meaning": "side (of something)",
+    "rtk": "A person (left) standing beside something (right) - the side as where someone stands next to something."
   },
   {
     "kanji": "際",
-    "meaning": "edge"
+    "meaning": "edge",
+    "rtk": "A hill/slope (left) meeting a boundary (right) - the edge where one thing meets another."
   },
   {
     "kanji": "装",
-    "meaning": "outfit"
+    "meaning": "outfit",
+    "rtk": "Clothes (top) arranged and put on (bottom) - an outfit as clothing arranged for wearing."
   },
   {
     "kanji": "友",
-    "meaning": "friend"
+    "meaning": "friend",
+    "rtk": "Two hands reaching toward each other - friends as people who reach out to help one another."
   },
   {
     "kanji": "冷",
-    "meaning": "cold (to the touch)"
+    "meaning": "cold (to the touch)",
+    "rtk": "Ice (left) that makes things cold (right) - cold as the temperature that ice creates when you touch it."
   },
   {
     "kanji": "有",
-    "meaning": "be in possession"
+    "meaning": "be in possession",
+    "rtk": "A hand (right) holding something (left) - being in possession by having something in your grasp."
   },
   {
     "kanji": "夢",
-    "meaning": "dream"
+    "meaning": "dream",
+    "rtk": "Grass/plants (top) growing in sleep (bottom) - dreams as the visions that grow in your mind while sleeping."
   },
   {
     "kanji": "探",
-    "meaning": "to feel around for"
+    "meaning": "to feel around for",
+    "rtk": "A hand (left) reaching into deep places (right) - feeling around by reaching with your hand into unknown spaces."
   },
   {
     "kanji": "余",
-    "meaning": "be in excess"
+    "meaning": "be in excess",
+    "rtk": "A person (top) with extra/leftover (bottom) - being in excess when you have more than needed."
   },
   {
     "kanji": "画",
-    "meaning": "drawing"
+    "meaning": "drawing",
+    "rtk": "A boundary (outer frame) with artistic strokes inside - drawing as artistic marks within defined borders."
   },
   {
     "kanji": "飲",
-    "meaning": "drink"
+    "meaning": "drink",
+    "rtk": "Food (left) going into the mouth as liquid (right) - drinking by taking liquid food into your mouth."
   },
   {
     "kanji": "破",
-    "meaning": "to tear"
+    "meaning": "to tear",
+    "rtk": "A stone (left) breaking something apart (right) - tearing by using force to break things into pieces."
   },
   {
     "kanji": "交",
-    "meaning": "mingle"
+    "meaning": "mingle",
+    "rtk": "Lines crossing and intersecting - mingling like paths that cross and connect with each other."
   },
   {
     "kanji": "難",
-    "meaning": "difficult"
+    "meaning": "difficult",
+    "rtk": "A bird (right) in a challenging situation (left) - difficult like a bird struggling against obstacles."
   },
   {
     "kanji": "横",
-    "meaning": "sideways"
+    "meaning": "sideways",
+    "rtk": "A tree (left) lying on its side (right) - sideways like a tree that has fallen over horizontally."
   },
   {
     "kanji": "五",
-    "meaning": "five"
+    "meaning": "five",
+    "rtk": "Five horizontal lines arranged in a pattern - the number five represented by five marks."
   },
   {
     "kanji": "静",
-    "meaning": "quiet"
+    "meaning": "quiet",
+    "rtk": "Blue/green (left) stillness like a peaceful temple (right) - quiet as the calm blue-green of still water."
   },
   {
     "kanji": "訳",
-    "meaning": "translation"
+    "meaning": "translation",
+    "rtk": "Words (left) being converted/divided (right) - translation as words being converted into different forms."
   },
   {
     "kanji": "計",
-    "meaning": "measure"
+    "meaning": "measure",
+    "rtk": "Words/numbers (left) used for counting (right) - measuring by using numbers and calculations."
   },
   {
     "kanji": "送",
-    "meaning": "send something"
+    "meaning": "send something",
+    "rtk": "Walking (bottom) while carrying something to deliver (top) - sending by walking to deliver items."
   },
   {
     "kanji": "許",
-    "meaning": "permit"
+    "meaning": "permit",
+    "rtk": "Words (left) giving permission (right) - permitting by speaking words that grant approval."
   },
   {
     "kanji": "似",
-    "meaning": "resemble"
+    "meaning": "resemble",
+    "rtk": "A person (left) appearing like something else (right) - resembling by having similar appearance."
   },
   {
     "kanji": "念",
-    "meaning": "a sense of"
+    "meaning": "a sense of",
+    "rtk": "Now (top) in the heart (bottom) - a sense of something felt in your heart at this moment."
   },
   {
     "kanji": "質",
-    "meaning": "quality"
+    "meaning": "quality",
+    "rtk": "An ax (left) and shells/money (right) - quality as what determines the value and worth of things."
   },
   {
     "kanji": "幸",
-    "meaning": "happiness"
+    "meaning": "happiness",
+    "rtk": "A lucky symbol with arms spread wide - happiness as the feeling when fortune smiles on you."
   },
   {
     "kanji": "役",
-    "meaning": "role"
+    "meaning": "role",
+    "rtk": "A person (left) going on a mission (right) - role as the part you play or duty you perform."
   },
   {
     "kanji": "居",
-    "meaning": "to be (animate object)"
+    "meaning": "to be (animate object)",
+    "rtk": "A person sitting (bottom) in a dwelling (top) - being present as an animate being in a location."
   },
   {
     "kanji": "街",
-    "meaning": "town district"
+    "meaning": "town district",
+    "rtk": "A road (left) with buildings and activity (right) - town district as the area along main roads."
   },
   {
     "kanji": "速",
-    "meaning": "fast"
+    "meaning": "fast",
+    "rtk": "Walking (bottom) with great velocity (top) - fast as moving with high speed while traveling."
   },
   {
     "kanji": "熱",
-    "meaning": "heat"
+    "meaning": "heat",
+    "rtk": "Fire (bottom) with intense energy above (top) - heat as the energy radiating from intense fire."
   },
   {
     "kanji": "危",
-    "meaning": "dangerous"
+    "meaning": "dangerous",
+    "rtk": "A person on a cliff (structure) in peril - dangerous like being in a precarious, risky position."
   },
   {
     "kanji": "青",
-    "meaning": "blue"
+    "meaning": "blue",
+    "rtk": "A growing plant (bottom) under the moon (top) - blue like the color of plants in moonlight."
   },
   {
     "kanji": "去",
-    "meaning": "past"
+    "meaning": "past",
+    "rtk": "A person walking away into the distance - the past as what has gone and moved away from now."
   },
   {
     "kanji": "社",
-    "meaning": "company"
+    "meaning": "company",
+    "rtk": "A shrine (left) where people gather (right) - company as people organized together like a religious community."
   },
   {
     "kanji": "傷",
-    "meaning": "wound"
+    "meaning": "wound",
+    "rtk": "A person (left) who has been hurt (right) - wound as injury inflicted on someone's body."
   },
   {
     "kanji": "朝",
-    "meaning": "morning"
+    "meaning": "morning",
+    "rtk": "The moon (left) giving way to the sun (right) - morning when the moon fades and sun appears."
   },
   {
     "kanji": "警",
-    "meaning": "to police (something)"
+    "meaning": "to police (something)",
+    "rtk": "Being alert (top) to guard and protect (bottom) - policing by staying watchful to maintain order."
   },
   {
     "kanji": "議",
-    "meaning": "deliberation"
+    "meaning": "deliberation",
+    "rtk": "Words (left) spoken in formal discussion (right) - deliberation as careful discussion using words."
   },
   {
     "kanji": "細",
-    "meaning": "thin"
+    "meaning": "thin",
+    "rtk": "Thread (left) that is very narrow (right) - thin like thread that has been made very fine."
   },
   {
     "kanji": "読",
-    "meaning": "read"
+    "meaning": "read",
+    "rtk": "Words (left) being spoken aloud (right) - reading by speaking the words you see written."
   },
   {
     "kanji": "品",
-    "meaning": "goods"
+    "meaning": "goods",
+    "rtk": "Three mouths stacked - goods as things that multiple people talk about and want."
   },
   {
     "kanji": "位",
-    "meaning": "rank"
+    "meaning": "rank",
+    "rtk": "A person (left) standing in position (right) - rank as your standing position relative to others."
   },
   {
     "kanji": "茶",
-    "meaning": "tea"
+    "meaning": "tea",
+    "rtk": "Grass/plants (top) processed in a building (bottom) - tea as plant leaves processed into a drink."
   },
   {
     "kanji": "買",
-    "meaning": "buy"
+    "meaning": "buy",
+    "rtk": "A net (top) to catch shells/money (bottom) - buying by using money caught in your net."
   },
   {
     "kanji": "階",
-    "meaning": "floor (of a building)"
+    "meaning": "floor (of a building)",
+    "rtk": "A hill/slope (left) with levels built on it (right) - floors as the levels built on elevated ground."
   },
   {
     "kanji": "徒",
-    "meaning": "follower"
+    "meaning": "follower",
+    "rtk": "A person walking (left) behind someone (right) - follower as one who walks behind a leader."
   },
   {
     "kanji": "休",
-    "meaning": "rest"
+    "meaning": "rest",
+    "rtk": "A person leaning against a tree - resting by finding support and shade under a tree."
   },
   {
     "kanji": "軽",
-    "meaning": "lightweight"
+    "meaning": "lightweight",
+    "rtk": "A vehicle (left) that is easy to move (right) - lightweight like a cart that's easy to push."
   },
   {
     "kanji": "太",
-    "meaning": "plump"
+    "meaning": "plump",
+    "rtk": "A large person with a big belly - plump as having a rounded, full figure."
   },
   {
     "kanji": "聖",
-    "meaning": "holy"
+    "meaning": "holy",
+    "rtk": "An ear (left) listening to the king/divine (right) - holy as listening to sacred, divine authority."
   },
   {
     "kanji": "降",
-    "meaning": "descend"
+    "meaning": "descend",
+    "rtk": "A hill/slope (left) with something coming down (right) - descending by moving down from higher ground."
   },
   {
     "kanji": "共",
-    "meaning": "together"
+    "meaning": "together",
+    "rtk": "Hands (top curves) holding something jointly (bottom) - together as sharing and holding things jointly."
   },
   {
     "kanji": "城",
-    "meaning": "castle"
+    "meaning": "castle",
+    "rtk": "Earth/ground (left) with fortified walls (right) - castle as fortified structure built on elevated ground."
   },
   {
     "kanji": "右",
-    "meaning": "right"
+    "meaning": "right",
+    "rtk": "A mouth (bottom) and hand (top) - right as the hand side you use for eating."
   },
   {
     "kanji": "官",
-    "meaning": "bureaucrat"
+    "meaning": "bureaucrat",
+    "rtk": "A house (top) with someone in authority inside (bottom) - bureaucrat as official working in government buildings."
   },
   {
     "kanji": "護",
-    "meaning": "keep safe"
+    "meaning": "keep safe",
+    "rtk": "Words/laws (left) that provide protection (right) - keeping safe through legal protection and advocacy."
   },
   {
     "kanji": "制",
-    "meaning": "control"
+    "meaning": "control",
+    "rtk": "A system (left) managed with authority (right) - control through systematic management and regulation."
   },
   {
     "kanji": "移",
-    "meaning": "transfer"
+    "meaning": "transfer",
+    "rtk": "A grain (left) being moved (right) - transferring by relocating something from one place to another."
   },
   {
     "kanji": "裏",
-    "meaning": "backside"
+    "meaning": "backside",
+    "rtk": "Clothes (top) with their inner surface (bottom) - backside as the inner, hidden surface of garments."
   },
   {
     "kanji": "片",
-    "meaning": "one of a pair"
+    "meaning": "one of a pair",
+    "rtk": "Half of something split - one piece when something has been divided into matching parts."
   },
   {
     "kanji": "原",
-    "meaning": "original"
+    "meaning": "original",
+    "rtk": "A cliff (left) with a spring (right) - original like the source spring that starts at the cliff."
   },
   {
     "kanji": "台",
-    "meaning": "pedestal"
+    "meaning": "pedestal",
+    "rtk": "A mouth (bottom) speaking from an elevated platform (top) - pedestal as the raised platform for speaking."
   },
   {
     "kanji": "武",
-    "meaning": "military"
+    "meaning": "military",
+    "rtk": "A person with a spear stopping conflict - military as armed force that halts violence through strength."
   },
   {
     "kanji": "腹",
-    "meaning": "belly"
+    "meaning": "belly",
+    "rtk": "Flesh/body (left) with the stomach area (right) - belly as the soft middle part of the body."
   },
   {
     "kanji": "耳",
-    "meaning": "ear"
+    "meaning": "ear",
+    "rtk": "An ear with its outer shape and inner canal - the organ for hearing sounds and maintaining balance."
   },
   {
     "kanji": "困",
-    "meaning": "distressed"
+    "meaning": "distressed",
+    "rtk": "A tree (inside) trapped in a box (outside) - distressed like something confined and unable to grow."
   },
   {
     "kanji": "眼",
-    "meaning": "eyeball"
+    "meaning": "eyeball",
+    "rtk": "An eye (right) with good vision (left) - eyeball as the complete organ of sight."
   },
   {
     "kanji": "忘",
-    "meaning": "forget"
+    "meaning": "forget",
+    "rtk": "A heart (bottom) that has lost something (top) - forgetting when your heart loses track of memories."
   },
   {
     "kanji": "園",
-    "meaning": "park"
+    "meaning": "park",
+    "rtk": "An enclosure (outer boundary) with gardens inside (inner elements) - park as enclosed recreational space."
   },
   {
     "kanji": "激",
-    "meaning": "intense"
+    "meaning": "intense",
+    "rtk": "Water (left) moving with great force (right) - intense like rushing water with powerful energy."
   },
   {
     "kanji": "吸",
-    "meaning": "suck"
+    "meaning": "suck",
+    "rtk": "A mouth (left) drawing something inward (right) - sucking by using mouth to pull things inside."
   },
   {
     "kanji": "示",
-    "meaning": "demonstrate"
+    "meaning": "demonstrate",
+    "rtk": "An altar (structure) showing something sacred - demonstrating by displaying something for others to see."
   },
   {
     "kanji": "具",
-    "meaning": "tool"
+    "meaning": "tool",
+    "rtk": "Eyes (top) examining implements (bottom) - tools as implements that you examine visually before using."
   },
   {
     "kanji": "容",
-    "meaning": "contain"
+    "meaning": "contain",
+    "rtk": "A house (top) with space inside (bottom) - containing by having interior space that holds things."
   },
   {
     "kanji": "宮",
-    "meaning": "Shinto shrine"
+    "meaning": "Shinto shrine",
+    "rtk": "A house (top) with sacred connections (bottom) - Shinto shrine as sacred building for worship."
   },
   {
     "kanji": "悲",
-    "meaning": "sad"
+    "meaning": "sad",
+    "rtk": "Something flying away (top) from the heart (bottom) - sadness when joy flies away from your heart."
   },
   {
     "kanji": "義",
-    "meaning": "justice"
+    "meaning": "justice",
+    "rtk": "Sheep (top) representing sacrifice for me (bottom) - justice as making sacrifices for moral principles."
   },
   {
     "kanji": "泣",
-    "meaning": "cry"
+    "meaning": "cry",
+    "rtk": "Water/tears (left) coming from the eyes (right) - crying as water flowing from your eyes when sad."
   },
   {
     "kanji": "式",
