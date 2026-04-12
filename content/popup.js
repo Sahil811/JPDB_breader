@@ -1413,7 +1413,23 @@ export class Popup {
     const definition = meanings
       .map((meaning) => meaning.glosses.join("; "))
       .join("; ");
-    const prompt = `Could you explain why the Japanese word ${word} is defined as ${definition}? Please provide an etymological breakdown by analyzing its individual kanji components. How do these meanings combine to form the overall definition of the word?`;
+    const prompt = `You are an expert teacher and communicator. Explain why the Japanese word ${word} is defined as "${definition}" so a complete beginner can genuinely understand it, not just read it.
+
+Provide an etymological breakdown of its individual kanji components and how these meanings logically combine to form the overall definition.
+
+Write in natural flowing paragraphs using Markdown formatting. Keep the tone conversational, clear, and thoughtful. Never sound robotic, academic, or like a textbook.
+
+Apply these principles naturally where they fit:
+- Start from the most basic truth and build upward.
+- Break the idea into small logical parts.
+- Connect unfamiliar ideas to familiar ones (analogies) or link to what a beginner likely knows.
+- Make the main point clear early, then support it.
+- Keep it simple without losing accuracy.
+- Never use technical linguistic jargon without immediately explaining it in plain language.
+- Make each idea flow naturally into the next.
+- Prioritize clarity and understanding over sounding impressive.
+
+End with one short sentence that captures the core meaning plainly.`;
 
     try {
       const response = await fetch(
