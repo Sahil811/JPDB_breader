@@ -1417,7 +1417,7 @@ export class Popup {
 
 Provide an etymological breakdown of its individual kanji components and how these meanings logically combine to form the overall definition.
 
-Write in natural flowing paragraphs using Markdown formatting. Keep the tone conversational, clear, and thoughtful. Never sound robotic, academic, or like a textbook.
+Write in natural flowing, deeply engaging, and *visually scannable* paragraphs. Keep the tone conversational, clear, and thoughtful. Break up the formatting cleanly with bullet points, bold emphasis, and short paragraphs so it isn't an exhausting wall of text. Never sound robotic or academic.
 
 Apply these principles naturally where they fit:
 - Start from the most basic truth and build upward.
@@ -1551,6 +1551,10 @@ class ExplanationPopup {
         color: lightskyblue; 
       }
       
+      .explanation-content p {
+        margin: 0 0 1.3em 0;
+      }
+      
       .explanation-content hr {
         border: none;
         border-top: 1px dashed rgba(255, 255, 255, 0.2);
@@ -1648,49 +1652,29 @@ class ExplanationPopup {
       .replace(/^#\s+(.*)$/gm, '<h1>$1</h1>')
       .replace(/^---$/gm, '<hr>');
 
-    const lines = parsed.split('\n');
-    let inUl = false;
-    let inOl = false;
-    let out = [];
+    const blocks = parsed.split(/\n\s*\n/);
+    let htmlBlocks = blocks.map(block => {
+      block = block.trim();
+      if (!block) return '';
+      
+      // Pass through structures we explicitly created
+      if (block.startsWith('<h') || block.startsWith('<hr')) return block;
+      
+      // Unordered Lists
+      if (block.match(/^[\-\*]\s+/)) {
+          return "<ul>" + block.split('\n').filter(l => l.trim()).map(l => `<li>${l.replace(/^[\-\*]\s+/, '')}</li>`).join('') + "</ul>";
+      }
+      
+      // Ordered lists
+      if (block.match(/^\d+\.\s+/)) {
+          return "<ol>" + block.split('\n').filter(l => l.trim()).map(l => `<li>${l.replace(/^\d+\.\s+/, '')}</li>`).join('') + "</ol>";
+      }
+      
+      // Standard paragraph. Preserve internal single line breaks.
+      return `<p>${block.replace(/\n/g, '<br>')}</p>`;
+    });
 
-    for (let i = 0; i < lines.length; i++) {
-        let line = lines[i].trim();
-
-        if (line.match(/^[\-\*]\s+(.*)$/)) {
-            if (!inUl) { out.push('<ul>'); inUl = true; }
-            out.push(`<li>${line.replace(/^[\-\*]\s+/, '')}</li>`);
-            continue;
-        } else if (inUl) {
-            out.push('</ul>'); inUl = false;
-        }
-
-        if (line.match(/^\d+\.\s+(.*)$/)) {
-            if (!inOl) { out.push('<ol>'); inOl = true; }
-            out.push(`<li>${line.replace(/^\d+\.\s+/, '')}</li>`);
-            continue;
-        } else if (inOl) {
-            out.push('</ol>'); inOl = false;
-        }
-
-        if (line === '') {
-            out.push('<br>');
-            continue;
-        }
-
-        out.push(line);
-    }
-    
-    if (inUl) out.push('</ul>');
-    if (inOl) out.push('</ol>');
-
-    let finalHtml = out.join('\n')
-      .replace(/(<br>\n){2,}/g, '<br><br>') 
-      .replace(/<\/h(\d)>\n<br>/g, '</h$1>') 
-      .replace(/<\/ul>\n<br>/g, '</ul>')     
-      .replace(/<\/ol>\n<br>/g, '</ol>')     
-      .replace(/<hr>\n<br>/g, '<hr>');       
-
-    return finalHtml;
+    return htmlBlocks.join('\n');
   }
 
   show(explanation) {
