@@ -34,11 +34,21 @@ article {
 }
 
 #mine-buttons,
-#review-buttons {
+#review-buttons,
+#utility-buttons {
   display: flex;
   flex-direction: row;
   gap: 0.25em;
   font-size: 12px;
+}
+
+#review-buttons {
+  flex: 1;
+}
+
+#utility-buttons {
+  margin-left: auto;
+  gap: 0.2em;
 }
 
 button {
@@ -69,26 +79,39 @@ button:active {
 #header {
   display: flex;
   flex-direction: row;
-  justify-content: left;
+  justify-content: space-between;
   align-items: center;
   gap: 0.5em;
-
-  margin: 0;
+  margin: 0 0 0.25em 0;
   padding: 0;
+}
 
+.header-main-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.7em;
+}
+
+.word-link {
+  color: var(--color-text);
   font-size: 150%;
   font-weight: bold;
+  text-decoration: none;
 }
 
-#header a {
-  color: var(--color-text);
+.word-link:hover {
+  text-decoration: underline;
 }
 
-#header a::after {
-  content: " 🔗";
-  font-size: 50%;
-  vertical-align: middle;
+.utility-icons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.2em;
+  font-size: 70%; /* Scales relative to the button sizes and header */
 }
+
 
 .state {
   display: flex;
@@ -365,63 +388,30 @@ button.easy {
   cursor: not-allowed;
 }
 
-.immersion-kit-button {
-  background-color: yellow;
-  color: black;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.image-audio-container {
-  position: relative;
-  display: inline-block;
-  width: 100%;
-  margin-bottom: 10px;
-}
-
-.example-image {
-  max-width: 100%;
-  display: block;
-  border-radius: 8px;
-}
-
-.audio-button {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  cursor: pointer;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  padding: 5px 10px;
-  opacity: 0; /* Initially hidden */
-  transition: opacity 0.3s ease; /* Smooth transition for hover effect */
-}
-
-/* Show the button on hover over the container */
-.image-audio-container:hover .audio-button {
-  opacity: 1;
-}
-
-/* If there's no image, make the button always visible */
-.image-audio-container:not(:has(.example-image)) .audio-button {
-  opacity: 1;
-  display: block;
-}
-
-.explain-button {
-  margin-left: 0.5em;
-  padding: 0.1em 0.3em;
-  font-size: 1em; /* Adjust as needed */
+.util-btn {
   background-color: transparent;
   color: var(--color-text);
-  border: 1px solid lightskyblue;
-  border-radius: var(--border-radius);
+  border: 1px solid transparent; /* invisible border keeps sizing steady */
+  border-radius: 50%; /* sleek circular shape */
+  padding: 0.15em;
+  font-size: 1.1em;
+  cursor: pointer;
+  opacity: 0.65;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8em;
+  height: 1.8em;
 }
 
-.youglish-button {
-  background-color: transparent;
-  color: var(--color-text);
-  border: 1px solid lightskyblue;
+.util-btn:hover {
+  opacity: 1;
+  background-color: var(--color-background-alt);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.util-btn.audio-btn:hover {
+  background-color: rgba(135, 206, 250, 0.2); /* soft highlight for audio */
 }

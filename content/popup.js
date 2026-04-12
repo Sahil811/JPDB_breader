@@ -5,6 +5,8 @@ import {
   requestMine,
   requestReview,
   requestSetFlag,
+  requestFetchAudioHash,
+  requestFetchAudioBytes,
 } from "./background_comms.js";
 import { Dialog } from "./dialog.js";
 import { getSentences } from "./word.js";
@@ -685,6 +687,48 @@ class ImmersionKit {
   }
 }
 
+// ── JPDB Pronunciation Audio ──
+// XOR key for decrypting JPDB audio files.
+const JPDB_XOR_KEY = [0x06, 0x23, 0x54, 0x0f];
+let _jpdbCurrentAudio = null;
+
+const JpdbAudio = {
+  _cache: {},
+
+  async speak(vid, spelling) {
+    if (_jpdbCurrentAudio) {
+      try { _jpdbCurrentAudio.pause(); } catch {}
+      _jpdbCurrentAudio = null;
+    }
+    if (!vid) return;
+    const hash = this._cache[vid] ?? await this._scrapeHash(vid, spelling);
+    if (hash) await this._play(hash);
+  },
+
+  async _scrapeHash(vid, spelling) {
+    try {
+      const result = await requestFetchAudioHash(vid, spelling);
+      if (result?.hash) { this._cache[vid] = result.hash; return result.hash; }
+    } catch {}
+    return null;
+  },
+
+  async _play(hash) {
+    try {
+      const result = await requestFetchAudioBytes(hash);
+      if (!result?.bytes) return;
+      const buf = new Uint8Array(result.bytes);
+      for (let i = 0; i < Math.min(4, buf.length); i++) buf[i] ^= JPDB_XOR_KEY[i];
+      const blobUrl = URL.createObjectURL(new Blob([buf], { type: 'audio/ogg' }));
+      const audio = new Audio(blobUrl);
+      _jpdbCurrentAudio = audio;
+      audio.onended = () => { URL.revokeObjectURL(blobUrl); _jpdbCurrentAudio = null; };
+      audio.onerror = () => { URL.revokeObjectURL(blobUrl); _jpdbCurrentAudio = null; };
+      audio.play().catch(() => URL.revokeObjectURL(blobUrl));
+    } catch {}
+  },
+};
+
 export class Popup {
   #demoMode;
   #element;
@@ -783,14 +827,12 @@ export class Popup {
         jsxCreateElement(
           "section",
           { id: "review-buttons" },
+          // SRS review buttons
           jsxCreateElement(
             "button",
             {
               class: "nothing",
-              onclick: demoMode
-                ? undefined
-                : async () =>
-                    await requestReview(this.#data.token.card, "nothing"),
+              onclick: demoMode ? undefined : async () => await requestReview(this.#data.token.card, "nothing"),
             },
             "Nothing"
           ),
@@ -798,10 +840,7 @@ export class Popup {
             "button",
             {
               class: "something",
-              onclick: demoMode
-                ? undefined
-                : async () =>
-                    await requestReview(this.#data.token.card, "something"),
+              onclick: demoMode ? undefined : async () => await requestReview(this.#data.token.card, "something"),
             },
             "Something"
           ),
@@ -809,10 +848,7 @@ export class Popup {
             "button",
             {
               class: "hard",
-              onclick: demoMode
-                ? undefined
-                : async () =>
-                    await requestReview(this.#data.token.card, "hard"),
+              onclick: demoMode ? undefined : async () => await requestReview(this.#data.token.card, "hard"),
             },
             "Hard"
           ),
@@ -820,10 +856,7 @@ export class Popup {
             "button",
             {
               class: "good",
-              onclick: demoMode
-                ? undefined
-                : async () =>
-                    await requestReview(this.#data.token.card, "good"),
+              onclick: demoMode ? undefined : async () => await requestReview(this.#data.token.card, "good"),
             },
             "Good"
           ),
@@ -831,53 +864,9 @@ export class Popup {
             "button",
             {
               class: "easy",
-              onclick: demoMode
-                ? undefined
-                : async () =>
-                    await requestReview(this.#data.token.card, "easy"),
+              onclick: demoMode ? undefined : async () => await requestReview(this.#data.token.card, "easy"),
             },
             "Easy"
-          ),
-          jsxCreateElement(
-            "button",
-            {
-              class: "immersion-kit-button",
-              onclick: async () => await this.toggleImmersionKit(),
-            },
-            "Examples"
-          ),
-          jsxCreateElement(
-            "button",
-            {
-              class: "button youglish-button",
-              onclick: (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                const word = this.#data.token.card.spelling;
-                window.open(
-                  `https://sentencesearch.neocities.org/#${encodeURIComponent(
-                    word
-                  )}`,
-                  "_blank"
-                );
-              },
-            },
-            "YouGlish"
-          ),
-          jsxCreateElement(
-            "button",
-            {
-              class: "explain-button",
-              onclick: (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                this.explainWord(
-                  this.#data.token.card.spelling,
-                  this.#data.token.card.meanings
-                );
-              },
-            },
-            "ℹ️"
           )
         ),
         (this.#vocabSection = jsxCreateElement("section", {
@@ -1111,13 +1100,47 @@ export class Popup {
         "div",
         { id: "header" },
         jsxCreateElement(
-          "a",
-          { lang: "ja", href: url, target: "_blank" },
-          jsxCreateElement("span", { class: "spelling" }, card.spelling),
+          "div",
+          { class: "header-main-info" },
           jsxCreateElement(
-            "span",
-            { class: "reading" },
-            card.spelling !== card.reading ? `(${card.reading})` : ""
+            "a",
+            { lang: "ja", href: url, target: "_blank", class: "word-link" },
+            jsxCreateElement("span", { class: "spelling" }, card.spelling),
+            jsxCreateElement(
+              "span",
+              { class: "reading" },
+              card.spelling !== card.reading ? `(${card.reading})` : ""
+            )
+          ),
+          jsxCreateElement(
+            "div",
+            { class: "utility-icons" },
+            jsxCreateElement(
+              "button",
+              {
+                class: "util-btn audio-btn",
+                title: "Play pronunciation",
+                onclick: (event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  JpdbAudio.speak(card.vid, card.spelling);
+                },
+              },
+              "🔊"
+            ),
+            jsxCreateElement(
+              "button",
+              {
+                class: "util-btn",
+                title: "Explain word",
+                onclick: (event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  this.explainWord(card.spelling, card.meanings);
+                },
+              },
+              "ℹ️"
+            )
           )
         ),
         jsxCreateElement(
@@ -1394,7 +1417,7 @@ export class Popup {
 
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-preview-02-05:generateContent?key=${config.geminiApiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${config.geminiApiKey}`,
         {
           method: "POST",
           body: JSON.stringify({
@@ -1454,17 +1477,67 @@ class ExplanationPopup {
       }
 
       @keyframes rotation {
-        0% {
-          transform: translate(-50%, -50%) rotate(0deg);
-        }
-        100% {
-          transform: translate(-50%, -50%) rotate(360deg);
-        }
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
       }
 
       .loading {
         min-height: 200px;
         position: relative;
+      }
+
+      .explanation-content {
+        font-family: inherit;
+        line-height: 1.6;
+        padding: 1.5em;
+        background: var(--color-background);
+        color: var(--color-text);
+        text-align: left;
+        font-size: 1.05em;
+      }
+      
+      .explanation-content h1, 
+      .explanation-content h2, 
+      .explanation-content h3, 
+      .explanation-content h4 {
+        margin: 1.2em 0 0.5em 0;
+        color: var(--color-text);
+        line-height: 1.3;
+      }
+      
+      .explanation-content h3 { 
+        font-size: 1.25em; 
+        border-bottom: 1px solid rgba(135, 206, 250, 0.3); 
+        padding-bottom: 0.3em; 
+      }
+      
+      .explanation-content h4 { 
+        font-size: 1.1em; 
+        color: lightskyblue; 
+      }
+      
+      .explanation-content hr {
+        border: none;
+        border-top: 1px dashed rgba(255, 255, 255, 0.2);
+        margin: 1.5em 0;
+      }
+      
+      .explanation-content ul, .explanation-content ol {
+        margin: 0.5em 0 1em 1.5em;
+        padding: 0;
+      }
+      
+      .explanation-content li { 
+        margin-bottom: 0.4em; 
+      }
+      
+      .explanation-content strong { 
+        font-weight: 600; 
+        color: lightskyblue; 
+      }
+      
+      .explanation-content em {
+        color: #A9A9A9;
       }
     `
     );
@@ -1482,7 +1555,7 @@ class ExplanationPopup {
       jsxCreateElement(
         "article",
         {
-          style: `width: 80vw; height: 80vh; overflow: auto;`,
+          style: `width: 80vw; height: 80vh; overflow: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: var(--border-radius);`,
         },
         (this.content = jsxCreateElement("div", {
           class: "explanation-content",
@@ -1504,41 +1577,58 @@ class ExplanationPopup {
   }
 
   formatExplanation(text) {
-    // Replace newlines with <br> for paragraph breaks.
-    let formattedText = text.replace(/\n/g, "<br>");
+    let parsed = text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/^#{4}\s+(.*)$/gm, '<h4>$1</h4>')
+      .replace(/^#{3}\s+(.*)$/gm, '<h3>$1</h3>')
+      .replace(/^#{2}\s+(.*)$/gm, '<h2>$1</h2>')
+      .replace(/^#\s+(.*)$/gm, '<h1>$1</h1>')
+      .replace(/^---$/gm, '<hr>');
 
-    // Wrap bullet point lists.
-    formattedText = formattedText.replace(
-      /(\*   .*?)<br>(?!\*)/gs,
-      (match, p1) => {
-        const items = p1.split("<br>*   ").filter((item) => item.trim() !== "");
-        if (items.length > 0) {
-          const listItems = items
-            .map((item) => `<li>${item.replace("*   ", "").trim()}</li>`)
-            .join("");
-          return `<ul>${listItems}</ul>`;
+    const lines = parsed.split('\n');
+    let inUl = false;
+    let inOl = false;
+    let out = [];
+
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i].trim();
+
+        if (line.match(/^[\-\*]\s+(.*)$/)) {
+            if (!inUl) { out.push('<ul>'); inUl = true; }
+            out.push(`<li>${line.replace(/^[\-\*]\s+/, '')}</li>`);
+            continue;
+        } else if (inUl) {
+            out.push('</ul>'); inUl = false;
         }
-        return "";
-      }
-    );
 
-    // Bold numbered headings and titles.
-    formattedText = formattedText.replace(
-      /^(\d+\..*):<br>/gm,
-      "<strong>$1</strong>:<br>"
-    );
-    formattedText = formattedText.replace(
-      /\*\*(.*?)\*\*/g,
-      "<strong>$1</strong>"
-    );
+        if (line.match(/^\d+\.\s+(.*)$/)) {
+            if (!inOl) { out.push('<ol>'); inOl = true; }
+            out.push(`<li>${line.replace(/^\d+\.\s+/, '')}</li>`);
+            continue;
+        } else if (inOl) {
+            out.push('</ol>'); inOl = false;
+        }
 
-    // Italicize romaji (in parentheses)
-    formattedText = formattedText.replace(/\(([a-zA-Zō]+)\)/g, "<em>($1)</em>");
+        if (line === '') {
+            out.push('<br>');
+            continue;
+        }
 
-    // Italicize romaji
-    formattedText = formattedText.replace(/([A-Za-z]+ō)/g, "<em>$1</em>");
+        out.push(line);
+    }
+    
+    if (inUl) out.push('</ul>');
+    if (inOl) out.push('</ol>');
 
-    return formattedText;
+    let finalHtml = out.join('\n')
+      .replace(/(<br>\n){2,}/g, '<br><br>') 
+      .replace(/<\/h(\d)>\n<br>/g, '</h$1>') 
+      .replace(/<\/ul>\n<br>/g, '</ul>')     
+      .replace(/<\/ol>\n<br>/g, '</ol>')     
+      .replace(/<hr>\n<br>/g, '<hr>');       
+
+    return finalHtml;
   }
 
   show(explanation) {

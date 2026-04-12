@@ -33,6 +33,12 @@ function requestUnabortable(message) {
 export function requestSetFlag(card, flag, state) {
     return requestUnabortable({ type: 'setFlag', vid: card.vid, sid: card.sid, flag, state });
 }
+export function requestFetchAudioHash(vid, spelling) {
+    return requestUnabortable({ type: 'fetchAudioHash', vid, spelling });
+}
+export function requestFetchAudioBytes(hash) {
+    return requestUnabortable({ type: 'fetchAudioBytes', hash });
+}
 export function requestMine(card, forq, sentence, translation) {
     return requestUnabortable({ type: 'mine', forq, vid: card.vid, sid: card.sid, sentence, translation });
 }

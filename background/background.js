@@ -187,6 +187,26 @@ const messageHandlers = {
         postResponse(port, request, null);
         await broadcastNewWordState(request.vid, request.sid);
     },
+    async fetchAudioHash(request, port) {
+        const { vid, spelling } = request;
+        const res = await fetch(
+            `https://jpdb.io/vocabulary/${vid}/${encodeURIComponent(spelling)}`,
+            { credentials: 'include' }
+        );
+        if (!res.ok) { postResponse(port, request, { hash: null }); return; }
+        const html = await res.text();
+        const match = html.match(/data-audio="([^"]+)"/);
+        postResponse(port, request, { hash: match?.[1] ?? null });
+    },
+    async fetchAudioBytes(request, port) {
+        const res = await fetch(
+            `https://jpdb.io/static/v/${request.hash}`,
+            { headers: { 'X-Access': "please don't steal these files" } }
+        );
+        if (!res.ok) { postResponse(port, request, { bytes: null }); return; }
+        const buf = await res.arrayBuffer();
+        postResponse(port, request, { bytes: Array.from(new Uint8Array(buf)) });
+    },
 };
 async function onPortMessage(message, port) {
     try {
