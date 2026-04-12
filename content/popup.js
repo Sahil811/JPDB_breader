@@ -1561,6 +1561,16 @@ class ExplanationPopup {
     `
     );
 
+    const modalArticle = jsxCreateElement(
+      "article",
+      {
+        style: `width: 90vw; max-width: 650px; height: auto; max-height: 85vh; overflow-y: auto; background: var(--color-background); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 15px 50px rgba(0,0,0,0.6); overscroll-behavior: contain; position: relative;`,
+      },
+      (this.content = jsxCreateElement("div", {
+        class: "explanation-content",
+      }))
+    );
+
     shadow.append(
       jsxCreateElement("link", {
         rel: "stylesheet",
@@ -1571,16 +1581,33 @@ class ExplanationPopup {
         href: browser.runtime.getURL("/content/popup.css"),
       }),
       styles,
-      jsxCreateElement(
-        "article",
-        {
-          style: `width: 90vw; max-width: 650px; height: auto; max-height: 85vh; overflow-y: auto; background: var(--color-background); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 15px 50px rgba(0,0,0,0.6); overscroll-behavior: contain; position: relative;`,
-        },
-        (this.content = jsxCreateElement("div", {
-          class: "explanation-content",
-        }))
-      )
+      modalArticle
     );
+
+    // Stop events from escaping the overlay
+    this.element.addEventListener("wheel", (e) => {
+      e.stopPropagation();
+      if (e.target === this.element) e.preventDefault();
+    }, { passive: false });
+
+    this.element.addEventListener("touchmove", (e) => {
+      e.stopPropagation();
+      if (e.target === this.element) e.preventDefault();
+    }, { passive: false });
+
+    // Explicit scroll locking for the article to stop manual scroll chaining
+    modalArticle.addEventListener("wheel", (e) => {
+      e.stopPropagation();
+      const el = e.currentTarget;
+      const isUp = e.deltaY < 0;
+      const isDown = e.deltaY > 0;
+      const isAtTop = el.scrollTop <= 0;
+      const isAtBottom = el.scrollHeight - Math.ceil(el.scrollTop) <= el.clientHeight;
+
+      if ((isUp && isAtTop) || (isDown && isAtBottom)) {
+        e.preventDefault();
+      }
+    }, { passive: false });
   }
 
   showLoading() {
