@@ -1497,99 +1497,146 @@ class ExplanationPopup {
       }
 
       .loader {
-        width: 48px;
-        height: 48px;
-        border: 5px solid #FFF;
-        border-bottom-color: transparent;
+        width: 44px;
+        height: 44px;
+        border: 3px solid rgba(135, 206, 250, 0.15);
+        border-top-color: lightskyblue;
         border-radius: 50%;
         display: inline-block;
         box-sizing: border-box;
-        animation: rotation 1s linear infinite;
+        animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
       }
 
-      @keyframes rotation {
+      @keyframes spin {
         0% { transform: translate(-50%, -50%) rotate(0deg); }
         100% { transform: translate(-50%, -50%) rotate(360deg); }
       }
 
       .loading {
-        min-height: 200px;
+        min-height: 250px;
         position: relative;
       }
 
       .explanation-content {
         font-family: inherit;
-        line-height: 1.6;
-        padding: 1.5em;
-        background: var(--color-background);
-        color: var(--color-text);
+        line-height: 1.7;
+        padding: 2.5em 2.5em 3em 2.5em;
+        background: transparent;
+        color: #e0e0e0;
         text-align: left;
-        font-size: 1.05em;
+        font-size: 1.08em;
+        letter-spacing: 0.01em;
       }
       
       .explanation-content h1, 
       .explanation-content h2, 
       .explanation-content h3, 
       .explanation-content h4 {
-        margin: 1.2em 0 0.5em 0;
-        color: var(--color-text);
+        margin: 1.4em 0 0.6em 0;
+        color: #ffffff;
         line-height: 1.3;
       }
       
       .explanation-content h3 { 
-        font-size: 1.25em; 
-        border-bottom: 1px solid rgba(135, 206, 250, 0.3); 
-        padding-bottom: 0.3em; 
+        font-size: 1.35em; 
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08); 
+        padding-bottom: 0.4em; 
+        margin-top: 1.8em;
       }
       
       .explanation-content h4 { 
-        font-size: 1.1em; 
+        font-size: 1.15em; 
         color: lightskyblue; 
       }
       
       .explanation-content p {
-        margin: 0 0 1.3em 0;
+        margin: 0 0 1.4em 0;
       }
       
       .explanation-content hr {
         border: none;
-        border-top: 1px dashed rgba(255, 255, 255, 0.2);
-        margin: 1.5em 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        margin: 1.8em 0;
       }
       
       .explanation-content ul, .explanation-content ol {
-        margin: 0.5em 0 1em 1.5em;
+        margin: 0.5em 0 1.4em 1.5em;
         padding: 0;
       }
       
       .explanation-content li { 
-        margin-bottom: 0.4em; 
+        margin-bottom: 0.5em; 
       }
       
       .explanation-content strong { 
         font-weight: 600; 
-        color: lightskyblue; 
+        color: #fff;
+        background: rgba(135, 206, 250, 0.15);
+        padding: 0.1em 0.3em;
+        border-radius: 4px;
       }
       
       .explanation-content em {
-        color: #A9A9A9;
+        color: #b0b0b0;
+      }
+
+      .premium-quote {
+        margin: 1.5em 0 1.5em 0.5em;
+        padding: 1em 1.5em;
+        border-left: 4px solid lightskyblue;
+        background: rgba(135, 206, 250, 0.06);
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+        color: #d0d0d0;
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: rgba(255,255,255,0.05);
+        color: #a0a0a0;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        z-index: 10;
+        font-size: 14px;
+      }
+      .close-btn:hover {
+        background: rgba(255,255,255,0.15);
+        color: #fff;
+        transform: scale(1.05);
       }
     `
     );
 
+    const closeBtn = jsxCreateElement("button", {
+      class: "close-btn",
+      onclick: () => this.hide()
+    }, "✕");
+
     const modalArticle = jsxCreateElement(
       "article",
       {
-        style: `width: 90vw; max-width: 650px; height: auto; max-height: 85vh; overflow-y: auto; background: var(--color-background); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 15px 50px rgba(0,0,0,0.6); overscroll-behavior: contain; position: relative;`,
+        id: "explanation-article",
+        style: `width: 90vw; max-width: 680px; height: auto; max-height: 85vh; overflow-y: auto; background: linear-gradient(145deg, var(--color-background) 0%, rgba(20,20,20,0.98) 100%); border: 1px solid rgba(255,255,255,0.08); border-top: 1px solid rgba(255,255,255,0.18); border-radius: 16px; box-shadow: 0 25px 65px rgba(0,0,0,0.8); overscroll-behavior: contain; position: relative; transform: scale(0.96) translateY(10px); opacity: 0; transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);`,
       },
+      closeBtn,
       (this.content = jsxCreateElement("div", {
         class: "explanation-content",
       }))
     );
+    this.article = modalArticle;
 
     shadow.append(
       jsxCreateElement("link", {
@@ -1640,6 +1687,10 @@ class ExplanationPopup {
     );
     this.element.style.opacity = "1";
     this.element.style.visibility = "visible";
+    if (this.article) {
+       this.article.style.transform = "scale(1) translateY(0)";
+       this.article.style.opacity = "1";
+    }
   }
 
   formatExplanation(text) {
@@ -1656,6 +1707,11 @@ class ExplanationPopup {
     let htmlBlocks = blocks.map(block => {
       block = block.trim();
       if (!block) return '';
+      
+      // Blockquotes
+      if (block.match(/^>\s+/)) {
+          return `<div class="premium-quote">${block.replace(/^>\s+/gm, '').replace(/\n/g, '<br>')}</div>`;
+      }
       
       // Pass through structures we explicitly created
       if (block.startsWith('<h') || block.startsWith('<hr')) return block;
@@ -1681,11 +1737,19 @@ class ExplanationPopup {
     this.content.innerHTML = this.formatExplanation(explanation);
     this.element.style.opacity = "1";
     this.element.style.visibility = "visible";
+    if (this.article) {
+       this.article.style.transform = "scale(1) translateY(0)";
+       this.article.style.opacity = "1";
+    }
   }
 
   hide() {
     this.element.style.opacity = "0";
     this.element.style.visibility = "hidden";
+    if (this.article) {
+       this.article.style.transform = "scale(0.96) translateY(10px)";
+       this.article.style.opacity = "0";
+    }
   }
 }
 
