@@ -1452,15 +1452,34 @@ class ExplanationPopup {
   constructor() {
     this.element = jsxCreateElement("div", {
       id: "jpdb-explanation-popup",
-      style: `all:initial;z-index:2147483647;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);`,
+      style: `all:initial; z-index:2147483647; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transition:opacity 0.2s ease, visibility 0.2s ease; overscroll-behavior:none;`,
+    });
+    
+    // Close modal when clicking the dark backdrop
+    this.element.addEventListener("click", (e) => {
+      if (e.target === this.element) this.hide();
     });
     const shadow = this.element.attachShadow({ mode: "closed" });
 
-    // Add loading spinner styles
+    // Add loading spinner and popup styles
     const styles = jsxCreateElement(
       "style",
       null,
       `
+      article::-webkit-scrollbar {
+        width: 8px;
+      }
+      article::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      article::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+      }
+      article::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
       .loader {
         width: 48px;
         height: 48px;
@@ -1555,7 +1574,7 @@ class ExplanationPopup {
       jsxCreateElement(
         "article",
         {
-          style: `width: 80vw; height: 80vh; overflow: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: var(--border-radius);`,
+          style: `width: 90vw; max-width: 650px; height: auto; max-height: 85vh; overflow-y: auto; background: var(--color-background); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 15px 50px rgba(0,0,0,0.6); overscroll-behavior: contain; position: relative;`,
         },
         (this.content = jsxCreateElement("div", {
           class: "explanation-content",
