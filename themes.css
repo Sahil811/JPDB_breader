@@ -1,44 +1,131 @@
-/* TODO allow users to force a color theme
-
-JS code for forcing dark:  [...[...document.styleSheets].find(m => m.href.endsWith('/common.css')).rules].find(r => r.media && [...r.media].includes('(prefers-color-scheme: dark)')).media.deleteMedium('(prefers-color-scheme: dark)')
-JS code for forcing light: [...[...document.styleSheets].find(m => m.href.endsWith('/common.css')).rules].find(r => r.media && [...r.media].includes('(prefers-color-scheme: dark)')).media.addMedium('never')
-*/
+/* Google-level Material Design 3 Theme Tokens */
 
 :root,
 :host,
 :host > * {
-    --color-input-background: #e4e4e4;
-    --color-input-border: #3c3d3d;
-    --color-button-border: #0a9994;
-    --color-link: var(--color-button-border);
-    --color-background: #f0f0f0;
-    --color-text: #000;
+    /* Light Theme (Default) */
+    --md-sys-color-primary: #0b57d0;
+    --md-sys-color-on-primary: #ffffff;
+    --md-sys-color-primary-container: #d3e3fd;
+    --md-sys-color-on-primary-container: #041e49;
+    
+    /* Semantic Status Colors (Light) */
+    --md-sys-color-error: #b3261e;
+    --md-sys-color-on-error: #ffffff;
+    --md-sys-color-error-container: #f9dedc;
+    --md-sys-color-on-error-container: #410e0b;
+    
+    --md-sys-color-success: #198639;
+    --md-sys-color-on-success: #ffffff;
+    --md-sys-color-success-container: #c4eed0;
+    --md-sys-color-on-success-container: #072711;
+
+    --md-sys-color-warning: #b45309;
+    --md-sys-color-on-warning: #ffffff;
+    --md-sys-color-warning-container: #fef3c7;
+    --md-sys-color-on-warning-container: #451a03;
+    
+    --md-sys-color-surface: #f8f9fa;
+    --md-sys-color-surface-dim: #daddd8;
+    --md-sys-color-surface-bright: #ffffff;
+    --md-sys-color-surface-container: #ececec;
+    --md-sys-color-surface-container-high: #e3e3e3;
+    
+    --md-sys-color-on-surface: #1f1f1f;
+    --md-sys-color-on-surface-variant: #444746;
+    
+    --md-sys-color-outline: #747775;
+    --md-sys-color-outline-variant: #c4c7c5;
+    
+    /* Legacy variables mapping to MD3 */
+    --color-input-background: var(--md-sys-color-surface-bright);
+    --color-input-border: var(--md-sys-color-outline-variant);
+    --color-button-border: var(--md-sys-color-primary);
+    --color-link: var(--md-sys-color-primary);
+    --color-background: var(--md-sys-color-surface);
+    --color-background-alt: var(--md-sys-color-surface-container);
+    --color-text: var(--md-sys-color-on-surface);
+    --text-color: var(--md-sys-color-on-surface);
+    --text-color-secondary: var(--md-sys-color-on-surface-variant);
+    --border-color: var(--md-sys-color-outline-variant);
+    
     --filter-more-contrast: brightness(85%) saturate(140%);
     --filter-less-contrast: brightness(120%) saturate(80%);
     --filter-brighter: brightness(105%) saturate(90%);
     --filter-darker: brightness(85%) saturate(115%);
+
+    /* Elevation / Shadows */
+    --md-sys-elevation-1: 0px 1px 2px 0px rgba(0,0,0,0.15), 0px 1px 3px 1px rgba(0,0,0,0.05);
+    --md-sys-elevation-2: 0px 1px 2px 0px rgba(0,0,0,0.15), 0px 2px 6px 2px rgba(0,0,0,0.05);
+    --md-sys-elevation-3: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px 0px rgba(0,0,0,0.05);
 }
 
 @media (prefers-color-scheme: dark) {
     :root,
     :host,
     :host > * {
-        --color-input-background: #333;
-        --color-input-border: #cedadc;
-        --color-button-border: #1fbab5;
-        --color-link: var(--color-button-border);
-        --color-background: #222;
-        --color-text: #fff;
+        /* Dark Theme */
+        --md-sys-color-primary: #a8c7fa;
+        --md-sys-color-on-primary: #062e6f;
+        --md-sys-color-primary-container: #0842a0;
+        --md-sys-color-on-primary-container: #d3e3fd;
+        
+        /* Semantic Status Colors (Dark) */
+        --md-sys-color-error: #f2b8b5;
+        --md-sys-color-on-error: #601410;
+        --md-sys-color-error-container: #8c1d18;
+        --md-sys-color-on-error-container: #f9dedc;
+        
+        --md-sys-color-success: #6dd58c;
+        --md-sys-color-on-success: #0f5223;
+        --md-sys-color-success-container: #156d2f;
+        --md-sys-color-on-success-container: #c4eed0;
+
+        --md-sys-color-warning: #ffb4ab;
+        --md-sys-color-on-warning: #690005;
+        --md-sys-color-warning-container: #93000a;
+        --md-sys-color-on-warning-container: #ffdad6;
+        
+        --md-sys-color-surface: #1e1e1e;
+        --md-sys-color-surface-dim: #141414;
+        --md-sys-color-surface-bright: #383838;
+        --md-sys-color-surface-container: #282828;
+        --md-sys-color-surface-container-high: #333333;
+        
+        --md-sys-color-on-surface: #e3e3e3;
+        --md-sys-color-on-surface-variant: #c4c7c5;
+        
+        --md-sys-color-outline: #8e918f;
+        --md-sys-color-outline-variant: #444746;
+        
+        --color-input-background: var(--md-sys-color-surface-container);
+        --color-input-border: var(--md-sys-color-outline-variant);
+        --color-button-border: var(--md-sys-color-primary);
+        --color-link: var(--md-sys-color-primary);
+        --color-background: var(--md-sys-color-surface);
+        --color-background-alt: var(--md-sys-color-surface-container);
+        --color-text: var(--md-sys-color-on-surface);
+        --text-color: var(--md-sys-color-on-surface);
+        --text-color-secondary: var(--md-sys-color-on-surface-variant);
+        --border-color: var(--md-sys-color-outline-variant);
+
         --filter-more-contrast: brightness(120%) saturate(80%);
         --filter-less-contrast: brightness(85%) saturate(140%);
         --filter-brighter: brightness(115%) saturate(85%);
         --filter-darker: brightness(85%) saturate(115%);
+
+        --md-sys-elevation-1: 0px 1px 2px 0px rgba(0,0,0,0.6), 0px 1px 3px 1px rgba(0,0,0,0.4);
+        --md-sys-elevation-2: 0px 1px 2px 0px rgba(0,0,0,0.6), 0px 2px 6px 2px rgba(0,0,0,0.4);
+        --md-sys-elevation-3: 0px 4px 8px 3px rgba(0,0,0,0.4), 0px 1px 3px 0px rgba(0,0,0,0.6);
     }
 }
 
 :root,
 :host,
 :host > * {
-    --border-radius: 5px;
-    --font-family: 'Noto Sans CJK JP', 'Noto Sans CJK', 'Noto Sans', sans-serif;
+    --border-radius: 12px;
+    --border-radius-sm: 8px;
+    --border-radius-pill: 9999px;
+    --font-family: 'Inter', 'Roboto', 'Noto Sans CJK JP', 'Noto Sans', sans-serif;
+    --transition-standard: 200ms cubic-bezier(0.2, 0, 0, 1);
 }

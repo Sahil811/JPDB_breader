@@ -135,82 +135,58 @@ const loadDictionary = async () => {
   }
 };
 
-// Load kanji meanings from JSON file
-const loadKanjiMeanings = async () => {
-  try {
-    // Log the attempted URL for debugging
-    const resourceUrl = chrome.runtime.getURL("kanji_meanings.json");
+/**
+ * Load kanji meanings from the bundled JSON file.
+ * Returns a Map<string, string> for O(1) lookup.
+ * Result is cached in the module-level promise so it is only fetched once.
+ */
+let _kanjiMeaningsPromise = null;
 
-    // Check if the file exists first
-    if (!resourceUrl) {
-      throw new Error("Could not generate URL for kanji_meanings.json");
-    }
-
-    const response = await fetch(resourceUrl);
-
-    // Detailed error logging
-    if (!response.ok) {
-      throw new Error(
-        `HTTP error! Status: ${response.status}, Text: ${await response.text()}`
-      );
-    }
-
+function getKanjiMeaningsPromise() {
+  if (_kanjiMeaningsPromise) return _kanjiMeaningsPromise;
+  _kanjiMeaningsPromise = (async () => {
+    const url = chrome.runtime.getURL("kanji_meanings.json");
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`kanji_meanings.json: HTTP ${response.status}`);
     const data = await response.json();
-
-    // Validate the data structure
-    if (!Array.isArray(data) && typeof data !== "object") {
-      throw new Error("Invalid data format: Expected array or object");
+    // Build a Map for O(1) lookups instead of O(n) .find() on every character
+    const map = new Map();
+    for (const entry of data) {
+      if (entry.kanji && entry.meaning) map.set(entry.kanji, entry.meaning);
     }
+    return map;
+  })().catch((err) => {
+    console.error("Failed to load kanji_meanings.json:", err);
+    _kanjiMeaningsPromise = null; // allow retry on next call
+    return new Map();
+  });
+  return _kanjiMeaningsPromise;
+}
 
-    return data;
-  } catch (error) {
-    // Enhanced error logging
-    console.error("Failed to load kanji meanings:", {
-      error: error.message,
-      stack: error.stack,
-      resourceUrl: chrome.runtime.getURL("kanji_meanings.json"),
-    });
-
-    // You might want to throw the error instead of returning empty array
-    // depending on how critical this data is for your extension
-    throw new Error(`Failed to load kanji meanings: ${error.message}`);
-  }
+// Helper: O(1) lookup from the Map
+const getKanjiFromMap = (map, char) => {
+  const meaning = map.get(char);
+  return meaning ? { kanji: char, meaning } : null;
 };
 
-// Helper function to get kanji details from local JSON data
-const getKanjiFromJSON = (kanjiMeanings, char) => {
-  const entry = kanjiMeanings.find((entry) => entry.kanji === char);
-  return entry ? { kanji: entry.kanji, meaning: entry.meaning } : null;
-};
+// Fetch kanji details — checks local Map first, then falls back to kanjiapi.dev
+async function getKanjiDetails(char, kanjiMap) {
+  if (!config.showKanji) return null;
 
-// Function to fetch kanji details, with fallback to JSON data
-async function getKanjiDetails(char, kanjiMeanings) {
-  // Assuming you have a config object available
-  const showKanji = config.showKanji;
+  const local = getKanjiFromMap(kanjiMap, char);
+  if (local) return local;
 
-  if (!showKanji) {
-    return null;
-  }
-
-  // Check if kanji meaning exists in JSON
-  const localKanji = getKanjiFromJSON(kanjiMeanings, char);
-  if (localKanji) {
-    return localKanji; // Return both kanji and meaning
-  }
-
-  // If not found in JSON, fetch from API
   try {
-    const response = await fetch(
-      `https://kanjiapi.dev/v1/kanji/${encodeURIComponent(char)}`
-    );
+    const response = await fetch(`https://kanjiapi.dev/v1/kanji/${encodeURIComponent(char)}`);
     return await response.json();
-  } catch (error) {
-    return null; // Handle error without logging
+  } catch {
+    return null;
   }
 }
 
-// Example usage
-const kanjiMeanings = await loadKanjiMeanings();
+// Removed blocking top-level await — kanjiMeanings is now loaded lazily
+// via getKanjiMeaningsPromise() when the first word is rendered.
+
 
 function isKanji(char) {
   return /\p{Script=Han}/u.test(char) && char !== "々";
@@ -330,6 +306,8 @@ class ImmersionKit {
     this.currentAudio = null;
     this.currentRequest = null; // Track current API request
     this.currentWord = null; // Track current word being displayed
+    this.lastPlayId = 0;
+    this.isLoopingAudio = false;
   }
 
   // Cancel any pending request
@@ -359,19 +337,14 @@ class ImmersionKit {
   }
 
   async fetchExamples(word) {
-    // Don't fetch if same word
-    if (word === this.currentWord) return true;
-
     // Cancel any pending request
     this.cancelCurrentRequest();
 
     try {
-      // Create new request state
       this.currentRequest = { aborted: false };
       const thisRequest = this.currentRequest;
       this.currentWord = word;
 
-      // Try the full word first
       if (
         (await this.tryFetchWithAbort(word, false, thisRequest)) ||
         (await this.tryFetchWithAbort(word, true, thisRequest))
@@ -379,7 +352,6 @@ class ImmersionKit {
         return !thisRequest.aborted;
       }
 
-      // If no examples found, try with particles
       const particles = ["を", "に", "が", "へ", "と", "で"];
       for (const particle of particles) {
         if (word.includes(particle) && !thisRequest.aborted) {
@@ -407,31 +379,54 @@ class ImmersionKit {
     } catch (error) {
       return false;
     } finally {
-      // Clear request if it's still the current one
       if (this.currentRequest && !this.currentRequest.aborted) {
         this.currentRequest = null;
       }
     }
   }
 
+  async _ensureMetadata() {
+    if (this.deckTitleMap) return;
+    try {
+      const response = await fetch("https://apiv2.immersionkit.com/index_meta");
+      const json = await response.json();
+      this.deckTitleMap = json.data || {};
+    } catch (e) {
+      this.deckTitleMap = {};
+    }
+  }
+
   async tryFetchWithAbort(word, useFullParams, request) {
     if (request.aborted) return false;
 
-    const baseUrl = `https://api.immersionkit.com/look_up_dictionary?keyword=${encodeURIComponent(
-      word
-    )}&sort=shortness`;
-    const fullUrl = `${baseUrl}&tags=&jlpt=&wk=&decks=`;
-    const url = useFullParams ? fullUrl : baseUrl;
+    // v2 API ignores useFullParams legacy flags
+    const url = `https://apiv2.immersionkit.com/search?q=${encodeURIComponent(word)}&exactMatch=false&limit=50&sort=sentence_length:asc`;
 
     try {
+      await this._ensureMetadata();
       const response = await fetch(url);
       if (request.aborted) return false;
 
       const data = await response.json();
       if (request.aborted) return false;
 
-      if (data?.data?.[0]?.examples?.length > 0) {
-        this.examples = data.data[0].examples;
+      const rawExamples = data.examples || [];
+      const count = rawExamples.length;
+
+      if (count > 0) {
+        const linodeBaseUrl = 'https://us-southeast-1.linodeobjects.com/immersionkit/media/';
+        this.examples = rawExamples.map(ex => {
+            const slug = ex.title || '';
+            const prettyTitle = this.deckTitleMap?.[slug]?.title || slug;
+            const mediaType = ex.id ? ex.id.split('_')[0] : '';
+            const fullImageUrl = ex.image && mediaType && prettyTitle ? `${linodeBaseUrl}${mediaType}/${prettyTitle}/media/${ex.image}` : '';
+            const fullSoundUrl = ex.sound && mediaType && prettyTitle ? `${linodeBaseUrl}${mediaType}/${prettyTitle}/media/${ex.sound}` : '';
+            return {
+              ...ex,
+              image_url: fullImageUrl,
+              sound_url: fullSoundUrl
+            };
+        });
         this.currentIndex = 0;
         return true;
       }
@@ -454,95 +449,121 @@ class ImmersionKit {
     }
   }
 
-  // Existing audio playback method (manual play)
-  async playAudio(url) {
-    if (!url) return;
-
-    // Stop any currently playing audio
-    if (this.currentAudio) {
-      this.currentAudio.stop();
-      this.currentAudio = null;
+  // Shared helper: fetch + decode audio from a URL, return a BufferSource
+  async _createBufferSource(url) {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    if (!this.audioContext) {
+      this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
+    const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+    const source = this.audioContext.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(this.audioContext.destination);
+    return source;
+  }
 
-    try {
-      const response = await fetch(url);
-      const arrayBuffer = await response.arrayBuffer();
-      const audioContext = new (window.AudioContext ||
-        window.webkitAudioContext)();
-      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-      this.currentAudio = audioContext.createBufferSource();
-      this.currentAudio.buffer = audioBuffer;
-      this.currentAudio.connect(audioContext.destination);
-      this.currentAudio.start();
-
-      // When audio ends, clear the currentAudio
-      this.currentAudio.onended = () => {
-        this.currentAudio = null;
-      };
-    } catch (error) {
-      console.error("Error playing audio:", error);
+  // Stop currently playing audio
+  _stopCurrent() {
+    if (this.currentAudio) {
+      try { this.currentAudio.stop(); } catch {}
+      this.currentAudio = null;
     }
   }
 
-  // New helper method: plays audio and returns a promise that resolves when playback ends
+  // Play audio (fire-and-forget)
+  async playAudio(url) {
+    if (!url) return;
+    const playId = ++this.lastPlayId;
+    this._stopCurrent();
+    try {
+      if (this.audioContext && this.audioContext.state === 'suspended') {
+        await this.audioContext.resume();
+      }
+      const source = await this._createBufferSource(url);
+      if (playId !== this.lastPlayId) return; // Prevent overlapping audio on rapid clicks
+      
+      this.currentAudio = source;
+      source.onended = () => { 
+        if (this.currentAudio === source) this.currentAudio = null;
+        if (this.isLoopingAudio) {
+           setTimeout(() => {
+             if (this.isLoopingAudio && playId === this.lastPlayId) {
+                this.playAudio(url);
+             }
+           }, 150);
+        }
+      };
+      source.start();
+    } catch (err) {}
+  }
+
+  // Play audio and wait for it to finish (used by playAllSequence)
   async playAudioPromise(url) {
     if (!url) return;
-    if (this.currentAudio) {
-      this.currentAudio.stop();
-      this.currentAudio = null;
-    }
+    const playId = ++this.lastPlayId;
+    this._stopCurrent();
     try {
-      const response = await fetch(url);
-      const arrayBuffer = await response.arrayBuffer();
-      const audioContext = new (window.AudioContext ||
-        window.webkitAudioContext)();
-      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      const source = await this._createBufferSource(url);
+      if (playId !== this.lastPlayId) return;
       return new Promise((resolve) => {
-        this.currentAudio = audioContext.createBufferSource();
-        this.currentAudio.buffer = audioBuffer;
-        this.currentAudio.connect(audioContext.destination);
-        this.currentAudio.start();
-        this.currentAudio.onended = () => {
-          this.currentAudio = null;
-          resolve();
+        this.currentAudio = source;
+        source.onended = () => { 
+          if (this.currentAudio === source) this.currentAudio = null;
+          resolve(); 
         };
+        source.start();
       });
-    } catch (error) {
-      console.error("Error playing audio:", error);
+    } catch (err) {
+      return Promise.resolve(); // Continue sequence on error
     }
+  }
+
+  // New method: Toggle Loop mode
+  toggleLoop() {
+    this.isLoopingAudio = !this.isLoopingAudio;
+    if (this.isLoopingAudio) {
+      this.isPlayingAll = false; // Disable play all
+      const example = this.examples[this.currentIndex];
+      if (example?.sound_url) {
+        this.playAudio(example.sound_url);
+      }
+    } else {
+      this._stopCurrent();
+    }
+    this.updateDisplay();
   }
 
   // New method: plays all examples sequentially, pausing briefly between them.
-  // If the container is removed from the DOM, the sequence stops.
-  // After finishing, it resets to start from the first example.
   async playAllSequence() {
-    if (this.isPlayingAll) return; // Prevent multiple simultaneous sequences
+    if (!this.examples.length) return;
     this.isPlayingAll = true;
-    // Loop from the current index to the end
-    for (let i = this.currentIndex; i < this.examples.length; i++) {
-      // Check if the immersion example container is still present in the DOM.
-      const container = this.vocabSection.querySelector(".immersion-example");
-      if (!container) {
-        // If not, cancel the play-all sequence.
-        this.isPlayingAll = false;
-        break;
-      }
-      if (!this.isPlayingAll) break; // Allow external cancellation
-      this.currentIndex = i;
-      this.updateDisplay(); // Update UI to reflect the current example
-      const example = this.examples[i];
-      if (example.sound_url) {
+    this.isLoopingAudio = false; // Disable single loop
+    this.updateDisplay();
+
+    while (this.isPlayingAll) {
+      const example = this.examples[this.currentIndex];
+      if (example?.sound_url) {
+        // Wait for audio
         await this.playAudioPromise(example.sound_url);
       } else {
         // If no audio, wait 1 second
         await new Promise((res) => setTimeout(res, 1000));
       }
       // Brief pause between examples (e.g. 500ms)
-      await new Promise((res) => setTimeout(res, 500));
+      await new Promise((res) => setTimeout(res, 400));
+      
+      if (!this.isPlayingAll) break;
+
+      this.currentIndex++;
+      if (this.currentIndex >= this.examples.length) {
+        this.currentIndex = 0;
+        this.isPlayingAll = false;
+        break;
+      }
+      this.updateDisplay();
     }
-    // Reset to start from the first example when sequence finishes
-    this.currentIndex = 0;
+    
     this.isPlayingAll = false;
     this.updateDisplay();
   }
@@ -566,7 +587,6 @@ class ImmersionKit {
   // Render method: existing buttons remain unchanged; a new "Play All" button is added in the same row as the navigation buttons.
   renderExample() {
     if (!this.examples.length) return null;
-
     const example = this.examples[this.currentIndex];
     if (!example) return null;
 
@@ -576,112 +596,80 @@ class ImmersionKit {
       jsxCreateElement(
         "div",
         { class: "example-content" },
-        // Navigation row with Prev, Index, Next, and Play-All buttons
+        // Navigation row with Prev, Index, Next, Loop, and Play-All buttons
         jsxCreateElement(
           "div",
           {
             class: "example-nav",
-            style: "display: flex; align-items: center; gap: 8px;",
+            style: "display: flex; align-items: center; gap: 8px; margin-bottom: 8px;",
           },
           jsxCreateElement(
             "button",
             {
-              // Removed disabled attribute for cyclic navigation
-              onclick: (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.navigate(-1);
-              },
+              class: "ik-btn",
+              onclick: (e) => { e.preventDefault(); e.stopPropagation(); this.navigate(-1); },
             },
             "←"
           ),
           jsxCreateElement(
             "span",
-            null,
+            { class: "example-counter" },
             `${this.currentIndex + 1}/${this.examples.length}`
           ),
           jsxCreateElement(
             "button",
             {
-              // Removed disabled attribute for cyclic navigation
-              onclick: (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.navigate(1);
-              },
+              class: "ik-btn",
+              onclick: (e) => { e.preventDefault(); e.stopPropagation(); this.navigate(1); },
             },
             "→"
           ),
-          // Play All button as an icon, aligned to the right
           jsxCreateElement(
             "button",
             {
-              class: "play-all-button",
-              style:
-                "margin-left: auto; padding: 4px 8px; font-size: 16px; cursor: pointer;",
-              onclick: (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                // Toggle Play-All: if already playing, cancel; otherwise, start the sequence.
-                if (this.isPlayingAll) {
-                  this.isPlayingAll = false;
-                } else {
-                  this.playAllSequence();
-                }
-              },
+              class: `ik-btn ${this.isLoopingAudio ? "is-active" : ""}`,
+              style: "margin-left: auto; cursor: pointer;",
+              title: "Loop current audio",
+              onclick: (e) => { e.preventDefault(); e.stopPropagation(); this.toggleLoop(); },
+            },
+            "🔁"
+          ),
+          jsxCreateElement(
+            "button",
+            {
+              class: `ik-btn ${this.isPlayingAll ? "is-active" : ""}`,
+              style: "cursor: pointer;",
+              title: "Play all examples",
+              onclick: (e) => { e.preventDefault(); e.stopPropagation(); this.isPlayingAll ? (this.isPlayingAll = false) : this.playAllSequence(); },
             },
             this.isPlayingAll ? "⏹️" : "▶️"
           )
         ),
-        // Image and Audio Button Container with fixed dimensions
+        // Image Container
         jsxCreateElement(
           "div",
-          {
-            class: "image-audio-container",
-            style:
-              "min-height: 200px; width: 100%; background: #222; display: flex; align-items: center; justify-content: center; position: relative;",
-          },
-          // Image
+          { class: "image-container" },
           example.image_url &&
             jsxCreateElement("img", {
               src: example.image_url,
               alt: "Example image",
               class: "example-image",
-              style: "max-width: 100%; max-height: 200px; display: block;",
-              onclick: (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.playAudio(example.sound_url);
-              },
+              onclick: (e) => { e.preventDefault(); e.stopPropagation(); this.playAudio(example.sound_url); },
             }),
-          // Audio Button
+          jsxCreateElement("div", { class: "image-gradient-overlay" }),
           jsxCreateElement(
             "button",
             {
-              class: "audio-button",
-              style:
-                "position: absolute; bottom: 8px; right: 8px; padding: 4px;",
-              onclick: (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.playAudio(example.sound_url);
-              },
+              class: "ik-btn-overlay",
+              onclick: (e) => { e.preventDefault(); e.stopPropagation(); this.playAudio(example.sound_url); },
             },
             "🔊"
           )
         ),
         // Japanese sentence
-        jsxCreateElement(
-          "div",
-          { class: "example-sentence" },
-          example.sentence
-        ),
+        jsxCreateElement("div", { class: "example-sentence" }, example.sentence),
         // English translation
-        jsxCreateElement(
-          "div",
-          { class: "example-translation" },
-          example.translation
-        )
+        jsxCreateElement("div", { class: "example-translation" }, example.translation)
       )
     );
   }
@@ -884,45 +872,43 @@ export class Popup {
   async toggleImmersionKit() {
     const currentWord = this.#data.token.card.spelling;
 
-    // Remove all existing example sections first
-    const existingExamples =
-      this.#vocabSection.querySelectorAll(".immersion-example");
-    existingExamples.forEach((example) => example.remove());
-
-    // Cancel any pending audio
-    if (this.immersionKit.currentAudio) {
-      this.immersionKit.currentAudio.stop();
-      this.immersionKit.currentAudio = null;
+    // Toggle off: hide examples if already showing for this word
+    const existing = this.#vocabSection.querySelector(".immersion-example");
+    if (existing && this.immersionKit.lastWord === currentWord) {
+      existing.remove();
+      return;
     }
 
-    // Reset play-all state
-    this.immersionKit.isPlayingAll = false;
+    // Remove stale examples from a previous word
+    this.#vocabSection.querySelectorAll(".immersion-example")
+      .forEach((el) => el.remove());
 
-    // Check if we need to fetch new examples
+    // Stop any playing audio using the refactored helper
+    this.immersionKit._stopCurrent();
+    this.immersionKit.isPlayingAll = false;
+    this.immersionKit.isLoopingAudio = false;
+
+    // Fetch only if this is a new word
     if (this.immersionKit.lastWord !== currentWord) {
-      // Clear old examples and fetch new ones
       this.immersionKit.examples = [];
       this.immersionKit.currentIndex = 0;
+      this.immersionKit.currentWord = null;
       const success = await this.immersionKit.fetchExamples(currentWord);
-      if (!success) return;
-
-      // Create new example section
-      const example = this.immersionKit.renderExample();
-      if (example) {
-        this.#vocabSection.appendChild(example);
-        await this.immersionKit.playAudio(
-          this.immersionKit.examples[0].sound_url
-        );
+      if (!success) {
+        const { showToast } = await import(browser.runtime.getURL("/content/toast.js"));
+        showToast('Info', 'No examples found or ImmersionKit API is currently offline.', { timeout: 3000 });
+        return;
       }
-    } else {
-      // Re-render existing examples if we're toggling visibility
-      const example = this.immersionKit.renderExample();
-      if (example) {
-        this.#vocabSection.appendChild(example);
-      }
+      this.immersionKit.lastWord = currentWord;
     }
 
-    this.immersionKit.isExpanded = true;
+    const example = this.immersionKit.renderExample();
+    if (example) {
+      this.#vocabSection.appendChild(example);
+      if (this.immersionKit.examples[0]?.sound_url) {
+        await this.immersionKit.playAudio(this.immersionKit.examples[0].sound_url);
+      }
+    }
   }
 
   fadeIn() {
@@ -935,6 +921,13 @@ export class Popup {
     this.#outerStyle.visibility = "visible";
   }
   fadeOut() {
+    // Stop immersion kit audio if it's currently looping or playing sequences
+    if (this.immersionKit) {
+      this.immersionKit._stopCurrent();
+      this.immersionKit.isPlayingAll = false;
+      this.immersionKit.isLoopingAudio = false;
+    }
+
     // Necessary because in settings page, config is undefined
     // TODO is this still true? ~hmry(2023-08-08)
     if (config && !config.disableFadeAnimation) {
@@ -960,16 +953,17 @@ export class Popup {
     const kanjiUrl = (kanji) =>
       `https://jpdb.io/kanji/${encodeURIComponent(kanji)}`;
 
-    // Get character details with local JSON check
+    // Get character details — kanjiMap is loaded lazily and cached
+    const kanjiMap = await getKanjiMeaningsPromise();
     let characterDetails = (
       await Promise.all(
         [...card.spelling].filter(isKanji).map(async (char) => {
-          const charDetails = await getKanjiDetails(char, kanjiMeanings);
+          const charDetails = await getKanjiDetails(char, kanjiMap);
           return charDetails
             ? {
                 kanji: charDetails.kanji,
                 meanings:
-                  charDetails.meaning || charDetails.meanings.join(", "),
+                  charDetails.meaning || charDetails.meanings?.join(", ") || "",
               }
             : null;
         })
@@ -1304,6 +1298,16 @@ export class Popup {
                 ),
         },
         !neverForget ? "Never forget" : "Unmark as never forget"
+      ),
+      jsxCreateElement(
+        "button",
+        {
+          class: "show-examples",
+          onclick: this.#demoMode
+            ? undefined
+            : async () => await this.toggleImmersionKit(),
+        },
+        "Examples"
       )
     );
   }
@@ -1365,9 +1369,11 @@ export class Popup {
     let popupLeft;
     let popupTop;
     const { writingMode } = getComputedStyle(word);
+    const gap = 8; // Spacing to prevent obscuring the underline/word
+
     if (writingMode.startsWith("horizontal")) {
       popupTop = clamp(
-        bottomSpace > topSpace ? wordBottom : wordTop - popupHeight,
+        bottomSpace > topSpace ? wordBottom + gap : wordTop - popupHeight - gap,
         minTop,
         maxTop
       );
@@ -1383,7 +1389,7 @@ export class Popup {
         maxTop
       );
       popupLeft = clamp(
-        rightSpace > leftSpace ? wordRight : wordLeft - popupWidth,
+        rightSpace > leftSpace ? wordRight + gap : wordLeft - popupWidth - gap,
         minLeft,
         maxLeft
       );
