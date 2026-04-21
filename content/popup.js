@@ -3,7 +3,7 @@ import { ExplanationPopup } from './explanation.js';
 import { JpdbAudio as PopupJpdbAudio } from './popup_audio.js';
 import { loadPopupSupplementalData } from './popup_resources.js';
 import { ShadowComponent } from './shadowbase.js';
-import { browser, clamp, nonNull, readExtJson } from "../util.js";
+import { browser, clamp, nonNull } from "../util.js";
 import { createWordDetailsContent } from './popup_word_view.js';
 import { jsxCreateElement } from "../jsx.js";
 import {
@@ -16,10 +16,8 @@ import {
 } from "./background_comms.js";
 import { Dialog } from "./dialog.js";
 import { getSentences } from "./word.js";
-import { JapaneseDictionary } from "../dictionary.js";
 import {
   geminiApi,
-  kanjiApi,
   showRequestErrorToast,
 } from "../integrations/api.js";
 const PARTS_OF_SPEECH = {
@@ -132,58 +130,7 @@ const PARTS_OF_SPEECH = {
   // 'unc': '', // Not used in jpdb: empty list instead. JMDict: "unclassified"
 };
 
-/**
- * Load kanji meanings from the bundled JSON file.
- * Returns a Map<string, string> for O(1) lookup.
- * Result is cached in the module-level promise so it is only fetched once.
- */
-let _kanjiMeaningsPromise = null;
 
-function getKanjiMeaningsPromise() {
-  if (_kanjiMeaningsPromise) return _kanjiMeaningsPromise;
-  _kanjiMeaningsPromise = (async () => {
-    const data = await readExtJson("kanji_meanings.json");
-    // Build a Map for O(1) lookups instead of O(n) .find() on every character
-    const map = new Map();
-    for (const entry of data) {
-      if (entry.kanji && entry.meaning) map.set(entry.kanji, entry.meaning);
-    }
-    return map;
-  })().catch((err) => {
-    console.error("Failed to load kanji_meanings.json:", err);
-    _kanjiMeaningsPromise = null; // allow retry on next call
-    return new Map();
-  });
-  return _kanjiMeaningsPromise;
-}
-
-// Helper: O(1) lookup from the Map
-const getKanjiFromMap = (map, char) => {
-  const meaning = map.get(char);
-  return meaning ? { kanji: char, meaning } : null;
-};
-
-// Fetch kanji details — checks local Map first, then falls back to kanjiapi.dev
-async function getKanjiDetails(char, kanjiMap) {
-  if (!config.showKanji) return null;
-
-  const local = getKanjiFromMap(kanjiMap, char);
-  if (local) return local;
-
-  try {
-    return await kanjiApi.fetchKanji(char);
-  } catch {
-    return null;
-  }
-}
-
-// Removed blocking top-level await — kanjiMeanings is now loaded lazily
-// via getKanjiMeaningsPromise() when the first word is rendered.
-
-
-function isKanji(char) {
-  return /\p{Script=Han}/u.test(char) && char !== "々";
-}
 
 function getClosestClientRect(elem, x, y) {
   const rects = elem.getClientRects();
@@ -286,47 +233,6 @@ function renderPitch(reading, pitch) {
   }
 }
 
-// ── JPDB Pronunciation Audio ──
-// XOR key for decrypting JPDB audio files.
-const JPDB_XOR_KEY = [0x06, 0x23, 0x54, 0x0f];
-let _jpdbCurrentAudio = null;
-
-const JpdbAudio = {
-  _cache: {},
-
-  async speak(vid, spelling) {
-    if (_jpdbCurrentAudio) {
-      try { _jpdbCurrentAudio.pause(); } catch {}
-      _jpdbCurrentAudio = null;
-    }
-    if (!vid) return;
-    const hash = this._cache[vid] ?? await this._scrapeHash(vid, spelling);
-    if (hash) await this._play(hash);
-  },
-
-  async _scrapeHash(vid, spelling) {
-    try {
-      const result = await requestFetchAudioHash(vid, spelling);
-      if (result?.hash) { this._cache[vid] = result.hash; return result.hash; }
-    } catch {}
-    return null;
-  },
-
-  async _play(hash) {
-    try {
-      const result = await requestFetchAudioBytes(hash);
-      if (!result?.bytes) return;
-      const buf = new Uint8Array(result.bytes);
-      for (let i = 0; i < Math.min(4, buf.length); i++) buf[i] ^= JPDB_XOR_KEY[i];
-      const blobUrl = URL.createObjectURL(new Blob([buf], { type: 'audio/ogg' }));
-      const audio = new Audio(blobUrl);
-      _jpdbCurrentAudio = audio;
-      audio.onended = () => { URL.revokeObjectURL(blobUrl); _jpdbCurrentAudio = null; };
-      audio.onerror = () => { URL.revokeObjectURL(blobUrl); _jpdbCurrentAudio = null; };
-      audio.play().catch(() => URL.revokeObjectURL(blobUrl));
-    } catch {}
-  },
-};
 
 export class Popup extends ShadowComponent {
   #demoMode;
@@ -644,374 +550,6 @@ export class Popup extends ShadowComponent {
         "Examples"
       )
     );
-    return;
-    const url = `https://jpdb.io/vocabulary/${card.vid}/${encodeURIComponent(
-      card.spelling
-    )}/${encodeURIComponent(card.reading)}`;
-    const kanjiUrl = (kanji) =>
-      `https://jpdb.io/kanji/${encodeURIComponent(kanji)}`;
-
-    // Get character details — kanjiMap is loaded lazily and cached
-    const kanjiMap = await getKanjiMeaningsPromise();
-    if (renderVersion !== this.#renderVersion || this.#data !== data) return;
-    let characterDetails = (
-      await Promise.all(
-        [...card.spelling].filter(isKanji).map(async (char) => {
-          const charDetails = await getKanjiDetails(char, kanjiMap);
-          return charDetails
-            ? {
-                kanji: charDetails.kanji,
-                meanings:
-                  charDetails.meaning || charDetails.meanings?.join(", ") || "",
-              }
-            : null;
-        })
-      )
-    ).filter(Boolean);
-    if (renderVersion !== this.#renderVersion || this.#data !== data) return;
-
-    characterDetails = characterDetails.length ? characterDetails : null;
-
-    let hindiMeaning = null;
-    if (config.showHindi) {
-      if (!dictionaryLoaded) {
-        await loadDictionary();
-        if (renderVersion !== this.#renderVersion || this.#data !== data) return;
-      }
-      hindiMeaning = dictionary.search(data.token.card.spelling);
-    }
-
-    const MEANINGS_PER_SET = 3;
-
-    const createMeaningChunks = (meanings, chunkSize = MEANINGS_PER_SET) => {
-      // Filter out non-string values and empty strings
-      const validMeanings = meanings.filter(
-        (meaning) => typeof meaning === "string" && meaning.trim().length > 0
-      );
-
-      return validMeanings.reduce((chunks, meaning, index) => {
-        const chunkIndex = Math.floor(index / chunkSize);
-        if (!chunks[chunkIndex]) chunks[chunkIndex] = [];
-        chunks[chunkIndex].push(meaning);
-        return chunks;
-      }, []);
-    };
-
-    const renderHindiMeanings = (meanings) => {
-      if (!meanings?.length) return "";
-
-      const uniqueMeanings = [...new Set(meanings)].filter(
-        (meaning) => typeof meaning === "string" && meaning.trim().length > 0
-      );
-
-      const meaningChunks = createMeaningChunks(uniqueMeanings);
-
-      if (!meaningChunks.length) return "";
-
-      const hasMoreMeanings = meaningChunks.length > 1;
-
-      return jsxCreateElement(
-        "div",
-        { class: "hindi-meanings" },
-        jsxCreateElement("h2", null, "Hindi Meaning"),
-        jsxCreateElement(
-          "div",
-          { class: "meaning-list" },
-          [
-            jsxCreateElement("div", { class: "meaning-set" }, [
-              jsxCreateElement("span", { class: "set-number" }, "1. "),
-              jsxCreateElement(
-                "span",
-                { class: "primary-meanings" },
-                meaningChunks[0].join("; ")
-              ),
-              ...(hasMoreMeanings
-                ? [
-                    jsxCreateElement(
-                      "button",
-                      {
-                        class: "toggle-more",
-                        onclick: (e) => {
-                          const container = e.target.closest(".hindi-meanings");
-                          const moreMeanings =
-                            container.querySelector(".more-meanings");
-                          const isExpanded =
-                            moreMeanings.classList.toggle("expanded");
-                          e.target.textContent = isExpanded ? "▼" : "▶";
-                        },
-                      },
-                      "▶"
-                    ),
-                  ]
-                : []),
-            ]),
-            hasMoreMeanings &&
-              jsxCreateElement(
-                "div",
-                { class: "more-meanings" },
-                meaningChunks
-                  .slice(1)
-                  .map((chunk, index) =>
-                    jsxCreateElement("div", { class: "meaning-set" }, [
-                      jsxCreateElement(
-                        "span",
-                        { class: "set-number" },
-                        `${index + 2}. `
-                      ),
-                      chunk.join("; "),
-                    ])
-                  )
-              ),
-          ].filter(Boolean)
-        )
-      );
-    };
-
-    // Group meanings by part of speech
-    const groupedMeanings = [];
-    let lastPOS = [];
-    for (const [index, meaning] of card.meanings.entries()) {
-      if (
-        // Same part of speech as previous meaning?
-        meaning.partOfSpeech.length == lastPOS.length &&
-        meaning.partOfSpeech.every((p, i) => p === lastPOS[i])
-      ) {
-        // Append to previous meaning group
-        groupedMeanings[groupedMeanings.length - 1].glosses.push(
-          meaning.glosses
-        );
-      } else {
-        // Create a new meaning group
-        groupedMeanings.push({
-          partOfSpeech: meaning.partOfSpeech,
-          glosses: [meaning.glosses],
-          startIndex: index,
-        });
-        lastPOS = meaning.partOfSpeech;
-      }
-    }
-    if (renderVersion !== this.#renderVersion || this.#data !== data) return;
-    this.#vocabSection.replaceChildren(
-      jsxCreateElement(
-        "div",
-        { id: "header" },
-        jsxCreateElement(
-          "div",
-          { class: "header-main-info" },
-          jsxCreateElement(
-            "a",
-            { lang: "ja", href: url, target: "_blank", class: "word-link" },
-            jsxCreateElement("span", { class: "spelling" }, card.spelling),
-            jsxCreateElement(
-              "span",
-              { class: "reading" },
-              card.spelling !== card.reading ? `(${card.reading})` : ""
-            )
-          ),
-          jsxCreateElement(
-            "div",
-            { class: "utility-icons" },
-            jsxCreateElement(
-              "button",
-              {
-                class: "util-btn audio-btn",
-                title: "Play pronunciation",
-                onclick: (event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  JpdbAudio.speak(card.vid, card.spelling);
-                },
-              },
-              "🔊"
-            ),
-            jsxCreateElement(
-              "button",
-              {
-                class: "util-btn",
-                title: "Explain word",
-                onclick: (event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  this.explainWord(card.spelling, card.meanings);
-                },
-              },
-              "ℹ️"
-            )
-          )
-        ),
-        jsxCreateElement(
-          "div",
-          { class: "state" },
-          card.state.map((s) => jsxCreateElement("span", { class: s }, s))
-        )
-      ),
-      jsxCreateElement(
-        "div",
-        { class: "metainfo" },
-        jsxCreateElement(
-          "span",
-          { class: "freq" },
-          card.frequencyRank ? `Top ${card.frequencyRank}` : ""
-        ),
-        card.pitchAccent.map((pitch) => renderPitch(card.reading, pitch))
-      ),
-      characterDetails
-        ? jsxCreateElement(
-            "div",
-            { class: "kanji-meanings" },
-            characterDetails
-              .filter((details) => details && details.meanings)
-              .map((details) => {
-                if (!details || !details.kanji) return null;
-
-                return jsxCreateElement(
-                  "div",
-                  {
-                    class: "kanji-item",
-                    style: {
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    },
-                  },
-                  // Link for kanji
-                  jsxCreateElement(
-                    "a",
-                    {
-                      lang: "ja",
-                      href: kanjiUrl(details.kanji),
-                      target: "_blank",
-                      style: {
-                        textDecoration: "none",
-                        color: "inherit",
-                        cursor: "pointer",
-                        display: details.kanji ? "inline" : "none",
-                        userSelect: "none", // for touch devices
-                      },
-                    },
-                    jsxCreateElement("span", {}, `${details.kanji}:`)
-                  ),
-                  jsxCreateElement("span", {}, " \u00A0"),
-                  // Link for meanings
-                  jsxCreateElement(
-                    "a",
-                    {
-                      href: `https://kanji.koohii.com/study/kanji/${details.kanji}`,
-                      target: "_blank",
-                      style: {
-                        textDecoration: "none",
-                        color: "inherit",
-                        cursor: "pointer",
-                        display: details.meanings ? "inline" : "none",
-                        userSelect: "none", // for touch devices
-                      },
-                    },
-                    jsxCreateElement(
-                      "span",
-                      { class: "reading" },
-                      details.meanings
-                    )
-                  )
-                );
-              })
-          )
-        : "",
-      hindiMeaning?.meaning?.length
-        ? renderHindiMeanings(hindiMeaning.meaning)
-        : "",
-      ...groupedMeanings.flatMap((meanings) => [
-        jsxCreateElement(
-          "h2",
-          null,
-          meanings.partOfSpeech
-            .map(
-              (pos) =>
-                PARTS_OF_SPEECH[pos] ??
-                `(Unknown part of speech #${pos}, please report)`
-            )
-            .filter((x) => x.length > 0)
-            .join(", ")
-        ),
-        jsxCreateElement(
-          "ol",
-          { start: meanings.startIndex + 1 },
-          meanings.glosses.map((glosses) =>
-            jsxCreateElement("li", null, glosses.join("; "))
-          )
-        ),
-      ])
-    );
-    const blacklisted = card.state.includes("blacklisted");
-    const neverForget = card.state.includes("never-forget");
-    this.#mineButtons.replaceChildren(
-      jsxCreateElement(
-        "button",
-        {
-          class: "add",
-          onclick: this.#demoMode
-            ? undefined
-            : () =>
-                requestMine(
-                  data.token.card,
-                  config.forqOnMine,
-                  getSentences(data, config.contextWidth).trim() ||
-                    undefined,
-                  undefined
-                ),
-        },
-        "Add"
-      ),
-      jsxCreateElement(
-        "button",
-        {
-          class: "edit-add-review",
-          onclick: this.#demoMode
-            ? undefined
-            : () => Dialog.get().showForWord(data),
-        },
-        "Edit, Add and Review..."
-      ),
-      jsxCreateElement(
-        "button",
-        {
-          class: "blacklist",
-          onclick: this.#demoMode
-            ? undefined
-            : async () =>
-                await requestSetFlag(
-                  this.#data.token.card,
-                  "blacklist",
-                  !blacklisted
-                ),
-        },
-        !blacklisted ? "Blacklist" : "Remove from blacklist"
-      ),
-      jsxCreateElement(
-        "button",
-        {
-          class: "never-forget",
-          onclick: this.#demoMode
-            ? undefined
-            : async () =>
-                await requestSetFlag(
-                  this.#data.token.card,
-                  "never-forget",
-                  !neverForget
-                ),
-        },
-        !neverForget ? "Never forget" : "Unmark as never forget"
-      ),
-      jsxCreateElement(
-        "button",
-        {
-          class: "show-examples",
-          onclick: this.#demoMode
-            ? undefined
-            : async () => await this.toggleImmersionKit(),
-        },
-        "Examples"
-      )
-    );
   }
   setData(data) {
     this.#data = data;
@@ -1154,8 +692,16 @@ End with one short sentence that captures the core meaning plainly.`;
     } catch (error) {
       if (requestId !== this.#explanationRequestId) return;
       console.error("Error fetching explanation:", error);
+      
+      let errorMessage = "Failed to get explanation. Please check your API key and try again.";
+      if (error?.status === 429) {
+        errorMessage = "Rate limit exceeded. Please wait a few minutes before trying again.";
+      } else if (error?.status === 401 || error?.status === 403) {
+        errorMessage = "Invalid API key. Please check your Gemini API key in settings.";
+      }
+      
       await showRequestErrorToast(error, {
-        message: "Failed to get explanation. Please check your API key and try again.",
+        message: errorMessage,
       });
       window.explanationPopup.hide();
     }
