@@ -3,52 +3,52 @@ import { browser, isChrome, sleep } from '../util.js';
 import { addErrorContext, jpdbApi } from '../integrations/api.js';
 import * as backend from './backend.js';
 export let config = loadConfig();
-const pendingAPICalls = [];
-let callerRunning = false;
-async function apiCaller() {
-    // If no API calls are pending, stop running
-    if (callerRunning || pendingAPICalls.length === 0)
-        // Only run one instance of this function at a time
-        return;
-    callerRunning = true;
-    while (pendingAPICalls.length > 0) {
-        // Get first call from queue
-        // Safety: We know this can't be undefined, because we checked that the length > 0
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const call = pendingAPICalls.shift();
-        try {
-            const [result, wait] = await call.func();
-            call.resolve(result);
-            await sleep(wait);
+class RequestQueue {
+    #pending = [];
+    #running = false;
+    async #run() {
+        if (this.#running || this.#pending.length === 0)
+            return;
+        this.#running = true;
+        while (this.#pending.length > 0) {
+            const call = this.#pending.shift();
+            try {
+                const [result, wait] = await call.func();
+                call.resolve(result);
+                await sleep(wait);
+            }
+            catch (error) {
+                call.reject(error);
+                await sleep(1500);
+            }
         }
-        catch (error) {
-            call.reject(error);
-            // TODO implement exponential backoff
-            await sleep(1500);
-        }
+        this.#running = false;
     }
-    callerRunning = false;
+    enqueue(func, resolve = () => { }, reject = () => { }) {
+        this.#pending.push({ func, resolve, reject });
+        this.#run();
+    }
+    run(func) {
+        return new Promise((resolve, reject) => {
+            this.enqueue(func, resolve, reject);
+        });
+    }
 }
-function enqueue(func) {
-    return new Promise((resolve, reject) => {
-        pendingAPICalls.push({ func, resolve, reject });
-        apiCaller();
-    });
-}
+const apiQueue = new RequestQueue();
 export async function addToDeck(vid, sid, deckId) {
-    return enqueue(() => backend.addToDeck(vid, sid, deckId));
+    return apiQueue.run(() => backend.addToDeck(vid, sid, deckId));
 }
 export async function removeFromDeck(vid, sid, deckId) {
-    return enqueue(() => backend.removeFromDeck(vid, sid, deckId));
+    return apiQueue.run(() => backend.removeFromDeck(vid, sid, deckId));
 }
 export async function setSentence(vid, sid, sentence, translation) {
-    return enqueue(() => backend.setSentence(vid, sid, sentence, translation));
+    return apiQueue.run(() => backend.setSentence(vid, sid, sentence, translation));
 }
 export async function review(vid, sid, rating) {
-    return enqueue(() => backend.review(vid, sid, rating));
+    return apiQueue.run(() => backend.review(vid, sid, rating));
 }
 export async function getCardState(vid, sid) {
-    return enqueue(() => backend.getCardState(vid, sid));
+    return apiQueue.run(() => backend.getCardState(vid, sid));
 }
 const maxParseLength = 16384;
 const pendingParagraphs = new Map();
@@ -94,8 +94,7 @@ export function enqueueParse(seq, text) {
     });
 }
 export function startParse() {
-    pendingAPICalls.push({ func: batchParses, resolve: () => { }, reject: () => { } });
-    apiCaller();
+    apiQueue.enqueue(batchParses);
 }
 // Content script communication
 const ports = new Set();

@@ -835,6 +835,89 @@
 
     const quizAudioService = createQuizAudioService();
 
+    const quizStateStorage = {
+        key: 'jpdbQuizState',
+
+        save(state) {
+            try {
+                localStorage.setItem(this.key, JSON.stringify(state));
+            } catch (error) {
+                console.error('Failed to save quiz state:', error);
+            }
+        },
+
+        restore(minOptions) {
+            try {
+                const savedState = localStorage.getItem(this.key);
+                if (!savedState) return null;
+
+                const state = safeJSONParse(savedState);
+                if (!state) return null;
+
+                const isValid =
+                    typeof state.currentQuestion === 'number' &&
+                    typeof state.score === 'number' &&
+                    (state.quizMode === 'word-to-meaning' || state.quizMode === 'meaning-to-word') &&
+                    Array.isArray(state.shuffledData) &&
+                    state.shuffledData.length >= minOptions;
+
+                return isValid ? state : null;
+            } catch (error) {
+                console.error('Failed to restore quiz state:', error);
+                return null;
+            }
+        }
+    };
+
+    function shuffleArray(array) {
+        const newArray = [...array];
+        for (let i = newArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        }
+        return newArray;
+    }
+
+    function filterJapaneseDistractors(correctOption, wrongOptions) {
+        const correctChars = new Set(correctOption.split(''));
+        return wrongOptions.filter(option => {
+            const optionChars = new Set(option.split(''));
+            const overlapSize = [...correctChars].filter(char => optionChars.has(char)).length;
+            const overlapRatio = overlapSize / correctOption.length;
+            return overlapRatio <= 0.7;
+        });
+    }
+
+    function generateQuizOptions({ currentVocab, shuffledData, quizMode, optionsPerQuestion }) {
+        const correctOption = quizMode === 'word-to-meaning' ? currentVocab.meaning : currentVocab.word;
+        let optionPool = quizMode === 'word-to-meaning'
+            ? shuffledData.map(item => item.meaning)
+            : shuffledData.map(item => item.word);
+
+        optionPool = [...new Set(optionPool)].filter(option => option !== correctOption);
+
+        if (optionPool.length < optionsPerQuestion - 1) {
+            throw new Error('Not enough unique options available for quiz questions.');
+        }
+
+        let attempts = 0;
+        let wrongOptions;
+
+        do {
+            wrongOptions = shuffleArray(optionPool).slice(0, optionsPerQuestion - 1);
+            if (quizMode === 'meaning-to-word') {
+                wrongOptions = filterJapaneseDistractors(correctOption, wrongOptions);
+            }
+            attempts++;
+        } while (wrongOptions.length < optionsPerQuestion - 1 && attempts < CONFIG.maxRetries);
+
+        if (wrongOptions.length < optionsPerQuestion - 1) {
+            wrongOptions = optionPool.slice(0, optionsPerQuestion - 1);
+        }
+
+        return shuffleArray([...wrongOptions, correctOption]);
+    }
+
     // ===== Data Model =====
     class VocabularyQuiz {
         constructor(vocabularyData, options = {}) {
@@ -886,7 +969,7 @@
                 throw new Error(`Not enough valid vocabulary words. Found ${this.vocabularyData.length}, need at least ${CONFIG.minRequiredWords}.`);
             }
 
-            this.shuffledData = this.shuffleArray([...this.vocabularyData]);
+            this.shuffledData = shuffleArray([...this.vocabularyData]);
             this.currentQuestion = 0;
             this.score = 0;
             this.totalQuestions = Math.min(this.shuffledData.length, this.options.maxQuestions);
@@ -944,121 +1027,36 @@
 
         // Save quiz state to local storage
         saveState() {
-            try {
-                const state = {
-                    currentQuestion: this.currentQuestion,
-                    score: this.score,
-                    quizMode: this.quizMode,
-                    shuffledData: this.shuffledData,
-                    incorrectAnswers: this.incorrectAnswers
-                };
-                localStorage.setItem('jpdbQuizState', JSON.stringify(state));
-            } catch (e) {
-                console.error('Failed to save quiz state:', e);
-            }
+            quizStateStorage.save({
+                currentQuestion: this.currentQuestion,
+                score: this.score,
+                quizMode: this.quizMode,
+                shuffledData: this.shuffledData,
+                incorrectAnswers: this.incorrectAnswers
+            });
         }
 
         // Try to restore quiz state from local storage
         tryRestoreState() {
-            try {
-                const savedState = localStorage.getItem('jpdbQuizState');
-                if (!savedState) return false;
+            const state = quizStateStorage.restore(this.options.optionsPerQuestion);
+            if (!state) return false;
 
-                const state = safeJSONParse(savedState);
-                if (!state) return false;
+            this.currentQuestion = state.currentQuestion;
+            this.score = state.score;
+            this.quizMode = state.quizMode;
+            this.shuffledData = state.shuffledData;
+            this.incorrectAnswers = Array.isArray(state.incorrectAnswers) ? state.incorrectAnswers : [];
 
-                // Validate and restore state
-                if (typeof state.currentQuestion === 'number' &&
-                    typeof state.score === 'number' &&
-                    (state.quizMode === 'word-to-meaning' || state.quizMode === 'meaning-to-word') &&
-                    Array.isArray(state.shuffledData) &&
-                    state.shuffledData.length >= this.options.optionsPerQuestion) {
-
-                    this.currentQuestion = state.currentQuestion;
-                    this.score = state.score;
-                    this.quizMode = state.quizMode;
-                    this.shuffledData = state.shuffledData;
-                    this.incorrectAnswers = Array.isArray(state.incorrectAnswers) ? state.incorrectAnswers : [];
-
-                    return true;
-                }
-
-                return false;
-            } catch (e) {
-                console.error('Failed to restore quiz state:', e);
-                return false;
-            }
+            return true;
         }
 
         generateOptions() {
-            const currentVocab = this.getCurrentVocab();
-            let correctOption;
-            let optionPool;
-
-            if (this.quizMode === 'word-to-meaning') {
-                correctOption = currentVocab.meaning;
-                optionPool = this.shuffledData.map(item => item.meaning);
-            } else {
-                correctOption = currentVocab.word;
-                optionPool = this.shuffledData.map(item => item.word);
-            }
-
-            // Remove duplicates from option pool
-            optionPool = [...new Set(optionPool)];
-
-            // Remove the correct option from the pool
-            optionPool = optionPool.filter(option => option !== correctOption);
-
-            // Check if we have enough options
-            if (optionPool.length < this.options.optionsPerQuestion - 1) {
-                throw new Error('Not enough unique options available for quiz questions.');
-            }
-
-            // Retry option generation if necessary to avoid too similar distractors
-            let attempts = 0;
-            let wrongOptions;
-
-            do {
-                // Shuffle and take N-1 wrong options
-                wrongOptions = this.shuffleArray(optionPool)
-                    .slice(0, this.options.optionsPerQuestion - 1);
-
-                // For Japanese options, ensure they don't have too much overlap with correct option
-                if (this.quizMode === 'meaning-to-word') {
-                    const correctChars = new Set(correctOption.split(''));
-                    wrongOptions = wrongOptions.filter(option => {
-                        // Calculate character overlap ratio
-                        const optionChars = new Set(option.split(''));
-                        const overlapSize = [...correctChars].filter(char => optionChars.has(char)).length;
-                        const overlapRatio = overlapSize / correctOption.length;
-
-                        // Reject options with high character overlap (>70%)
-                        return overlapRatio <= 0.7;
-                    });
-                }
-
-                attempts++;
-            } while (wrongOptions.length < this.options.optionsPerQuestion - 1 && attempts < CONFIG.maxRetries);
-
-            // If we still don't have enough options, fall back to using the top of the option pool
-            if (wrongOptions.length < this.options.optionsPerQuestion - 1) {
-                wrongOptions = optionPool.slice(0, this.options.optionsPerQuestion - 1);
-            }
-
-            // Create final options array with the correct option
-            const options = [...wrongOptions, correctOption];
-
-            // Shuffle options
-            return this.shuffleArray(options);
-        }
-
-        shuffleArray(array) {
-            const newArray = [...array];
-            for (let i = newArray.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-            }
-            return newArray;
+            return generateQuizOptions({
+                currentVocab: this.getCurrentVocab(),
+                shuffledData: this.shuffledData,
+                quizMode: this.quizMode,
+                optionsPerQuestion: this.options.optionsPerQuestion
+            });
         }
 
         getResultMessage() {

@@ -1,15 +1,18 @@
 import { ImmersionKit } from './immersionkit.js';
 import { ExplanationPopup } from './explanation.js';
+import { JpdbAudio as PopupJpdbAudio } from './popup_audio.js';
+import { loadPopupSupplementalData } from './popup_resources.js';
 import { ShadowComponent } from './shadowbase.js';
 import { browser, clamp, nonNull, readExtJson } from "../util.js";
+import { createWordDetailsContent } from './popup_word_view.js';
 import { jsxCreateElement } from "../jsx.js";
 import {
   config,
   requestMine,
+  requestFetchAudioBytes,
+  requestFetchAudioHash,
   requestReview,
   requestSetFlag,
-  requestFetchAudioHash,
-  requestFetchAudioBytes,
 } from "./background_comms.js";
 import { Dialog } from "./dialog.js";
 import { getSentences } from "./word.js";
@@ -127,20 +130,6 @@ const PARTS_OF_SPEECH = {
   // v4n: '', // Not used in jpdb. JMDict: "Yodan verb with 'nu' ending (archaic)"
   va: "Archaic", // Not from JMDict? TODO Don't understand this one, seems identical to #v4n ?
   // 'unc': '', // Not used in jpdb: empty list instead. JMDict: "unclassified"
-};
-
-const dictionary = new JapaneseDictionary();
-let dictionaryLoaded = false;
-
-const loadDictionary = async () => {
-  if (!config.showHindi) return;
-  if (dictionaryLoaded) return;
-  try {
-    await dictionary.loadDictionary();
-    dictionaryLoaded = true;
-  } catch (error) {
-    console.error("Failed to load dictionary:", error);
-  }
 };
 
 /**
@@ -573,6 +562,89 @@ export class Popup extends ShadowComponent {
     if (this.#data === undefined) return;
     const data = this.#data;
     const card = data.token.card;
+    const { characterDetails: popupCharacterDetails, hindiMeaning: popupHindiMeaning } = await loadPopupSupplementalData(card, {
+      showKanji: config.showKanji,
+      showHindi: config.showHindi,
+    });
+    if (renderVersion !== this.#renderVersion || this.#data !== data) return;
+
+    this.#vocabSection.replaceChildren(
+      ...createWordDetailsContent({
+        card,
+        characterDetails: popupCharacterDetails,
+        hindiMeaning: popupHindiMeaning,
+        onPlayAudio: () => PopupJpdbAudio.speak(card.vid, card.spelling),
+        onExplainWord: () => this.explainWord(card.spelling, card.meanings),
+      })
+    );
+
+    const popupBlacklisted = card.state.includes("blacklisted");
+    const popupNeverForget = card.state.includes("never-forget");
+    this.#mineButtons.replaceChildren(
+      jsxCreateElement(
+        "button",
+        {
+          class: "add",
+          onclick: this.#demoMode
+            ? undefined
+            : () =>
+                requestMine(
+                  data.token.card,
+                  config.forqOnMine,
+                  getSentences(data, config.contextWidth).trim() || undefined,
+                  undefined
+                ),
+        },
+        "Add"
+      ),
+      jsxCreateElement(
+        "button",
+        {
+          class: "edit-add-review",
+          onclick: this.#demoMode ? undefined : () => Dialog.get().showForWord(data),
+        },
+        "Edit, Add and Review..."
+      ),
+      jsxCreateElement(
+        "button",
+        {
+          class: "blacklist",
+          onclick: this.#demoMode
+            ? undefined
+            : async () =>
+                await requestSetFlag(
+                  this.#data.token.card,
+                  "blacklist",
+                  !popupBlacklisted
+                ),
+        },
+        !popupBlacklisted ? "Blacklist" : "Remove from blacklist"
+      ),
+      jsxCreateElement(
+        "button",
+        {
+          class: "never-forget",
+          onclick: this.#demoMode
+            ? undefined
+            : async () =>
+                await requestSetFlag(
+                  this.#data.token.card,
+                  "never-forget",
+                  !popupNeverForget
+                ),
+        },
+        !popupNeverForget ? "Never forget" : "Unmark as never forget"
+      ),
+      jsxCreateElement(
+        "button",
+        {
+          class: "show-examples",
+          onclick: this.#demoMode ? undefined : async () => await this.toggleImmersionKit(),
+        },
+        "Examples"
+      )
+    );
+    return;
     const url = `https://jpdb.io/vocabulary/${card.vid}/${encodeURIComponent(
       card.spelling
     )}/${encodeURIComponent(card.reading)}`;

@@ -231,20 +231,38 @@ a.word-link:hover .spelling { color: var(--c-primary); }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   padding: 0;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 50%;
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
   background: transparent;
   color: var(--c-secondary);
-  transition: background 0.12s, color 0.12s, transform 0.1s;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.util-btn:hover  { background: var(--c-hover); color: var(--c-primary); transform: scale(1.1); }
-.util-btn:active { background: var(--c-hover-dark); transform: scale(0.95); }
+.util-btn:hover {
+  background: var(--c-primary-bg);
+  color: var(--c-primary);
+  border-color: rgba(25, 103, 210, 0.1);
+  transform: scale(1.1) translateY(-1px);
+  box-shadow: 0 4px 8px rgba(25, 103, 210, 0.1);
+}
+
+.util-btn:active {
+  background: var(--c-hover-dark);
+  transform: scale(0.95);
+  box-shadow: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .util-btn:hover {
+    border-color: rgba(138, 180, 248, 0.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+}
 
 /* State badge */
 .state {
@@ -332,18 +350,37 @@ a.word-link:hover .spelling { color: var(--c-primary); }
 .kanji-item {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 2px 9px 2px 6px;
+  gap: 6px;
+  padding: 3px 10px;
   background: var(--c-hover);
   border: 1px solid var(--c-border);
   border-radius: 999px;
   font-size: 12.5px;
+  transition: background 0.15s, border-color 0.15s;
 }
 
-.kanji-item a:first-child span { font-size: 1.1em; font-weight: 800; color: var(--c-primary); }
-.kanji-item .reading           { color: var(--c-on-surface); font-size: 0.9em; font-weight: 500; }
-.kanji-item a                  { text-decoration: none; color: inherit; }
-.kanji-item a:hover            { text-decoration: underline; }
+.kanji-item:hover {
+  background: var(--c-surface);
+  border-color: var(--c-primary);
+}
+
+.kanji-link {
+  text-decoration: none;
+  font-weight: 800;
+  color: var(--c-primary);
+  font-size: 1.1em;
+}
+
+.kanji-meaning-link {
+  text-decoration: none;
+  color: var(--c-on-surface);
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.kanji-item a:hover {
+  text-decoration: underline;
+}
 
 /* ──────────────────────────────────────────
    SECONDARY MEANINGS (Hindi)
