@@ -1,8 +1,22 @@
-import { loadConfig } from './config.js';
+import { loadConfig, getConfig } from './config.js';
 import { browser, isChrome, sleep } from '../util.js';
 import { addErrorContext, jpdbApi } from '../integrations/api.js';
 import * as backend from './backend.js';
-export let config = loadConfig();
+
+export let config = null;
+
+// Initialize config on service worker startup
+async function initConfig() {
+    config = await loadConfig();
+}
+
+// Call init immediately and export a promise that resolves when ready
+const configReady = initConfig();
+
+// Export a function to get config (ensures it's loaded)
+export function getConfigAsync() {
+    return config;
+}
 class RequestQueue {
     #pending = [];
     #running = false;
@@ -126,11 +140,18 @@ const messageHandlers = {
     },
     async updateConfig(request, port) {
         const oldCSS = config.customWordCSS;
-        config = loadConfig();
+        config = await loadConfig();
         if (config.customWordCSS !== oldCSS) {
             for (const port of ports) {
-                browser.tabs.insertCSS(port.sender.tab.id, { code: config.customWordCSS, cssOrigin: 'author' });
-                browser.tabs.removeCSS(port.sender.tab.id, { code: oldCSS });
+                await browser.scripting.insertCSS({
+                    target: { tabId: port.sender.tab.id },
+                    css: config.customWordCSS,
+                    origin: 'AUTHOR'
+                });
+                await browser.scripting.removeCSS({
+                    target: { tabId: port.sender.tab.id },
+                    css: oldCSS
+                });
             }
         }
         postResponse(port, request, null);
@@ -237,8 +258,14 @@ browser.runtime.onConnect.addListener(port => {
     port.onDisconnect.addListener(onPortDisconnect);
     port.onMessage.addListener(onPortMessage);
     // TODO filter to only url-relevant config options
-    post(port, { type: 'updateConfig', config });
-    browser.tabs.insertCSS(port.sender.tab.id, { code: config.customWordCSS, cssOrigin: 'author' });
+    configReady.then(() => {
+        post(port, { type: 'updateConfig', config });
+        browser.scripting.insertCSS({
+            target: { tabId: port.sender.tab.id },
+            css: config.customWordCSS,
+            origin: 'AUTHOR'
+        });
+    });
 });
 // Context menu (Parse with jpdb)
 function portForTab(tabId) {
@@ -247,25 +274,41 @@ function portForTab(tabId) {
             return port;
     return undefined;
 }
-const parseSelection = browser.contextMenus.create({
-    id: 'parse-selection',
-    title: 'Parse 「%s」with jpdb',
-    contexts: ['selection'],
+
+// Create context menu on install/update
+browser.runtime.onInstalled.addListener(() => {
+    browser.contextMenus.create({
+        id: 'parse-selection',
+        title: 'Parse 「%s」with jpdb',
+        contexts: ['selection'],
+    });
 });
 async function insertCSS(tabId) {
     // We need to await here, because ordering is significant.
     // The custom styles should load after the default styles, so they can overwrite them
-    await browser.tabs.insertCSS(tabId, { file: '/content/word.css', cssOrigin: 'author' });
-    if (config.customWordCSS)
-        await browser.tabs.insertCSS(tabId, { code: config.customWordCSS, cssOrigin: 'author' });
+    await browser.scripting.insertCSS({
+        target: { tabId },
+        files: ['/content/word.css'],
+        origin: 'AUTHOR'
+    });
+    if (config.customWordCSS) {
+        await browser.scripting.insertCSS({
+            target: { tabId },
+            css: config.customWordCSS,
+            origin: 'AUTHOR'
+        });
+    }
 }
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
-    if (info.menuItemId === parseSelection) {
+    if (info.menuItemId === 'parse-selection') {
         const port = portForTab(tab.id);
         if (port === undefined) {
             // New tab, inject css
             await insertCSS(tab.id);
         }
-        await browser.tabs.executeScript(tab.id, { file: '/integrations/contextmenu.js' });
+        await browser.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: ['/integrations/contextmenu.js']
+        });
     }
 });

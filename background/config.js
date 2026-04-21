@@ -1,4 +1,6 @@
 // Common types shared across both content and background scripts
+import { browser } from '../util.js';
+
 export const CURRENT_SCHEMA_VERSION = 1;
 export const defaultConfig = {
   schemaVersion: CURRENT_SCHEMA_VERSION,
@@ -29,18 +31,10 @@ export const defaultConfig = {
   easyKey: null,
   geminiApiKey: null,
 };
-function localStorageGet(key, fallback = null) {
-  const data = localStorage.getItem(key);
-  if (data === null) return fallback;
-  try {
-    return JSON.parse(data) ?? fallback;
-  } catch {
-    return fallback;
-  }
-}
-function localStorageSet(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
-}
+
+// Cache for config
+let configCache = null;
+
 export function migrateSchema(config) {
   if (config.schemaVersion === 0) {
     // Keybinds changed from string to object
@@ -61,26 +55,47 @@ export function migrateSchema(config) {
     config.schemaVersion = 1;
   }
 }
-export function loadConfig() {
-  const config = Object.fromEntries(
-    Object.entries(defaultConfig).map(([key, defaultValue]) => [
-      key,
-      localStorageGet(key, defaultValue),
-    ])
-  );
 
-  console.log(config, "f");
-  config.schemaVersion = localStorageGet("schemaVersion", 0);
-  migrateSchema(config);
-  // If the schema version is not the current version after applying all migrations, give up and refuse to load the config.
-  // Use the default as a fallback.
-  if (config.schemaVersion !== CURRENT_SCHEMA_VERSION) {
+export async function loadConfig() {
+  if (configCache) return configCache;
+  
+  try {
+    const result = await browser.storage.local.get(Object.keys(defaultConfig));
+    const config = { ...defaultConfig };
+    
+    for (const [key, value] of Object.entries(result)) {
+      if (value !== undefined) {
+        config[key] = value;
+      }
+    }
+    
+    migrateSchema(config);
+    
+    // If the schema version is not the current version after applying all migrations, 
+    // use the default as a fallback.
+    if (config.schemaVersion !== CURRENT_SCHEMA_VERSION) {
+      configCache = defaultConfig;
+      return defaultConfig;
+    }
+    
+    configCache = config;
+    return config;
+  } catch (error) {
+    console.error('Failed to load config:', error);
     return defaultConfig;
   }
-  return config;
 }
-export function saveConfig(config) {
-  for (const [key, value] of Object.entries(config)) {
-    localStorageSet(key, value);
+
+export async function saveConfig(config) {
+  try {
+    await browser.storage.local.set(config);
+    configCache = config;
+  } catch (error) {
+    console.error('Failed to save config:', error);
   }
+}
+
+// Synchronous version for backward compatibility (returns cached config)
+export function getConfig() {
+  return configCache || defaultConfig;
 }

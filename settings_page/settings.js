@@ -67,7 +67,18 @@ addEventListener(
   { capture: true }
 );
 try {
-  const config = loadConfig();
+  // Load config asynchronously
+  let config = null;
+  
+  (async () => {
+    config = await loadConfig();
+    
+    // Populate form fields with config values
+    for (const elem of document.querySelectorAll("[name]")) {
+      elem.value = config[elem.name] ?? null;
+    }
+  })();
+  
   defineCustomElements();
   nonNull(document.querySelector("#export")).addEventListener(
     "click",
@@ -143,9 +154,6 @@ try {
       popup.updateStyle(newCSS);
     }
   );
-  for (const elem of document.querySelectorAll("[name]")) {
-    elem.value = config[elem.name] ?? null;
-  }
   const popup = Popup.getDemoMode(nonNull(document.querySelector("#preview")));
   popup.setData(POPUP_EXAMPLE_DATA);
   popup.fadeIn();
@@ -153,6 +161,9 @@ try {
   saveButton.addEventListener("click", async (event) => {
     event.preventDefault();
     try {
+      if (!config) {
+        config = await loadConfig();
+      }
       for (const name of Object.keys(config)) {
         const elem = document.querySelector(`[name="${name}"]`);
         if (elem !== null) {

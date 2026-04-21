@@ -1,13 +1,32 @@
 import { loadConfig } from '../background/config.js';
 import { browser, nonNull } from '../util.js';
 import { jsxCreateElement } from '../jsx.js';
-const config = loadConfig();
+
+let config = null;
+
 async function parsePage(tab) {
+    // Load config if not already loaded
+    if (!config) {
+        config = await loadConfig();
+    }
+    
     // Parse the page
-    await browser.tabs.insertCSS(tab.id, { file: '/content/word.css', cssOrigin: 'author' });
-    if (config.customWordCSS)
-        await browser.tabs.insertCSS(tab.id, { code: config.customWordCSS, cssOrigin: 'author' });
-    browser.tabs.executeScript(tab.id, { file: '/integrations/parse_selection.js' });
+    await browser.scripting.insertCSS({
+        target: { tabId: tab.id },
+        files: ['/content/word.css'],
+        origin: 'AUTHOR'
+    });
+    if (config.customWordCSS) {
+        await browser.scripting.insertCSS({
+            target: { tabId: tab.id },
+            css: config.customWordCSS,
+            origin: 'AUTHOR'
+        });
+    }
+    await browser.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['/integrations/parse_selection.js']
+    });
     // Close the popup
     setTimeout(() => window.close(), 10);
 }

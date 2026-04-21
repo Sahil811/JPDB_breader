@@ -11,6 +11,9 @@ function matchesHotkey(event, hotkey) {
 }
 async function hotkeyListener(event) {
     try {
+        // Wait for config to be initialized
+        if (!config) return;
+        
         if (matchesHotkey(event, config.showPopupKey) && !config.showPopupOnHover) {
             event.preventDefault();
             popupKeyHeld = true;
@@ -70,6 +73,7 @@ async function hotkeyListener(event) {
 window.addEventListener('keydown', hotkeyListener);
 window.addEventListener('mousedown', hotkeyListener);
 function hidePopupHotkeyListener(event) {
+    if (!config) return;
     if (matchesHotkey(event, config.showPopupKey)) {
         event.preventDefault();
         popupKeyHeld = false;
@@ -79,6 +83,7 @@ function hidePopupHotkeyListener(event) {
 window.addEventListener('keyup', hidePopupHotkeyListener);
 window.addEventListener('mouseup', hidePopupHotkeyListener);
 document.addEventListener('mousedown', e => {
+    if (!config) return;
     if (config.touchscreenSupport) {
         // to prevent issues with simultaneous showing and hiding
         // and to allow clicking on the popup without making it disappear.
@@ -91,7 +96,7 @@ document.addEventListener('mousedown', e => {
     }
 });
 export function onWordHoverStart({ target, x, y }) {
-    if (target === null)
+    if (target === null || !config)
         return;
     currentHover = [target, x, y];
     if (popupKeyHeld || config.showPopupOnHover) {

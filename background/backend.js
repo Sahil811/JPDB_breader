@@ -1,14 +1,18 @@
 import { assertNonNull, truncate } from "../util.js";
 import { addErrorContext, jpdbApi } from "../integrations/api.js";
-import { config } from "./background.js";
+import { getConfigAsync } from "./background.js";
+
+// Get config at runtime (not at import time)
+const getConfig = () => getConfigAsync();
 
 const API_RATELIMIT = 0.2; // seconds between requests
 const SCRAPE_RATELIMIT = 1.1; // seconds between requests
 
 export async function parse(text) {
+  const config = getConfig();
   let data;
   try {
-    data = await jpdbApi.parse({ text, apiToken: config.apiToken });
+    data = await jpdbApi.parse({ text, apiToken: config?.apiToken });
   } catch (error) {
     throw addErrorContext(error, `while parsing "${truncate(text.join(" "), 20)}"`);
   }
@@ -89,11 +93,12 @@ export function addToDeck(vid, sid, deckId) {
 }
 
 async function addToDeckAPI(vid, sid, deckId) {
+  const config = getConfig();
   try {
     await jpdbApi.addVocabulary({
       deckId,
       vocabulary: [[vid, sid]],
-      apiToken: config.apiToken,
+      apiToken: config?.apiToken,
     });
   } catch (error) {
     throw addErrorContext(error, `while adding word ${vid}/${sid} to deck "${deckId}"`);
@@ -126,11 +131,12 @@ export function removeFromDeck(vid, sid, deckId) {
 }
 
 async function removeFromDeckAPI(vid, sid, deckId) {
+  const config = getConfig();
   try {
     await jpdbApi.removeVocabulary({
       deckId,
       vocabulary: [[vid, sid]],
-      apiToken: config.apiToken,
+      apiToken: config?.apiToken,
     });
   } catch (error) {
     throw addErrorContext(error, `while removing word ${vid}/${sid} from deck "${deckId}"`);

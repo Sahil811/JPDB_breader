@@ -19,7 +19,13 @@ function preregisterAbortableRequest() {
     const promise = new Promise((resolve, reject) => {
         waitingPromises.set(seq, { resolve, reject });
         abort.signal.addEventListener('abort', () => {
-            port.postMessage({ type: 'cancel', seq });
+            if (port) {
+                try {
+                    port.postMessage({ type: 'cancel', seq });
+                } catch (e) {
+                    console.warn('Failed to send cancel message:', e);
+                }
+            }
         });
     });
     return [seq, promise, abort];
@@ -27,7 +33,13 @@ function preregisterAbortableRequest() {
 // Avoid repetition for most common use case
 function requestUnabortable(message) {
     const [seq, promise] = preregisterUnabortableRequest();
-    port.postMessage({ ...message, seq });
+    try {
+        if (!port) throw new Error('Not connected to background script');
+        port.postMessage({ ...message, seq });
+    } catch (e) {
+        waitingPromises.delete(seq);
+        return Promise.reject(e);
+    }
     return promise;
 }
 export function requestSetFlag(card, flag, state) {
@@ -66,11 +78,9 @@ const deserializeError = isChrome
         return e;
     }
     : (err) => err;
-export const port = browser.runtime.connect();
-port.onDisconnect.addListener(() => {
-    console.error('disconnect:', port);
-});
-port.onMessage.addListener((message, port) => {
+export let port;
+
+function handleMessage(message) {
     switch (message.type) {
         case 'success':
             {
@@ -130,4 +140,47 @@ port.onMessage.addListener((message, port) => {
             }
             break;
     }
-});
+}
+
+function onDisconnect() {
+    let lastError;
+    try {
+        lastError = browser.runtime.lastError;
+    } catch (e) {
+        // Context invalidated
+    }
+
+    if (lastError?.message?.includes('Extension context invalidated')) {
+        console.warn('JPDBreader: Extension context invalidated. Please refresh the page.');
+        return;
+    }
+
+    console.error('Disconnected from background script:', lastError ? lastError.message : 'Unknown reason');
+    
+    // Fail all pending promises
+    const error = new Error('Connection to background script lost');
+    for (const [seq, promise] of waitingPromises) {
+        promise.reject(error);
+    }
+    waitingPromises.clear();
+    
+    // Reconnect after a delay
+    setTimeout(connect, 1000);
+}
+
+export function connect() {
+    try {
+        port = browser.runtime.connect();
+        port.onDisconnect.addListener(onDisconnect);
+        port.onMessage.addListener(handleMessage);
+    } catch (e) {
+        if (e.message?.includes('Extension context invalidated')) {
+            console.warn('JPDBreader: Extension context invalidated. Reconnection stopped. Please refresh the page.');
+            return;
+        }
+        console.error('Failed to connect to background script:', e);
+        setTimeout(connect, 1000);
+    }
+}
+
+connect();

@@ -1,5 +1,5 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "JPDBreader",
   "version": "13.0",
   "description": "JPDB parsing and mining in your browser",
@@ -12,7 +12,7 @@
     "96": "icons/logo_96.png",
     "128": "icons/logo_128.png"
   },
-  "browser_action": {
+  "action": {
     "default_icon": {
       "16": "icons/logo_16.png",
       "24": "icons/logo_24.png",
@@ -87,42 +87,50 @@
     }
   ],
   "background": {
-    "page": "background/background.html",
-    "persistent": true
+    "service_worker": "background/background.js",
+    "type": "module"
   },
   "web_accessible_resources": [
-    "integrations/common.js",
-    "integrations/api.js",
-    "content/background_comms.js",
-    "content/content.js",
-    "content/dialog.js",
-    "content/dialog.css",
-    "content/parse.js",
-    "content/popup.js",
-    "content/popup_audio.js",
-    "content/popup_resources.js",
-    "content/popup_word_view.js",
-    "content/popup.css",
-    "content/immersionkit.js",
-    "content/explanation.js",
-    "content/shadowbase.js",
-    "content/word.js",
-    "content/word.css",
-    "content/toast.js",
-    "content/toast.css",
-    "util.js",
-    "jsx.js",
-    "common.css",
-    "themes.css",
-    "kanji_meanings.json",
-    "japanese_dictionary_hindi.json",
-    "dictionary.js",
-    "integrations/parse_selection.js"
+    {
+      "resources": [
+        "integrations/common.js",
+        "integrations/api.js",
+        "content/background_comms.js",
+        "content/content.js",
+        "content/dialog.js",
+        "content/dialog.css",
+        "content/parse.js",
+        "content/popup.js",
+        "content/popup_audio.js",
+        "content/popup_resources.js",
+        "content/popup_word_view.js",
+        "content/popup.css",
+        "content/immersionkit.js",
+        "content/explanation.js",
+        "content/shadowbase.js",
+        "content/word.js",
+        "content/word.css",
+        "content/toast.js",
+        "content/toast.css",
+        "util.js",
+        "jsx.js",
+        "common.css",
+        "themes.css",
+        "kanji_meanings.json",
+        "japanese_dictionary_hindi.json",
+        "dictionary.js",
+        "integrations/parse_selection.js"
+      ],
+      "matches": ["<all_urls>"]
+    }
   ],
   "permissions": [
-    "tabs",
     "activeTab",
     "contextMenus",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
     "https://jpdb.io/*",
     "*://reader.ttsu.app/*",
     "*://reader.mokuro.app/*",
@@ -132,7 +140,7 @@
     "*://kamwithk.github.io/exSTATic/tracker.html",
     "*://renji-xd.github.io/texthooker-ui/",
     "file:///*mokuro*.html",
-    "*://*mokuro.moe/*",
+    "*://mokuro.moe/*",
     "*://ja.wikipedia.org/*",
     "*://ja.m.wikipedia.org/*",
     "*://app.readwok.com/*",
@@ -140,7 +148,6 @@
     "*://bunpro.jp/*",
     "*://www.nhk.or.jp/*",
     "*://www3.nhk.or.jp/*",
-    "*://jpdb.io/*",
     "*://ankiuser.net/*"
   ]
 }

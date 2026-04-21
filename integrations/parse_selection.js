@@ -150,8 +150,14 @@
   });
   document.body.appendChild(parsePageButton);
 
-  parsePageButton.addEventListener("click", () => {
-    browser.tabs.executeScript({ file: "/integrations/contextmenu.js" });
+  parsePageButton.addEventListener("click", async () => {
+    const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+    if (tab?.id) {
+      await browser.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ["/integrations/contextmenu.js"]
+      });
+    }
   });
 
   // --- Event Handling ---
