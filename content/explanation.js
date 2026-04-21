@@ -1,24 +1,44 @@
 import { jsxCreateElement } from '../jsx.js';
 import { config } from './background_comms.js';
+import { ShadowComponent } from './shadowbase.js';
 
-export class ExplanationPopup {
+export class ExplanationPopup extends ShadowComponent {
   constructor() {
-    this.element = jsxCreateElement("div", {
+    const hostElement = jsxCreateElement("div", {
       id: "jpdb-explanation-popup",
-      style: `all:initial; z-index:2147483647; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transition:opacity 0.2s ease, visibility 0.2s ease; overscroll-behavior:none;`,
+      style: `all:initial; z-index:2147483647; position:fixed; top:0; left:0; width:100vw; height:100vh; opacity:0; visibility:hidden; transition:opacity 0.2s ease, visibility 0.2s ease; overscroll-behavior:none;`,
     });
     
+    super(hostElement, ["/themes.css", "/content/popup.css"]);
+
     // Close modal when clicking the dark backdrop
     this.element.addEventListener("click", (e) => {
+      // With Shadow DOM, e.target is the host element when clicking the backdrop
       if (e.target === this.element) this.hide();
     });
-    const shadow = this.element.attachShadow({ mode: "closed" });
 
     // Add loading spinner and popup styles
     const styles = jsxCreateElement(
       "style",
       null,
       `
+      :host {
+        display: block;
+      }
+      
+      .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        backdrop-filter: blur(6px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
       article::-webkit-scrollbar {
         width: 8px;
       }
@@ -56,6 +76,7 @@ export class ExplanationPopup {
       .loading {
         min-height: 250px;
         position: relative;
+        width: 100%;
       }
 
       .explanation-content {
@@ -175,28 +196,25 @@ export class ExplanationPopup {
     );
     this.article = modalArticle;
 
-    shadow.append(
-      jsxCreateElement("link", {
-        rel: "stylesheet",
-        href: browser.runtime.getURL("/themes.css"),
-      }),
-      jsxCreateElement("link", {
-        rel: "stylesheet",
-        href: browser.runtime.getURL("/content/popup.css"),
-      }),
+    const overlay = jsxCreateElement("div", { class: "overlay" }, modalArticle);
+    
+    // Also allow clicking the overlay div inside shadow to close
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) this.hide();
+    });
+
+    this.shadow.append(
       styles,
-      modalArticle
+      overlay
     );
 
     // Stop events from escaping the overlay
     this.element.addEventListener("wheel", (e) => {
       e.stopPropagation();
-      if (e.target === this.element) e.preventDefault();
     }, { passive: false });
 
     this.element.addEventListener("touchmove", (e) => {
       e.stopPropagation();
-      if (e.target === this.element) e.preventDefault();
     }, { passive: false });
 
     // Explicit scroll locking for the article to stop manual scroll chaining
@@ -295,11 +313,11 @@ document.addEventListener("click", (event) => {
   const parentPopup = document.getElementById("jpdb-popup");
 
   if (event.target === parentPopup) {
-    window.explanationPopup.hide();
+    if (window.explanationPopup) window.explanationPopup.hide();
     return;
   }
 
   if (explanationPopup && !explanationPopup.contains(event.target)) {
-    window.explanationPopup.hide();
+    if (window.explanationPopup) window.explanationPopup.hide();
   }
 });
