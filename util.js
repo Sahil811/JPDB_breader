@@ -44,10 +44,26 @@ export function clamp(num, min, max) {
 export async function readExtFile(path) {
     try {
         const resp = await fetch(browser.runtime.getURL(path));
+        if (!resp.ok) {
+            throw new Error(`HTTP ${resp.status}`);
+        }
         return await resp.text();
     }
     catch (error) {
         throw new Error(`Could not read file ${path}: ${error.message}`, { cause: error });
+    }
+}
+/** Read JSON from an extension-relative file */
+export async function readExtJson(path) {
+    try {
+        const resp = await fetch(browser.runtime.getURL(path));
+        if (!resp.ok) {
+            throw new Error(`HTTP ${resp.status}`);
+        }
+        return await resp.json();
+    }
+    catch (error) {
+        throw new Error(`Could not read JSON file ${path}: ${error.message}`, { cause: error });
     }
 }
 export function snakeToCamel(string) {

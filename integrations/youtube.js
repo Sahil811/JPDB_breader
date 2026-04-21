@@ -3,12 +3,12 @@
   const $browser = globalThis.browser ?? globalThis.chrome,
     $import = (path) => import($browser.runtime.getURL(path));
   const { showError } = await $import("/content/toast.js");
+  const { youtubeApi } = await $import("/integrations/api.js");
   const { addedObserver, parseVisibleObserver } = await $import(
     "/integrations/common.js"
   );
   async function getTranscriptFromURL(url) {
-    const response = await fetch(url);
-    const data = await response.text();
+    const data = await youtubeApi.fetchWatchPage(url);
     const regex = /({"captionTracks":.*isTranslatable":(true|false)}])/;
     const matches = regex.exec(data);
     if (!matches?.length) throw new Error("Could not find captions.");
@@ -18,8 +18,7 @@
     );
     if (!subSource) return null;
     if (subSource.kind === "asr") {
-      const response = await fetch(subSource.baseUrl);
-      const data = await response.text();
+      const data = await youtubeApi.fetchTranscript(subSource.baseUrl);
       const subs = data
         .replace('<?xml version="1.0" encoding="utf-8" ?><transcript>', "")
         .replace("</transcript>", "")

@@ -1,4 +1,4 @@
-import { browser } from '../util.js';
+import { browser, readExtFile } from '../util.js';
 
 /**
  * A central cache for parsed CSS stylesheets.
@@ -33,9 +33,7 @@ export class ShadowComponent {
       
       if (!StyleSheetCache.has(fullUrl)) {
         try {
-          // Fetch the CSS text
-          const response = await fetch(fullUrl);
-          const cssText = await response.text();
+          const cssText = await readExtFile(urlPath);
           
           // Create a constructable stylesheet
           const sheet = new CSSStyleSheet();

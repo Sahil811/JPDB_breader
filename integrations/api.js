@@ -6,7 +6,7 @@ const DEFAULT_TIMEOUTS = Object.freeze({
   jpdbPage: 10000,
   immersionKit: 7000,
   kanji: 5000,
-  gemini: 15000,
+  gemini: 45000,
   media: 12000,
 });
 
@@ -536,11 +536,36 @@ export const geminiApi = {
         }),
         parseAs: "json",
         timeoutMs: DEFAULT_TIMEOUTS.gemini,
-        safeToRetry: false,
+        safeToRetry: true,
+        retries: 2,
         signal,
       }
     );
 
     return data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  },
+};
+
+export const youtubeApi = {
+  fetchWatchPage(url, signal) {
+    return request("YouTube", "watch page", url, {
+      method: "GET",
+      parseAs: "text",
+      timeoutMs: DEFAULT_TIMEOUTS.default,
+      safeToRetry: true,
+      retries: 1,
+      signal,
+    });
+  },
+
+  fetchTranscript(url, signal) {
+    return request("YouTube", "transcript", url, {
+      method: "GET",
+      parseAs: "text",
+      timeoutMs: DEFAULT_TIMEOUTS.default,
+      safeToRetry: true,
+      retries: 1,
+      signal,
+    });
   },
 };

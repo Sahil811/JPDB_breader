@@ -1,3 +1,5 @@
+import { readExtJson } from "./util.js";
+
 export class JapaneseDictionary {
   constructor() {
     this.dictionary = null;
@@ -9,13 +11,7 @@ export class JapaneseDictionary {
     if (this.dictionary) return;
 
     try {
-      const response = await fetch(
-        chrome.runtime.getURL("japanese_dictionary_hindi.json")
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      this.dictionary = await response.json();
+      this.dictionary = await readExtJson("japanese_dictionary_hindi.json");
       this.buildIndices();
     } catch (error) {
       console.error("Error loading dictionary:", error);

@@ -1,7 +1,7 @@
 import { ImmersionKit } from './immersionkit.js';
 import { ExplanationPopup } from './explanation.js';
 import { ShadowComponent } from './shadowbase.js';
-import { browser, clamp, nonNull } from "../util.js";
+import { browser, clamp, nonNull, readExtJson } from "../util.js";
 import { jsxCreateElement } from "../jsx.js";
 import {
   config,
@@ -153,10 +153,7 @@ let _kanjiMeaningsPromise = null;
 function getKanjiMeaningsPromise() {
   if (_kanjiMeaningsPromise) return _kanjiMeaningsPromise;
   _kanjiMeaningsPromise = (async () => {
-    const url = chrome.runtime.getURL("kanji_meanings.json");
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`kanji_meanings.json: HTTP ${response.status}`);
-    const data = await response.json();
+    const data = await readExtJson("kanji_meanings.json");
     // Build a Map for O(1) lookups instead of O(n) .find() on every character
     const map = new Map();
     for (const entry of data) {
