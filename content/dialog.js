@@ -2,8 +2,8 @@ import { jsxCreateElement } from '../jsx.js';
 import { assertNonNull, browser } from '../util.js';
 import { config, requestMine, requestReview } from './background_comms.js';
 import { getSentences } from './word.js';
-export class Dialog {
-    #element;
+import { ShadowComponent } from './shadowbase.js';
+export class Dialog extends ShadowComponent {
     #header;
     #sentence;
     #clickStartedOutside;
@@ -13,14 +13,15 @@ export class Dialog {
     static get() {
         if (!this.#dialog) {
             this.#dialog = new this();
-            document.body.appendChild(this.#dialog.#element);
+            document.body.appendChild(this.#dialog.element);
         }
         return this.#dialog;
     }
     constructor() {
-        this.#element = (jsxCreateElement("div", { id: 'jpdb-dialog', style: 'all:initial;display:none', onclick: event => {
+        const hostElement = jsxCreateElement("div", { id: 'jpdb-dialog', style: 'all:initial;display:none', onclick: event => {
                 event.stopPropagation();
-            } }));
+            } });
+        super(hostElement, ['/content/dialog.css']);
         const add = async (rating) => {
             assertNonNull(this.#data);
             await requestMine(this.#data.token.card, addToForq.checked, this.#sentence.innerText.trim() || undefined, translation.innerText.trim() || undefined);
@@ -29,10 +30,9 @@ export class Dialog {
             }
             this.closeModal();
         };
-        const shadow = this.#element.attachShadow({ mode: 'closed' });
         let addToForq;
         let translation;
-        shadow.append(jsxCreateElement("link", { rel: 'stylesheet', href: browser.runtime.getURL('/content/dialog.css') }), jsxCreateElement("div", { id: 'modal-wrapper', 
+        this.shadow.append(jsxCreateElement("div", { id: 'modal-wrapper', 
             // We can't use click because then mousedown inside the content and mouseup outside would count as a click
             // That means users might accidentally close the modal while dragging to select the sentence or translation.
             onmousedown: ({ target, currentTarget }) => {
@@ -83,10 +83,10 @@ export class Dialog {
         this.#sentence.innerText = getSentences(this.#data, this.#contextWidth);
     }
     showModal() {
-        this.#element.style.display = 'initial';
+        this.element.style.display = 'initial';
     }
     closeModal() {
-        this.#element.style.display = 'none';
+        this.element.style.display = 'none';
     }
     setData(data) {
         this.#data = data;

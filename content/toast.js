@@ -1,9 +1,16 @@
 import { browser } from '../util.js';
 import { jsxCreateElement } from '../jsx.js';
-const toastContainer = jsxCreateElement("div", null);
-const shadow = toastContainer.attachShadow({ mode: 'closed' });
-shadow.append(jsxCreateElement("link", { rel: 'stylesheet', href: browser.runtime.getURL('/themes.css') }), jsxCreateElement("link", { rel: 'stylesheet', href: browser.runtime.getURL('/common.css') }), jsxCreateElement("link", { rel: 'stylesheet', href: browser.runtime.getURL('/content/toast.css') }));
-document.body.append(toastContainer);
+import { ShadowComponent } from './shadowbase.js';
+
+const toastContainerElement = jsxCreateElement("div", null);
+document.body.append(toastContainerElement);
+
+const toastComponent = new ShadowComponent(toastContainerElement, [
+  '/themes.css',
+  '/common.css',
+  '/content/toast.css'
+]);
+
 export function showToast(kind, message, options = {}) {
     const toast = (jsxCreateElement("div", { class: 'toast' },
         jsxCreateElement("span", { class: 'kind' },
@@ -13,15 +20,15 @@ export function showToast(kind, message, options = {}) {
         jsxCreateElement("span", { class: 'buttons' },
             options.action ? (jsxCreateElement("button", { class: 'action', onclick: options.action }, options.actionIcon ?? 'o')) : (''),
             jsxCreateElement("button", { class: 'close', onclick: () => {
-                    shadow.removeChild(toast);
+                    toast.remove();
                     clearTimeout(timeout);
                 } }, "\u2715"))));
     const timeout = options.timeout != Infinity
         ? setTimeout(() => {
-            shadow.removeChild(toast);
+            toast.remove();
         }, options.timeout ?? 3000)
         : undefined;
-    shadow.append(toast);
+    toastComponent.append(toast);
 }
 export function showError(error) {
     console.error(error);
