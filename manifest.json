@@ -92,6 +92,7 @@
   },
   "web_accessible_resources": [
     "integrations/common.js",
+    "integrations/api.js",
     "content/background_comms.js",
     "content/content.js",
     "content/dialog.js",

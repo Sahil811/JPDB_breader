@@ -14,6 +14,11 @@ import {
 import { Dialog } from "./dialog.js";
 import { getSentences } from "./word.js";
 import { JapaneseDictionary } from "../dictionary.js";
+import {
+  geminiApi,
+  kanjiApi,
+  showRequestErrorToast,
+} from "../integrations/api.js";
 const PARTS_OF_SPEECH = {
   n: "Noun",
   pn: "Pronoun",
@@ -180,8 +185,7 @@ async function getKanjiDetails(char, kanjiMap) {
   if (local) return local;
 
   try {
-    const response = await fetch(`https://kanjiapi.dev/v1/kanji/${encodeURIComponent(char)}`);
-    return await response.json();
+    return await kanjiApi.fetchKanji(char);
   } catch {
     return null;
   }
@@ -346,6 +350,8 @@ export class Popup extends ShadowComponent {
   #vocabSection;
   #mineButtons;
   #data;
+  #renderVersion = 0;
+  #explanationRequestId = 0;
   static #popup;
   static get() {
     if (!this.#popup) {
@@ -507,10 +513,18 @@ export class Popup extends ShadowComponent {
       this.immersionKit.examples = [];
       this.immersionKit.currentIndex = 0;
       this.immersionKit.currentWord = null;
-      const success = await this.immersionKit.fetchExamples(currentWord);
-      if (!success) {
-        const { showToast } = await import(browser.runtime.getURL("/content/toast.js"));
-        showToast('Info', 'No examples found or ImmersionKit API is currently offline.', { timeout: 3000 });
+      const result = await this.immersionKit.fetchExamples(currentWord);
+      if (result?.stale) return;
+      if (!result?.found) {
+        if (result?.error) {
+          await showRequestErrorToast(result.error, {
+            message: "ImmersionKit is currently unavailable. Please try again.",
+            timeout: 3500,
+          });
+        } else {
+          const { showToast } = await import(browser.runtime.getURL("/content/toast.js"));
+          showToast("Info", "No examples found for this word.", { timeout: 3000 });
+        }
         return;
       }
       this.immersionKit.lastWord = currentWord;
@@ -558,9 +572,10 @@ export class Popup extends ShadowComponent {
     this.#outerStyle.pointerEvents = "";
     this.#outerStyle.userSelect = "";
   }
-  async render() {
+  async render(renderVersion = this.#renderVersion) {
     if (this.#data === undefined) return;
-    const card = this.#data.token.card;
+    const data = this.#data;
+    const card = data.token.card;
     const url = `https://jpdb.io/vocabulary/${card.vid}/${encodeURIComponent(
       card.spelling
     )}/${encodeURIComponent(card.reading)}`;
@@ -569,6 +584,7 @@ export class Popup extends ShadowComponent {
 
     // Get character details — kanjiMap is loaded lazily and cached
     const kanjiMap = await getKanjiMeaningsPromise();
+    if (renderVersion !== this.#renderVersion || this.#data !== data) return;
     let characterDetails = (
       await Promise.all(
         [...card.spelling].filter(isKanji).map(async (char) => {
@@ -583,6 +599,7 @@ export class Popup extends ShadowComponent {
         })
       )
     ).filter(Boolean);
+    if (renderVersion !== this.#renderVersion || this.#data !== data) return;
 
     characterDetails = characterDetails.length ? characterDetails : null;
 
@@ -590,8 +607,9 @@ export class Popup extends ShadowComponent {
     if (config.showHindi) {
       if (!dictionaryLoaded) {
         await loadDictionary();
+        if (renderVersion !== this.#renderVersion || this.#data !== data) return;
       }
-      hindiMeaning = dictionary.search(this.#data.token.card.spelling);
+      hindiMeaning = dictionary.search(data.token.card.spelling);
     }
 
     const MEANINGS_PER_SET = 3;
@@ -703,6 +721,7 @@ export class Popup extends ShadowComponent {
         lastPOS = meaning.partOfSpeech;
       }
     }
+    if (renderVersion !== this.#renderVersion || this.#data !== data) return;
     this.#vocabSection.replaceChildren(
       jsxCreateElement(
         "div",
@@ -864,9 +883,9 @@ export class Popup extends ShadowComponent {
             ? undefined
             : () =>
                 requestMine(
-                  this.#data.token.card,
+                  data.token.card,
                   config.forqOnMine,
-                  getSentences(this.#data, config.contextWidth).trim() ||
+                  getSentences(data, config.contextWidth).trim() ||
                     undefined,
                   undefined
                 ),
@@ -879,7 +898,7 @@ export class Popup extends ShadowComponent {
           class: "edit-add-review",
           onclick: this.#demoMode
             ? undefined
-            : () => Dialog.get().showForWord(this.#data),
+            : () => Dialog.get().showForWord(data),
         },
         "Edit, Add and Review..."
       ),
@@ -927,7 +946,8 @@ export class Popup extends ShadowComponent {
   }
   setData(data) {
     this.#data = data;
-    this.render();
+    const renderVersion = ++this.#renderVersion;
+    void this.render(renderVersion);
   }
   containsMouse(event) {
     const targetElement = event.target;
@@ -1018,7 +1038,10 @@ export class Popup extends ShadowComponent {
 
   async explainWord(word, meanings) {
     if (!config.geminiApiKey) {
-      alert("Please set your Gemini API key in the extension settings first.");
+      const { showToast } = await import(browser.runtime.getURL("/content/toast.js"));
+      showToast("Info", "Please set your Gemini API key in the extension settings first.", {
+        timeout: 3500,
+      });
       return;
     }
 
@@ -1029,6 +1052,7 @@ export class Popup extends ShadowComponent {
 
     // Show loading state
     window.explanationPopup.showLoading();
+    const requestId = ++this.#explanationRequestId;
 
     const definition = meanings
       .map((meaning) => meaning.glosses.join("; "))
@@ -1052,35 +1076,20 @@ Apply these principles naturally where they fit:
 End with one short sentence that captures the core meaning plainly.`;
 
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${config.geminiApiKey}`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            contents: [
-              {
-                role: "user",
-                parts: [{ text: prompt }],
-              },
-            ],
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const explanation = data.candidates[0].content.parts[0].text;
+      const explanation = await geminiApi.explainWord({
+        apiKey: config.geminiApiKey,
+        prompt,
+      });
+      if (requestId !== this.#explanationRequestId) return;
       window.explanationPopup.show(explanation);
     } catch (error) {
+      if (requestId !== this.#explanationRequestId) return;
       console.error("Error fetching explanation:", error);
-      alert(
-        "Failed to get explanation. Please check your API key and try again."
-      );
+      await showRequestErrorToast(error, {
+        message: "Failed to get explanation. Please check your API key and try again.",
+      });
       window.explanationPopup.hide();
     }
   }
 }
-
+

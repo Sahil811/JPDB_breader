@@ -1,4 +1,5 @@
-import { jsxCreateElement } from '../jsx.js';
+import { jsxCreateElement } from "../jsx.js";
+import { immersionKitApi, isAbortError } from "../integrations/api.js";
 
 export class ImmersionKit {
   constructor(vocabSection) {
@@ -7,159 +8,120 @@ export class ImmersionKit {
     this.isExpanded = false;
     this.lastWord = null;
     this.vocabSection = vocabSection;
-    // Flag to indicate if the Play-All sequence is active
     this.isPlayingAll = false;
-    // For audio playback via playAudio method
     this.currentAudio = null;
-    this.currentRequest = null; // Track current API request
-    this.currentWord = null; // Track current word being displayed
+    this.currentController = null;
+    this.currentRequestId = 0;
+    this.currentWord = null;
     this.lastPlayId = 0;
     this.isLoopingAudio = false;
+    this.deckTitleMap = null;
   }
 
-  // Cancel any pending request
   cancelCurrentRequest() {
-    if (this.currentRequest) {
-      this.currentRequest.aborted = true;
-      this.currentRequest = null;
+    this.currentRequestId += 1;
+    if (this.currentController) {
+      this.currentController.abort();
+      this.currentController = null;
     }
   }
 
-  async tryFetch(word, useFullParams = false) {
-    const baseUrl = `https://api.immersionkit.com/look_up_dictionary?keyword=${encodeURIComponent(
-      word
-    )}&sort=shortness`;
-    const fullUrl = `${baseUrl}&tags=&jlpt=&wk=&decks=`;
+  _isCurrentRequest(requestId) {
+    return requestId === this.currentRequestId;
+  }
 
-    const response = await fetch(useFullParams ? fullUrl : baseUrl);
-    const data = await response.json();
+  async _ensureMetadata(signal) {
+    if (this.deckTitleMap) return this.deckTitleMap;
 
-    if (data?.data?.[0]?.examples?.length > 0) {
-      this.examples = data.data[0].examples;
-      this.currentIndex = 0;
-      return true;
+    try {
+      const json = await immersionKitApi.fetchMetadata(signal);
+      this.deckTitleMap = json?.data || {};
+    } catch (error) {
+      if (isAbortError(error)) throw error;
+      this.deckTitleMap = {};
     }
 
-    return false;
+    return this.deckTitleMap;
+  }
+
+  _mapExamples(rawExamples) {
+    const linodeBaseUrl = "https://us-southeast-1.linodeobjects.com/immersionkit/media/";
+
+    return rawExamples.map((example) => {
+      const slug = example.title || "";
+      const prettyTitle = this.deckTitleMap?.[slug]?.title || slug;
+      const mediaType = example.id ? example.id.split("_")[0] : "";
+      const basePath = example.image && mediaType && prettyTitle ? `${linodeBaseUrl}${mediaType}/${prettyTitle}/media/` : "";
+
+      return {
+        ...example,
+        image_url: example.image && basePath ? `${basePath}${example.image}` : "",
+        sound_url: example.sound && basePath ? `${basePath}${example.sound}` : "",
+      };
+    });
+  }
+
+  async tryFetchWithAbort(word, signal, requestId) {
+    if (signal.aborted || !this._isCurrentRequest(requestId)) {
+      return { found: false, stale: true };
+    }
+
+    await this._ensureMetadata(signal);
+
+    const data = await immersionKitApi.search(word, signal);
+    if (signal.aborted || !this._isCurrentRequest(requestId)) {
+      return { found: false, stale: true };
+    }
+
+    const rawExamples = data?.examples || [];
+    if (rawExamples.length === 0) {
+      return { found: false };
+    }
+
+    this.examples = this._mapExamples(rawExamples);
+    this.currentIndex = 0;
+    return { found: true };
   }
 
   async fetchExamples(word) {
-    // Cancel any pending request
     this.cancelCurrentRequest();
 
-    try {
-      this.currentRequest = { aborted: false };
-      const thisRequest = this.currentRequest;
-      this.currentWord = word;
+    const controller = new AbortController();
+    this.currentController = controller;
+    const requestId = ++this.currentRequestId;
+    this.currentWord = word;
 
-      if (
-        (await this.tryFetchWithAbort(word, false, thisRequest)) ||
-        (await this.tryFetchWithAbort(word, true, thisRequest))
-      ) {
-        return !thisRequest.aborted;
-      }
+    try {
+      const primaryResult = await this.tryFetchWithAbort(word, controller.signal, requestId);
+      if (primaryResult.found || primaryResult.stale) return primaryResult;
 
       const particles = ["を", "に", "が", "へ", "と", "で"];
       for (const particle of particles) {
-        if (word.includes(particle) && !thisRequest.aborted) {
-          const [before, after] = word.split(particle);
+        if (!word.includes(particle)) continue;
 
-          if (
-            (before &&
-              (await this.tryFetchWithAbort(before, false, thisRequest))) ||
-            (await this.tryFetchWithAbort(before, true, thisRequest))
-          ) {
-            return !thisRequest.aborted;
-          }
-
-          if (
-            (after &&
-              (await this.tryFetchWithAbort(after, false, thisRequest))) ||
-            (await this.tryFetchWithAbort(after, true, thisRequest))
-          ) {
-            return !thisRequest.aborted;
-          }
+        const [before, after] = word.split(particle);
+        for (const candidate of [before, after].filter(Boolean)) {
+          const result = await this.tryFetchWithAbort(candidate, controller.signal, requestId);
+          if (result.found || result.stale) return result;
         }
       }
 
-      return false;
+      return { found: false };
     } catch (error) {
-      return false;
+      if (isAbortError(error)) {
+        return { found: false, stale: true };
+      }
+
+      return { found: false, error };
     } finally {
-      if (this.currentRequest && !this.currentRequest.aborted) {
-        this.currentRequest = null;
+      if (this.currentController === controller) {
+        this.currentController = null;
       }
     }
   }
 
-  async _ensureMetadata() {
-    if (this.deckTitleMap) return;
-    try {
-      const response = await fetch("https://apiv2.immersionkit.com/index_meta");
-      const json = await response.json();
-      this.deckTitleMap = json.data || {};
-    } catch (e) {
-      this.deckTitleMap = {};
-    }
-  }
-
-  async tryFetchWithAbort(word, useFullParams, request) {
-    if (request.aborted) return false;
-
-    // v2 API ignores useFullParams legacy flags
-    const url = `https://apiv2.immersionkit.com/search?q=${encodeURIComponent(word)}&exactMatch=false&limit=50&sort=sentence_length:asc`;
-
-    try {
-      await this._ensureMetadata();
-      const response = await fetch(url);
-      if (request.aborted) return false;
-
-      const data = await response.json();
-      if (request.aborted) return false;
-
-      const rawExamples = data.examples || [];
-      const count = rawExamples.length;
-
-      if (count > 0) {
-        const linodeBaseUrl = 'https://us-southeast-1.linodeobjects.com/immersionkit/media/';
-        this.examples = rawExamples.map(ex => {
-            const slug = ex.title || '';
-            const prettyTitle = this.deckTitleMap?.[slug]?.title || slug;
-            const mediaType = ex.id ? ex.id.split('_')[0] : '';
-            const fullImageUrl = ex.image && mediaType && prettyTitle ? `${linodeBaseUrl}${mediaType}/${prettyTitle}/media/${ex.image}` : '';
-            const fullSoundUrl = ex.sound && mediaType && prettyTitle ? `${linodeBaseUrl}${mediaType}/${prettyTitle}/media/${ex.sound}` : '';
-            return {
-              ...ex,
-              image_url: fullImageUrl,
-              sound_url: fullSoundUrl
-            };
-        });
-        this.currentIndex = 0;
-        return true;
-      }
-      return false;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  // Updated navigate() method for cyclic navigation:
-  // It wraps the current index using modular arithmetic.
-  navigate(direction) {
-    this.currentIndex =
-      (this.currentIndex + direction + this.examples.length) %
-      this.examples.length;
-    this.updateDisplay();
-    const example = this.examples[this.currentIndex];
-    if (example?.sound_url) {
-      this.playAudio(example.sound_url);
-    }
-  }
-
-  // Shared helper: fetch + decode audio from a URL, return a BufferSource
   async _createBufferSource(url) {
-    const response = await fetch(url);
-    const arrayBuffer = await response.arrayBuffer();
+    const arrayBuffer = await immersionKitApi.fetchMedia(url);
     if (!this.audioContext) {
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
@@ -170,67 +132,80 @@ export class ImmersionKit {
     return source;
   }
 
-  // Stop currently playing audio
   _stopCurrent() {
     if (this.currentAudio) {
-      try { this.currentAudio.stop(); } catch {}
+      try {
+        this.currentAudio.stop();
+      } catch {}
       this.currentAudio = null;
     }
   }
 
-  // Play audio (fire-and-forget)
   async playAudio(url) {
     if (!url) return;
+
     const playId = ++this.lastPlayId;
     this._stopCurrent();
+
     try {
-      if (this.audioContext && this.audioContext.state === 'suspended') {
+      if (this.audioContext && this.audioContext.state === "suspended") {
         await this.audioContext.resume();
       }
+
       const source = await this._createBufferSource(url);
-      if (playId !== this.lastPlayId) return; // Prevent overlapping audio on rapid clicks
-      
+      if (playId !== this.lastPlayId) return;
+
       this.currentAudio = source;
-      source.onended = () => { 
+      source.onended = () => {
         if (this.currentAudio === source) this.currentAudio = null;
         if (this.isLoopingAudio) {
-           setTimeout(() => {
-             if (this.isLoopingAudio && playId === this.lastPlayId) {
-                this.playAudio(url);
-             }
-           }, 150);
+          setTimeout(() => {
+            if (this.isLoopingAudio && playId === this.lastPlayId) {
+              this.playAudio(url);
+            }
+          }, 150);
         }
       };
       source.start();
-    } catch (err) {}
+    } catch {}
   }
 
-  // Play audio and wait for it to finish (used by playAllSequence)
   async playAudioPromise(url) {
     if (!url) return;
+
     const playId = ++this.lastPlayId;
     this._stopCurrent();
+
     try {
       const source = await this._createBufferSource(url);
       if (playId !== this.lastPlayId) return;
-      return new Promise((resolve) => {
+
+      return await new Promise((resolve) => {
         this.currentAudio = source;
-        source.onended = () => { 
+        source.onended = () => {
           if (this.currentAudio === source) this.currentAudio = null;
-          resolve(); 
+          resolve();
         };
         source.start();
       });
-    } catch (err) {
-      return Promise.resolve(); // Continue sequence on error
+    } catch {
+      return Promise.resolve();
     }
   }
 
-  // New method: Toggle Loop mode
+  navigate(direction) {
+    this.currentIndex = (this.currentIndex + direction + this.examples.length) % this.examples.length;
+    this.updateDisplay();
+    const example = this.examples[this.currentIndex];
+    if (example?.sound_url) {
+      this.playAudio(example.sound_url);
+    }
+  }
+
   toggleLoop() {
     this.isLoopingAudio = !this.isLoopingAudio;
     if (this.isLoopingAudio) {
-      this.isPlayingAll = false; // Disable play all
+      this.isPlayingAll = false;
       const example = this.examples[this.currentIndex];
       if (example?.sound_url) {
         this.playAudio(example.sound_url);
@@ -241,28 +216,25 @@ export class ImmersionKit {
     this.updateDisplay();
   }
 
-  // New method: plays all examples sequentially, pausing briefly between them.
   async playAllSequence() {
     if (!this.examples.length) return;
+
     this.isPlayingAll = true;
-    this.isLoopingAudio = false; // Disable single loop
+    this.isLoopingAudio = false;
     this.updateDisplay();
 
     while (this.isPlayingAll) {
       const example = this.examples[this.currentIndex];
       if (example?.sound_url) {
-        // Wait for audio
         await this.playAudioPromise(example.sound_url);
       } else {
-        // If no audio, wait 1 second
-        await new Promise((res) => setTimeout(res, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
-      // Brief pause between examples (e.g. 500ms)
-      await new Promise((res) => setTimeout(res, 400));
-      
+
+      await new Promise((resolve) => setTimeout(resolve, 400));
       if (!this.isPlayingAll) break;
 
-      this.currentIndex++;
+      this.currentIndex += 1;
       if (this.currentIndex >= this.examples.length) {
         this.currentIndex = 0;
         this.isPlayingAll = false;
@@ -270,12 +242,11 @@ export class ImmersionKit {
       }
       this.updateDisplay();
     }
-    
+
     this.isPlayingAll = false;
     this.updateDisplay();
   }
 
-  // Display update method
   updateDisplay() {
     const example = this.examples[this.currentIndex];
     if (!example) return;
@@ -291,9 +262,9 @@ export class ImmersionKit {
     }
   }
 
-  // Render method: existing buttons remain unchanged; a new "Play All" button is added in the same row as the navigation buttons.
   renderExample() {
     if (!this.examples.length) return null;
+
     const example = this.examples[this.currentIndex];
     if (!example) return null;
 
@@ -303,7 +274,6 @@ export class ImmersionKit {
       jsxCreateElement(
         "div",
         { class: "example-content" },
-        // Navigation row with Prev, Index, Next, Loop, and Play-All buttons
         jsxCreateElement(
           "div",
           {
@@ -314,22 +284,26 @@ export class ImmersionKit {
             "button",
             {
               class: "ik-btn",
-              onclick: (e) => { e.preventDefault(); e.stopPropagation(); this.navigate(-1); },
+              onclick: (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.navigate(-1);
+              },
             },
-            "←"
+            "◀"
           ),
-          jsxCreateElement(
-            "span",
-            { class: "example-counter" },
-            `${this.currentIndex + 1}/${this.examples.length}`
-          ),
+          jsxCreateElement("span", { class: "example-counter" }, `${this.currentIndex + 1}/${this.examples.length}`),
           jsxCreateElement(
             "button",
             {
               class: "ik-btn",
-              onclick: (e) => { e.preventDefault(); e.stopPropagation(); this.navigate(1); },
+              onclick: (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.navigate(1);
+              },
             },
-            "→"
+            "▶"
           ),
           jsxCreateElement(
             "button",
@@ -337,7 +311,11 @@ export class ImmersionKit {
               class: `ik-btn ${this.isLoopingAudio ? "is-active" : ""}`,
               style: "margin-left: auto; cursor: pointer;",
               title: "Loop current audio",
-              onclick: (e) => { e.preventDefault(); e.stopPropagation(); this.toggleLoop(); },
+              onclick: (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleLoop();
+              },
             },
             "🔁"
           ),
@@ -347,12 +325,19 @@ export class ImmersionKit {
               class: `ik-btn ${this.isPlayingAll ? "is-active" : ""}`,
               style: "cursor: pointer;",
               title: "Play all examples",
-              onclick: (e) => { e.preventDefault(); e.stopPropagation(); this.isPlayingAll ? (this.isPlayingAll = false) : this.playAllSequence(); },
+              onclick: (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (this.isPlayingAll) {
+                  this.isPlayingAll = false;
+                } else {
+                  this.playAllSequence();
+                }
+              },
             },
-            this.isPlayingAll ? "⏹️" : "▶️"
+            this.isPlayingAll ? "Stop" : "Play All"
           )
         ),
-        // Image Container
         jsxCreateElement(
           "div",
           { class: "image-container" },
@@ -361,24 +346,29 @@ export class ImmersionKit {
               src: example.image_url,
               alt: "Example image",
               class: "example-image",
-              onclick: (e) => { e.preventDefault(); e.stopPropagation(); this.playAudio(example.sound_url); },
+              onclick: (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.playAudio(example.sound_url);
+              },
             }),
           jsxCreateElement("div", { class: "image-gradient-overlay" }),
           jsxCreateElement(
             "button",
             {
               class: "ik-btn-overlay",
-              onclick: (e) => { e.preventDefault(); e.stopPropagation(); this.playAudio(example.sound_url); },
+              onclick: (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.playAudio(example.sound_url);
+              },
             },
             "🔊"
           )
         ),
-        // Japanese sentence
         jsxCreateElement("div", { class: "example-sentence" }, example.sentence),
-        // English translation
         jsxCreateElement("div", { class: "example-translation" }, example.translation)
       )
     );
   }
 }
-

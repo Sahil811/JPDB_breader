@@ -616,7 +616,7 @@
             opacity: 1;
             bottom: 140%;
         }
-    \`;
+    `;
 
     // ===== Utility Functions =====
     // Debounce function to prevent rapid-fire clicks
@@ -653,6 +653,187 @@
             return defaultValue;
         }
     }
+
+    const QUIZ_SELECTORS = Object.freeze({
+        vocabularyList: ['.vocabulary-list'],
+        entry: ['.entry'],
+        spelling: ['.vocabulary-spelling'],
+        wordLink: ['a'],
+        readingRuby: ['rt'],
+        settingsPanel: ['#quiz-settings-panel'],
+        quizOption: ['.quiz-option'],
+        nextButton: ['.next-btn'],
+        restartButton: ['.restart-btn']
+    });
+
+    function queryFirst(root, selectors) {
+        for (const selector of selectors) {
+            const match = root.querySelector(selector);
+            if (match) return match;
+        }
+        return null;
+    }
+
+    function queryAll(root, selectors) {
+        const results = [];
+        for (const selector of selectors) {
+            results.push(...root.querySelectorAll(selector));
+        }
+        return results;
+    }
+
+    const jpdbVocabularyPage = {
+        findVocabularyList(root = document) {
+            return queryFirst(root, QUIZ_SELECTORS.vocabularyList);
+        },
+
+        getEntries(vocabList) {
+            return queryAll(vocabList, QUIZ_SELECTORS.entry);
+        },
+
+        extractJapaneseWord(wordLink) {
+            const clone = wordLink.cloneNode(true);
+            queryAll(clone, QUIZ_SELECTORS.readingRuby).forEach(rt => rt.remove());
+            return clone.textContent.trim();
+        },
+
+        extractMeaning(entry, spellingDiv) {
+            let meaning = spellingDiv.nextElementSibling?.textContent.trim() || '';
+            if (meaning) return meaning;
+
+            const possibleMeaningDivs = entry.querySelectorAll('div');
+            for (const element of possibleMeaningDivs) {
+                const text = element.textContent.trim();
+                if (text && text.length > 3 && !text.includes('Top') && !text.includes('New') && isNaN(text)) {
+                    return text;
+                }
+            }
+
+            return '';
+        },
+
+        extractEntry(entry) {
+            try {
+                const spellingDiv = queryFirst(entry, QUIZ_SELECTORS.spelling);
+                if (!spellingDiv) return null;
+
+                const wordLink = queryFirst(spellingDiv, QUIZ_SELECTORS.wordLink);
+                if (!wordLink) return null;
+
+                const japaneseWord = this.extractJapaneseWord(wordLink);
+                if (!japaneseWord) return null;
+
+                const reading = queryAll(wordLink, QUIZ_SELECTORS.readingRuby)
+                    .map(rt => rt.textContent.trim())
+                    .join('');
+
+                return {
+                    word: japaneseWord,
+                    meaning: this.extractMeaning(entry, spellingDiv) || 'Unknown meaning',
+                    reading
+                };
+            } catch (error) {
+                console.error('Error extracting vocabulary:', error);
+                return null;
+            }
+        }
+    };
+
+    function createQuizAudioService() {
+        let audioContext = null;
+        let currentSource = null;
+
+        function stopCurrent() {
+            if (currentSource) {
+                try {
+                    currentSource.stop();
+                } catch (error) {
+                    console.warn('Failed to stop quiz audio source:', error);
+                }
+                currentSource = null;
+            }
+        }
+
+        function ensureAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioContext;
+        }
+
+        function requestGM({ method, url, responseType }) {
+            return new Promise((resolve, reject) => {
+                GM_xmlhttpRequest({
+                    method,
+                    url,
+                    responseType,
+                    onload: (response) => {
+                        if (response.status >= 200 && response.status < 300) {
+                            resolve(response.response);
+                        } else {
+                            reject(new Error(`Request failed: ${response.status} ${response.statusText}`));
+                        }
+                    },
+                    onerror: (error) => reject(error)
+                });
+            });
+        }
+
+        return {
+            async play(word, reading) {
+                if (!word && !reading) {
+                    throw new Error('No word or reading provided');
+                }
+
+                const params = new URLSearchParams();
+                if (word) params.set('term', word);
+                if (reading) params.set('reading', reading);
+
+                const response = await requestGM({
+                    method: 'GET',
+                    url: `http://localhost:5050/?${params.toString()}`,
+                    responseType: 'json'
+                });
+
+                const audioSources = response?.audioSources ?? [];
+                if (audioSources.length === 0) {
+                    throw new Error('No audio sources found');
+                }
+
+                const context = ensureAudioContext();
+                if (context.state === 'suspended') {
+                    await context.resume();
+                }
+
+                for (const audioSource of audioSources) {
+                    try {
+                        const audioData = await requestGM({
+                            method: 'GET',
+                            url: audioSource.url,
+                            responseType: 'arraybuffer'
+                        });
+                        const audioBuffer = await context.decodeAudioData(audioData);
+                        const source = context.createBufferSource();
+                        source.buffer = audioBuffer;
+                        source.connect(context.destination);
+                        stopCurrent();
+                        currentSource = source;
+                        source.onended = () => {
+                            if (currentSource === source) currentSource = null;
+                        };
+                        source.start(0);
+                        return;
+                    } catch (error) {
+                        console.warn(`Failed to play audio from ${audioSource.name}:`, error);
+                    }
+                }
+
+                throw new Error('All audio sources failed to play');
+            }
+        };
+    }
+
+    const quizAudioService = createQuizAudioService();
 
     // ===== Data Model =====
     class VocabularyQuiz {
@@ -901,6 +1082,7 @@
             this.container = null;
             this.contentArea = null;
             this.settingsVisible = false;
+            this.audioService = quizAudioService;
 
             // Track if quiz is fully initialized
             this.isInitialized = false;
@@ -968,7 +1150,7 @@
             // For options (1-4 keys)
             const keyNum = parseInt(event.key);
             if (!isNaN(keyNum) && keyNum >= 1 && keyNum <= 4 && !this.quiz.isQuizComplete()) {
-                const options = this.contentArea.querySelectorAll('.quiz-option');
+                const options = queryAll(this.contentArea, QUIZ_SELECTORS.quizOption);
                 if (options.length >= keyNum && !options[keyNum - 1].disabled) {
                     event.preventDefault();
                     options[keyNum - 1].click();
@@ -978,7 +1160,7 @@
 
             // For "Next" button (Enter or Space)
             if ((event.key === 'Enter' || event.key === ' ') && !this.quiz.isQuizComplete()) {
-                const nextButton = this.contentArea.querySelector('.next-btn');
+                const nextButton = queryFirst(this.contentArea, QUIZ_SELECTORS.nextButton);
                 if (nextButton) {
                     event.preventDefault();
                     nextButton.click();
@@ -988,7 +1170,7 @@
 
             // For "Restart" button (R key)
             if (event.key.toLowerCase() === 'r' && this.quiz.isQuizComplete()) {
-                const restartButton = this.contentArea.querySelector('.restart-btn');
+                const restartButton = queryFirst(this.contentArea, QUIZ_SELECTORS.restartButton);
                 if (restartButton) {
                     event.preventDefault();
                     restartButton.click();
@@ -1187,7 +1369,7 @@
         }
 
         toggleSettings() {
-            const settingsPanel = document.getElementById('quiz-settings-panel');
+            const settingsPanel = queryFirst(document, QUIZ_SELECTORS.settingsPanel);
             this.settingsVisible = !this.settingsVisible;
             settingsPanel.style.display = this.settingsVisible ? 'block' : 'none';
         }
@@ -1206,68 +1388,7 @@
 
         async playAudio(word, reading) {
             try {
-                if (!word && !reading) {
-                    throw new Error('No word or reading provided');
-                }
-
-                // Create a new audio context
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const source = audioContext.createBufferSource();
-                
-                // First fetch the audio source list
-                const audioSources = await new Promise((resolve, reject) => {
-                    const params = new URLSearchParams();
-                    if (word) params.set('term', word);
-                    if (reading) params.set('reading', reading);
-                    
-                    GM_xmlhttpRequest({
-                        method: 'GET',
-                        url: `http://localhost:5050/?${params.toString()}`,
-                        responseType: 'json',
-                        onload: (response) => {
-                            if (response.status === 200 && response.response.audioSources?.length > 0) {
-                                resolve(response.response.audioSources);
-                            } else {
-                                reject(new Error('No audio sources found'));
-                            }
-                        },
-                        onerror: (error) => reject(error)
-                    });
-                });
-
-                // Try each audio source until one works
-                for (const audioSource of audioSources) {
-                    try {
-                        const audioData = await new Promise((resolve, reject) => {
-                            GM_xmlhttpRequest({
-                                method: 'GET',
-                                url: audioSource.url,
-                                responseType: 'arraybuffer',
-                                onload: (response) => {
-                                    if (response.status === 200) {
-                                        resolve(response.response);
-                                    } else {
-                                        reject(new Error(`Failed to fetch audio: ${response.statusText}`));
-                                    }
-                                },
-                                onerror: (error) => reject(error)
-                            });
-                        });
-
-                        // Decode and play the audio
-                        const audioBuffer = await audioContext.decodeAudioData(audioData);
-                        source.buffer = audioBuffer;
-                        source.connect(audioContext.destination);
-                        source.start(0);
-                        return; // Success - exit the function
-                    } catch (error) {
-                        console.warn(`Failed to play audio from ${audioSource.name}:`, error);
-                        // Try the next source
-                    }
-                }
-
-                throw new Error('All audio sources failed to play');
-                
+                await this.audioService.play(word, reading);
             } catch (error) {
                 console.error('Error playing audio:', error);
                 alert('Failed to play audio. Please ensure the audio server is running on localhost:5050');
@@ -1276,7 +1397,6 @@
 
         renderQuestion() {
             const currentVocab = this.quiz.getCurrentVocab();
-            const reading = currentVocab.reading || ''; // Get reading if available
 
             // Progress bar
             const progressBarContainer = document.createElement('div');
@@ -1316,13 +1436,9 @@
                     playButton.className = 'play-audio-btn';
                     playButton.innerHTML = '▶';
                     playButton.title = 'Play pronunciation';
-                    playButton.addEventListener('click', (e) => {
+                    playButton.addEventListener('click', async (e) => {
                         e.stopPropagation();
-                        const url = `http://localhost:5050/?term=${encodeURIComponent(currentVocab.word)}&reading=${encodeURIComponent(currentVocab.reading || '')}`;
-                        const audio = new Audio(url);
-                        audio.play().catch(() => {
-                            alert('Failed to play audio. Please ensure the audio server is running.');
-                        });
+                        await this.playAudio(currentVocab.word, currentVocab.reading || '');
                     });
                     questionContainer.appendChild(playButton);
                 }
@@ -1358,23 +1474,20 @@
                     playButton.innerHTML = '▶';
                     playButton.title = 'Play pronunciation';
                     playButton.style.marginLeft = 'auto';
-                    playButton.addEventListener('click', (e) => {
+                    playButton.addEventListener('click', async (e) => {
                         e.stopPropagation();
                         const vocab = this.quiz.shuffledData.find(v => v.word === option || v.meaning === option);
                         if (vocab) {
-                            const url = `http://localhost:5050/?term=${encodeURIComponent(vocab.word)}&reading=${encodeURIComponent(vocab.reading || '')}`;
-                            const audio = new Audio(url);
-                            audio.play().catch(() => {
-                                alert('Failed to play audio. Please ensure the audio server is running.');
-                            });
+                            await this.playAudio(vocab.word, vocab.reading || '');
                         }
                     });
                     
                     optionContainer.appendChild(textSpan);
                     optionContainer.appendChild(playButton);
                     optionButton.appendChild(optionContainer);
+                } else {
+                    optionButton.textContent = option;
                 }
-                optionButton.textContent = option;
                 optionButton.addEventListener('click', () => {
                     this.debouncedOptionClick(optionButton, option, optionsContainer);
                 });
@@ -1395,7 +1508,7 @@
                                   currentVocab.meaning : currentVocab.word;
 
             // Disable all options
-            const allOptions = optionsContainer.querySelectorAll('.quiz-option');
+            const allOptions = queryAll(optionsContainer, QUIZ_SELECTORS.quizOption);
             allOptions.forEach(btn => btn.disabled = true);
 
             if (selectedOption === correctOption) {
@@ -1501,60 +1614,21 @@
     // ===== Helper Functions =====
     // Extract the full Japanese word from a word link by removing any <rt> elements
     function extractJapaneseWord(wordLink) {
-        const clone = wordLink.cloneNode(true);
-        clone.querySelectorAll('rt').forEach(rt => rt.remove());
-        return clone.textContent.trim();
+        return jpdbVocabularyPage.extractJapaneseWord(wordLink);
     }
 
     // Extract vocabulary data from the JPDB page
     function extractVocabularyData(vocabList) {
-        const vocabEntries = vocabList.querySelectorAll('.entry');
-        return Array.from(vocabEntries)
-            .map(entry => {
-                try {
-                    const spellingDiv = entry.querySelector('.vocabulary-spelling');
-                    if (!spellingDiv) return null;
-                    const wordLink = spellingDiv.querySelector('a');
-                    if (!wordLink) return null;
-                    const japaneseWord = extractJapaneseWord(wordLink);
-                    if (!japaneseWord) return null;
-                    let meaning = '';
-                    if (spellingDiv.nextElementSibling) {
-                        meaning = spellingDiv.nextElementSibling.textContent.trim();
-                    }
-                    if (!meaning) {
-                        const possibleMeaningDivs = entry.querySelectorAll('div');
-                        for (let i = 0; i < possibleMeaningDivs.length; i++) {
-                            const text = possibleMeaningDivs[i].textContent.trim();
-                            if (text && text.length > 3 && !text.includes('Top') &&
-                                !text.includes('New') && isNaN(text)) {
-                                meaning = text;
-                                break;
-                            }
-                        }
-                    }
-                    // Extract reading from rt elements
-                    const reading = Array.from(wordLink.querySelectorAll('rt'))
-                        .map(rt => rt.textContent.trim())
-                        .join('');
-
-                    return {
-                        word: japaneseWord,
-                        meaning: meaning || 'Unknown meaning',
-                        reading: reading
-                    };
-                } catch (error) {
-                    console.error('Error extracting vocabulary:', error);
-                    return null;
-                }
-            })
+        return jpdbVocabularyPage.getEntries(vocabList)
+            .map(entry => jpdbVocabularyPage.extractEntry(entry))
             .filter(item => item !== null);
     }
 
     // Initialize the quiz button on the page
     function initQuizButton() {
-        const vocabList = document.querySelector('.vocabulary-list');
+        const vocabList = jpdbVocabularyPage.findVocabularyList();
         if (!vocabList) return;
+        if (document.querySelector('.quiz-start-btn')) return;
         const quizButton = document.createElement('button');
         quizButton.textContent = 'Start Vocabulary Quiz';
         quizButton.className = 'quiz-start-btn';

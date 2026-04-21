@@ -1,5 +1,6 @@
 import { loadConfig } from './config.js';
 import { browser, isChrome, sleep } from '../util.js';
+import { addErrorContext, jpdbApi } from '../integrations/api.js';
 import * as backend from './backend.js';
 export let config = loadConfig();
 const pendingAPICalls = [];
@@ -189,22 +190,32 @@ const messageHandlers = {
     },
     async fetchAudioHash(request, port) {
         const { vid, spelling } = request;
-        const res = await fetch(
-            `https://jpdb.io/vocabulary/${vid}/${encodeURIComponent(spelling)}`,
-            { credentials: 'include' }
-        );
-        if (!res.ok) { postResponse(port, request, { hash: null }); return; }
-        const html = await res.text();
+        let html;
+        try {
+            html = await jpdbApi.fetchVocabularyPage({ vid, spelling });
+        }
+        catch (error) {
+            if (error.status === 404) {
+                postResponse(port, request, { hash: null });
+                return;
+            }
+            throw addErrorContext(error, `while fetching audio hash for word ${vid}`);
+        }
         const match = html.match(/data-audio="([^"]+)"/);
         postResponse(port, request, { hash: match?.[1] ?? null });
     },
     async fetchAudioBytes(request, port) {
-        const res = await fetch(
-            `https://jpdb.io/static/v/${request.hash}`,
-            { headers: { 'X-Access': "please don't steal these files" } }
-        );
-        if (!res.ok) { postResponse(port, request, { bytes: null }); return; }
-        const buf = await res.arrayBuffer();
+        let buf;
+        try {
+            buf = await jpdbApi.fetchAudioBytes({ hash: request.hash });
+        }
+        catch (error) {
+            if (error.status === 404) {
+                postResponse(port, request, { bytes: null });
+                return;
+            }
+            throw addErrorContext(error, `while fetching audio bytes for hash ${request.hash}`);
+        }
         postResponse(port, request, { bytes: Array.from(new Uint8Array(buf)) });
     },
 };
