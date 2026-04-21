@@ -77,7 +77,7 @@ export function renderPitch(reading, pitch) {
     let lastBorder = 0;
     const borders = Array.from(
       pitch.matchAll(/L(?=H)|H(?=L)/g),
-      (x) => nonNull(x.index) + 1
+      (x) => nonNull(x.index) + 1,
     );
     let low = pitch[0] === "L";
 
@@ -86,8 +86,8 @@ export function renderPitch(reading, pitch) {
         jsxCreateElement(
           "span",
           { class: low ? "low" : "high" },
-          reading.slice(lastBorder, border)
-        )
+          reading.slice(lastBorder, border),
+        ),
       );
       lastBorder = border;
       low = !low;
@@ -98,8 +98,8 @@ export function renderPitch(reading, pitch) {
         jsxCreateElement(
           "span",
           { class: low ? "low-final" : "high-final" },
-          reading.slice(lastBorder)
-        )
+          reading.slice(lastBorder),
+        ),
       );
     }
 
@@ -137,7 +137,7 @@ export function groupMeanings(card) {
 
 function createMeaningChunks(meanings, chunkSize = 3) {
   const validMeanings = meanings.filter(
-    (meaning) => typeof meaning === "string" && meaning.trim().length > 0
+    (meaning) => typeof meaning === "string" && meaning.trim().length > 0,
   );
 
   return validMeanings.reduce((chunks, meaning, index) => {
@@ -152,7 +152,7 @@ export function renderHindiMeanings(meanings) {
   if (!meanings?.length) return "";
 
   const uniqueMeanings = [...new Set(meanings)].filter(
-    (meaning) => typeof meaning === "string" && meaning.trim().length > 0
+    (meaning) => typeof meaning === "string" && meaning.trim().length > 0,
   );
   const meaningChunks = createMeaningChunks(uniqueMeanings);
   if (!meaningChunks.length) return "";
@@ -172,7 +172,7 @@ export function renderHindiMeanings(meanings) {
           jsxCreateElement(
             "span",
             { class: "primary-meanings" },
-            meaningChunks[0].join("; ")
+            meaningChunks[0].join("; "),
           ),
           ...(hasMoreMeanings
             ? [
@@ -182,12 +182,14 @@ export function renderHindiMeanings(meanings) {
                     class: "toggle-more",
                     onclick: (e) => {
                       const container = e.target.closest(".hindi-meanings");
-                      const moreMeanings = container.querySelector(".more-meanings");
-                      const isExpanded = moreMeanings.classList.toggle("expanded");
+                      const moreMeanings =
+                        container.querySelector(".more-meanings");
+                      const isExpanded =
+                        moreMeanings.classList.toggle("expanded");
                       e.target.textContent = isExpanded ? "-" : "+";
                     },
                   },
-                  "+"
+                  "+",
                 ),
               ]
             : []),
@@ -196,15 +198,21 @@ export function renderHindiMeanings(meanings) {
           jsxCreateElement(
             "div",
             { class: "more-meanings" },
-            meaningChunks.slice(1).map((chunk, index) =>
-              jsxCreateElement("div", { class: "meaning-set" }, [
-                jsxCreateElement("span", { class: "set-number" }, `${index + 2}. `),
-                chunk.join("; "),
-              ])
-            )
+            meaningChunks
+              .slice(1)
+              .map((chunk, index) =>
+                jsxCreateElement("div", { class: "meaning-set" }, [
+                  jsxCreateElement(
+                    "span",
+                    { class: "set-number" },
+                    `${index + 2}. `,
+                  ),
+                  chunk.join("; "),
+                ]),
+              ),
           ),
-      ].filter(Boolean)
-    )
+      ].filter(Boolean),
+    ),
   );
 }
 
@@ -216,7 +224,8 @@ export function createWordDetailsContent({
   onExplainWord,
 }) {
   const url = `https://jpdb.io/vocabulary/${card.vid}/${encodeURIComponent(card.spelling)}/${encodeURIComponent(card.reading)}`;
-  const kanjiUrl = (kanji) => `https://jpdb.io/kanji/${encodeURIComponent(kanji)}`;
+  const kanjiUrl = (kanji) =>
+    `https://jpdb.io/kanji/${encodeURIComponent(kanji)}`;
   const groupedMeanings = groupMeanings(card);
 
   return [
@@ -233,8 +242,8 @@ export function createWordDetailsContent({
           jsxCreateElement(
             "span",
             { class: "reading" },
-            card.spelling !== card.reading ? `(${card.reading})` : ""
-          )
+            card.spelling !== card.reading ? `(${card.reading})` : "",
+          ),
         ),
         jsxCreateElement(
           "div",
@@ -250,7 +259,7 @@ export function createWordDetailsContent({
                 onPlayAudio();
               },
             },
-            "🔊"
+            "🔊",
           ),
           jsxCreateElement(
             "button",
@@ -263,15 +272,17 @@ export function createWordDetailsContent({
                 onExplainWord();
               },
             },
-            "ℹ️"
-          )
-        )
+            "ℹ️",
+          ),
+        ),
       ),
       jsxCreateElement(
         "div",
         { class: "state" },
-        card.state.map((state) => jsxCreateElement("span", { class: state }, state))
-      )
+        card.state.map((state) =>
+          jsxCreateElement("span", { class: state }, state),
+        ),
+      ),
     ),
     jsxCreateElement(
       "div",
@@ -279,9 +290,9 @@ export function createWordDetailsContent({
       jsxCreateElement(
         "span",
         { class: "freq" },
-        card.frequencyRank ? `Top ${card.frequencyRank}` : ""
+        card.frequencyRank ? `Top ${card.frequencyRank}` : "",
       ),
-      card.pitchAccent.map((pitch) => renderPitch(card.reading, pitch))
+      card.pitchAccent.map((pitch) => renderPitch(card.reading, pitch)),
     ),
     characterDetails
       ? jsxCreateElement(
@@ -301,24 +312,30 @@ export function createWordDetailsContent({
                     lang: "ja",
                     href: kanjiUrl(details.kanji),
                     target: "_blank",
-                    class: "kanji-link"
+                    class: "kanji-link",
                   },
-                  jsxCreateElement("span", {}, `${details.kanji}:`)
+                  jsxCreateElement("span", {}, `${details.kanji}:`),
                 ),
                 jsxCreateElement(
                   "a",
                   {
                     href: `https://kanji.koohii.com/study/kanji/${details.kanji}`,
                     target: "_blank",
-                    class: "kanji-meaning-link"
+                    class: "kanji-meaning-link",
                   },
-                  jsxCreateElement("span", { class: "reading" }, details.meanings)
-                )
+                  jsxCreateElement(
+                    "span",
+                    { class: "reading" },
+                    details.meanings,
+                  ),
+                ),
               );
-            })
+            }),
         )
       : "",
-    hindiMeaning?.meaning?.length ? renderHindiMeanings(hindiMeaning.meaning) : "",
+    hindiMeaning?.meaning?.length
+      ? renderHindiMeanings(hindiMeaning.meaning)
+      : "",
     ...groupedMeanings.flatMap((meanings) => [
       jsxCreateElement(
         "h2",
@@ -326,17 +343,18 @@ export function createWordDetailsContent({
         meanings.partOfSpeech
           .map(
             (pos) =>
-              PARTS_OF_SPEECH[pos] ?? `(Unknown part of speech #${pos}, please report)`
+              PARTS_OF_SPEECH[pos] ??
+              `(Unknown part of speech #${pos}, please report)`,
           )
           .filter((value) => value.length > 0)
-          .join(", ")
+          .join(", "),
       ),
       jsxCreateElement(
         "ol",
         { start: meanings.startIndex + 1 },
         meanings.glosses.map((glosses) =>
-          jsxCreateElement("li", null, glosses.join("; "))
-        )
+          jsxCreateElement("li", null, glosses.join("; ")),
+        ),
       ),
     ]),
   ];
