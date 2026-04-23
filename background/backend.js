@@ -115,8 +115,7 @@ async function addToForqScrape(vid, sid) {
     throw addErrorContext(error, `while adding word ${vid}/${sid} to FORQ`);
   }
 
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  if (doc.querySelector('a[href="/login"]') !== null) {
+  if (html.includes('href="/login"')) {
     throw Error("You are not logged in to jpdb.io - Adding cards to the FORQ requires being logged in");
   }
 
@@ -153,8 +152,7 @@ async function removeFromForqScrape(vid, sid) {
     throw addErrorContext(error, `while removing word ${vid}/${sid} from FORQ`);
   }
 
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  if (doc.querySelector('a[href="/login"]') !== null) {
+  if (html.includes('href="/login"')) {
     throw Error("You are not logged in to jpdb.io - Removing cards from the FORQ requires being logged in");
   }
 
@@ -162,13 +160,14 @@ async function removeFromForqScrape(vid, sid) {
 }
 
 export async function setSentence(vid, sid, sentence, translation) {
+  const config = getConfig();
   try {
     await jpdbApi.setCardSentence({
       vid,
       sid,
       sentence,
       translation,
-      apiToken: config.apiToken,
+      apiToken: config?.apiToken,
     });
   } catch (error) {
     const sentencePreview = sentence === undefined ? "none" : `"${truncate(sentence, 10)}"`;
@@ -204,14 +203,15 @@ export async function review(vid, sid, rating) {
     throw addErrorContext(error, `while getting next review number for word ${vid}/${sid}`);
   }
 
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  if (doc.querySelector('a[href="/login"]') !== null) {
+  if (html.includes('href="/login"')) {
     throw Error("You are not logged in to jpdb.io - Reviewing cards requires being logged in");
   }
 
-  const reviewNoInput = doc.querySelector('form[action^="/review"] input[type=hidden][name=r]');
-  assertNonNull(reviewNoInput);
-  const reviewNo = parseInt(reviewNoInput.value, 10);
+  const reviewNoMatch = html.match(/name="r"\s+value="(\d+)"/i) || html.match(/value="(\d+)"\s+name="r"/i);
+  if (!reviewNoMatch) {
+    throw Error("Could not find review number on jpdb.io review page");
+  }
+  const reviewNo = parseInt(reviewNoMatch[1], 10);
 
   try {
     await jpdbApi.submitReview({
@@ -228,12 +228,13 @@ export async function review(vid, sid, rating) {
 }
 
 export async function getCardState(vid, sid) {
+  const config = getConfig();
   let data;
   try {
     data = await jpdbApi.lookupVocabulary({
       list: [[vid, sid]],
       fields: ["card_state"],
-      apiToken: config.apiToken,
+      apiToken: config?.apiToken,
     });
   } catch (error) {
     throw addErrorContext(error, `while getting state for word ${vid}/${sid}`);
