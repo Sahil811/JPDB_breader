@@ -77,23 +77,22 @@ export async function loadConfig(forceReload = false) {
     // If the schema version is not the current version after applying all migrations, 
     // use the default as a fallback.
     if (config.schemaVersion !== CURRENT_SCHEMA_VERSION) {
-      configCache = Object.freeze(defaultConfig);
+      configCache = defaultConfig;
       return configCache;
     }
     
-    configCache = Object.freeze(config);
+    configCache = config;
     return configCache;
   } catch (error) {
     console.error('Failed to load config:', error);
-    return Object.freeze(defaultConfig);
+    return defaultConfig;
   }
 }
 
 export async function saveConfig(newConfig) {
   try {
-    const frozenConfig = Object.freeze({ ...newConfig });
-    await browser.storage.local.set(frozenConfig);
-    configCache = frozenConfig;
+    await browser.storage.local.set({ ...newConfig });
+    configCache = newConfig;
   } catch (error) {
     console.error('Failed to save config:', error);
   }
