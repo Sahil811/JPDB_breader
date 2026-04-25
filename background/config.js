@@ -32,6 +32,7 @@ export const defaultConfig = {
   geminiApiKey: null,
   theme: 'auto',
   showReviewButtons: true,
+  minimalMineButtons: false,
   nextUnknownWordKey: null,
   prevUnknownWordKey: null,
 };

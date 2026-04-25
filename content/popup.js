@@ -362,63 +362,70 @@ export class Popup extends ShadowComponent {
 
     const popupBlacklisted = card.state.includes("blacklisted");
     const popupNeverForget = card.state.includes("never-forget");
-    this.#mineButtons.replaceChildren(
-      jsxCreateElement(
-        "button",
-        {
-          class: "add",
-          onclick: this.#demoMode
-            ? undefined
-            : async (e) => {
-                const btn = e.currentTarget;
-                btn.disabled = true;
-                const originalText = btn.textContent;
-                btn.textContent = "Adding...";
-                try {
-                  await requestMine(
-                    data.token.card,
-                    config.forqOnMine,
-                    getSentences(data, config.contextWidth).trim() || undefined,
-                    undefined
-                  );
-                } finally {
-                  btn.disabled = false;
-                  btn.textContent = originalText;
-                }
-              },
-        },
-        "Add"
-      ),
-      jsxCreateElement(
-        "button",
-        {
-          class: "edit-add-review",
-          onclick: this.#demoMode ? undefined : () => Dialog.get().showForWord(data),
-        },
-        "Edit, Add and Review..."
-      ),
-      jsxCreateElement(
-        "button",
-        {
-          class: "blacklist",
-          onclick: this.#demoMode
-            ? undefined
-            : async (e) => {
-                const btn = e.currentTarget;
-                btn.disabled = true;
-                try {
-                  await requestSetFlag(
-                    this.#data.token.card,
-                    "blacklist",
-                    !popupBlacklisted
-                  );
-                } finally {
-                  btn.disabled = false;
-                }
-              },
-        },
-        !popupBlacklisted ? "Blacklist" : "Unblacklist"
-      ),
+    const minimal = config?.minimalMineButtons === true;
+
+    const allButtons = [];
+    if (!minimal) {
+      allButtons.push(
+        jsxCreateElement(
+          "button",
+          {
+            class: "add",
+            onclick: this.#demoMode
+              ? undefined
+              : async (e) => {
+                  const btn = e.currentTarget;
+                  btn.disabled = true;
+                  const originalText = btn.textContent;
+                  btn.textContent = "Adding...";
+                  try {
+                    await requestMine(
+                      data.token.card,
+                      config.forqOnMine,
+                      getSentences(data, config.contextWidth).trim() || undefined,
+                      undefined
+                    );
+                  } finally {
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                  }
+                },
+          },
+          "Add"
+        ),
+        jsxCreateElement(
+          "button",
+          {
+            class: "edit-add-review",
+            onclick: this.#demoMode ? undefined : () => Dialog.get().showForWord(data),
+          },
+          "Edit, Add and Review..."
+        ),
+        jsxCreateElement(
+          "button",
+          {
+            class: "blacklist",
+            onclick: this.#demoMode
+              ? undefined
+              : async (e) => {
+                  const btn = e.currentTarget;
+                  btn.disabled = true;
+                  try {
+                    await requestSetFlag(
+                      this.#data.token.card,
+                      "blacklist",
+                      !popupBlacklisted
+                    );
+                  } finally {
+                    btn.disabled = false;
+                  }
+                },
+          },
+          !popupBlacklisted ? "Blacklist" : "Unblacklist"
+        )
+      );
+    }
+    allButtons.push(
       jsxCreateElement(
         "button",
         {
@@ -450,6 +457,10 @@ export class Popup extends ShadowComponent {
         "Examples"
       )
     );
+
+    this.#mineButtons.className = minimal ? 'minimal' : '';
+    this.#mineButtons.id = 'mine-buttons';
+    this.#mineButtons.replaceChildren(...allButtons);
 
     // Toggle review buttons visibility based on config
     this.#updateReviewButtonsVisibility();
