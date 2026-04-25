@@ -55,16 +55,8 @@ export async function readExtFile(path) {
 }
 /** Read JSON from an extension-relative file */
 export async function readExtJson(path) {
-    try {
-        const resp = await fetch(browser.runtime.getURL(path));
-        if (!resp.ok) {
-            throw new Error(`HTTP ${resp.status}`);
-        }
-        return await resp.json();
-    }
-    catch (error) {
-        throw new Error(`Could not read JSON file ${path}: ${error.message}`, { cause: error });
-    }
+    const text = await readExtFile(path);
+    return JSON.parse(text);
 }
 export function snakeToCamel(string) {
     return string.replaceAll(/(?<!^_*)_(.)/g, (m, p1) => p1.toUpperCase());

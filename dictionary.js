@@ -20,7 +20,7 @@ export class JapaneseDictionary {
   }
 
   buildIndices() {
-    if (!this.dictionary) return;
+    if (!this.dictionary || this.kanjiIndex.size > 0) return;
 
     this.dictionary.forEach((entry, idx) => {
       // Index kanji readings

@@ -7,18 +7,18 @@ const JPDB_XOR_KEY = [0x06, 0x23, 0x54, 0x0f];
 let currentAudio = null;
 
 export const JpdbAudio = {
-  cache: {},
+  cache: new Map(),
 
   async speak(vid, spelling) {
     if (currentAudio) {
       try {
         currentAudio.pause();
-      } catch {}
+      } catch (e) { console.warn('JPDBreader: audio error', e); }
       currentAudio = null;
     }
 
     if (!vid) return;
-    const hash = this.cache[vid] ?? (await this.scrapeHash(vid, spelling));
+    const hash = this.cache.get(vid) ?? (await this.scrapeHash(vid, spelling));
     if (hash) await this.play(hash);
   },
 
@@ -26,10 +26,13 @@ export const JpdbAudio = {
     try {
       const result = await requestFetchAudioHash(vid, spelling);
       if (result?.hash) {
-        this.cache[vid] = result.hash;
+        if (this.cache.size > 200) {
+          this.cache.delete(this.cache.keys().next().value);
+        }
+        this.cache.set(vid, result.hash);
         return result.hash;
       }
-    } catch {}
+    } catch (e) { console.warn('JPDBreader: audio error', e); }
 
     return null;
   },
@@ -57,6 +60,6 @@ export const JpdbAudio = {
         currentAudio = null;
       };
       audio.play().catch(() => URL.revokeObjectURL(blobUrl));
-    } catch {}
+    } catch (e) { console.warn('JPDBreader: audio error', e); }
   },
 };

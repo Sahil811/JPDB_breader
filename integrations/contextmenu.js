@@ -65,7 +65,6 @@
             // Use the previous child (the last child that is still inside the selection) as our end node
             endNode = range.endContainer.childNodes[range.endOffset - 1];
         }
-        console.log('start:', startNode, 'end:', endNode);
         // Set up recursion stack
         // We need information from further up the tree (such as furigana, or whether we should ignore some nodes because they are invisible)
         // So first we walk up the tree collecting all parent nodes, and then walk down again recording this information
@@ -77,15 +76,13 @@
                 break;
             parents.unshift(current);
         }
-        console.log('parents:', parents);
         current = startNode;
         const stack = [];
         let rubyTexts = [];
         let ignore = false;
         for (const parent of parents) {
             const display = displayCategory(parent);
-            console.log('Start parent:', display, parent);
-            if (display === 'none' || display === 'ruby-text') {
+            if(display === 'none' || display === 'ruby-text') {
                 ignore = true;
             }
             else if (display === 'ruby') {
@@ -113,8 +110,7 @@
         }
         outerLoop: while (true) {
             const display = displayCategory(current);
-            console.log('current:', current, 'display:', display, 'rubyTexts:', rubyTexts, 'ignore:', ignore);
-            if (display === 'none' || display === 'ruby-text') {
+            if(display === 'none' || display === 'ruby-text') {
                 ignore = true;
             }
             else if (display === 'ruby') {
@@ -125,7 +121,6 @@
                     const text = current;
                     // Ignore empty text nodes, as well as whitespace at the beginning of the run
                     if (text.data.length > 0 && !(fragments.length === 0 && text.data.trim().length === 0)) {
-                        console.log('Pushing as text');
                         fragments.push({
                             start: offset,
                             length: text.length,
@@ -133,9 +128,6 @@
                             node: text,
                             hasRuby: rubyTexts.length !== 0,
                         });
-                    }
-                    else {
-                        console.log('Ignoring leading whitespace');
                     }
                 }
                 else if (display === 'block') {
@@ -145,14 +137,12 @@
             if (current === endNode)
                 break;
             if (current.firstChild !== null) {
-                console.log('Continuing with child');
                 stack.push({ display, rubyTexts, ignore, node: current });
                 current = current.firstChild;
                 continue;
             }
             else if (current.nextSibling !== null) {
-                console.log('Continuing with sibling');
-                ignore = stack[stack.length - 1].ignore;
+                ignore= stack[stack.length - 1].ignore;
                 rubyTexts = stack[stack.length - 1].rubyTexts;
                 current = current.nextSibling;
                 continue;

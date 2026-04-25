@@ -219,19 +219,27 @@
   let currentUrl = "";
   const subs = new Subs();
   let playerElement = null;
-  // Get every time url changes
-  new MutationObserver(() => {
+  let subtitleObserverRef = null;
+  // Detect URL changes via YouTube SPA navigation and browser history events
+  function onUrlChange() {
     if (window.location.href !== currentUrl) {
+      const wasVideo = currentUrl.includes("watch?v=");
       currentUrl = window.location.href;
       if (currentUrl.includes("watch?v=")) {
         observerCallback();
+      } else if (wasVideo) {
+        // Navigated away from a video page — clean up stale state
+        if (subtitleObserverRef) {
+          subtitleObserverRef.disconnect();
+        }
+        subs.clean(true);
+        playerElement = null;
+        previousText = "";
       }
     }
-  }).observe(document.body, {
-    attributes: false,
-    childList: true,
-    subtree: true,
-  });
+  }
+  document.addEventListener("yt-navigate-finish", onUrlChange);
+  window.addEventListener("popstate", onUrlChange);
   function observerCallback() {
     subs.clean(true);
     getTranscriptFromURL(currentUrl).then((transcript) => {
@@ -269,7 +277,7 @@
           return caption.start + caption.dur > currentTime + 0.2;
         });
         if (curr && curr.text !== previousText) {
-          captionsegment.innerHTML = curr.text;
+          captionsegment.textContent = curr.text;
           if (captionsegment.parentElement) {
             visible.observe(captionsegment.parentElement);
             previousText = curr.text;
@@ -299,6 +307,7 @@
       subtree: true,
       childList: true,
     });
+    subtitleObserverRef = videosubs;
   } catch (error) {
     console.log("[jpdb] video subs error:", error);
   }

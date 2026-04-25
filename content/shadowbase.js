@@ -21,8 +21,8 @@ export class ShadowComponent {
     this.shadow = element.attachShadow({ mode: 'closed' });
     this._styleUrls = styleUrls;
     
-    // Asynchronously fetch and adopt stylesheets
-    this._injectStyles();
+    // Fetch and adopt stylesheets; expose promise so consumers can await readiness
+    this.stylesReady = this._injectStyles();
   }
 
   async _injectStyles() {

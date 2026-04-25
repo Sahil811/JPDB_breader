@@ -136,7 +136,7 @@ export class ImmersionKit {
     if (this.currentAudio) {
       try {
         this.currentAudio.stop();
-      } catch {}
+      } catch (e) { console.warn('JPDBreader: ImmersionKit audio error', e); }
       this.currentAudio = null;
     }
   }
@@ -167,7 +167,7 @@ export class ImmersionKit {
         }
       };
       source.start();
-    } catch {}
+    } catch (e) { console.warn('JPDBreader: ImmersionKit audio error', e); }
   }
 
   async playAudioPromise(url) {
@@ -188,7 +188,8 @@ export class ImmersionKit {
         };
         source.start();
       });
-    } catch {
+    } catch (e) {
+      console.warn('JPDBreader: ImmersionKit audio error', e);
       return Promise.resolve();
     }
   }
