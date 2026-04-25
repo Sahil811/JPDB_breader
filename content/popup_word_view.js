@@ -242,7 +242,9 @@ export function createWordDetailsContent({
           jsxCreateElement(
             "span",
             { class: "reading" },
-            card.spelling !== card.reading ? `(${card.reading})` : "",
+            card.spelling !== card.reading && card.pitchAccent.length === 0
+              ? `(${card.reading})`
+              : "",
           ),
         ),
       ),
