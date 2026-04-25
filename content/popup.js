@@ -430,7 +430,7 @@ export class Popup extends ShadowComponent {
                 }
               },
         },
-        !popupBlacklisted ? "Blacklist" : "Remove from blacklist"
+        !popupBlacklisted ? "Blacklist" : "Unblacklist"
       ),
       jsxCreateElement(
         "button",
@@ -452,7 +452,7 @@ export class Popup extends ShadowComponent {
                 }
               },
         },
-        !popupNeverForget ? "Never forget" : "Unmark as never forget"
+        !popupNeverForget ? "Never forget" : "Unmark"
       ),
       jsxCreateElement(
         "button",
