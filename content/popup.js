@@ -252,6 +252,9 @@ export class Popup extends ShadowComponent {
     }
     return this.#popup;
   }
+  static exists() {
+    return !!this.#popup;
+  }
   static getDemoMode(parent) {
     const popup = new this(true);
     parent.append(popup.element);
@@ -439,6 +442,9 @@ export class Popup extends ShadowComponent {
     }
     this.#outerStyle.opacity = "1";
     this.#outerStyle.visibility = "visible";
+  }
+  isVisible() {
+    return this.#outerStyle.visibility === 'visible';
   }
   fadeOut() {
     // Stop immersion kit audio if it's currently looping or playing sequences

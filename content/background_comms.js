@@ -1,7 +1,7 @@
 import { browser, Canceled, isChrome } from '../util.js';
 import { reverseIndex } from './parse.js';
 import { Popup } from './popup.js';
-import { showError } from './toast.js';
+import { showError, showToast } from './toast.js';
 // Background script communication
 export let config;
 const waitingPromises = new Map();
@@ -136,10 +136,32 @@ function handleMessage(message) {
                     }
                     idx.className = className;
                 }
-                Popup.get().render();
+                if (Popup.exists() && Popup.get().isVisible()) {
+                    Popup.get().render();
+                }
             }
             break;
     }
+}
+
+let reconnectDelay = 1000;
+let reconnectAttempts = 0;
+const MAX_RECONNECT_DELAY = 30000;
+const MAX_RECONNECT_ATTEMPTS = 50;
+
+function resetBackoff() {
+    reconnectDelay = 1000;
+    reconnectAttempts = 0;
+}
+
+function scheduleReconnect() {
+    reconnectAttempts++;
+    if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
+        showToast('Error', 'Lost connection to extension. Please reload the page.');
+        return;
+    }
+    setTimeout(connect, reconnectDelay);
+    reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY);
 }
 
 function onDisconnect() {
@@ -164,8 +186,8 @@ function onDisconnect() {
     }
     waitingPromises.clear();
     
-    // Reconnect after a delay
-    setTimeout(connect, 1000);
+    // Reconnect with exponential backoff
+    scheduleReconnect();
 }
 
 export function connect() {
@@ -173,13 +195,14 @@ export function connect() {
         port = browser.runtime.connect();
         port.onDisconnect.addListener(onDisconnect);
         port.onMessage.addListener(handleMessage);
+        resetBackoff();
     } catch (e) {
         if (e.message?.includes('Extension context invalidated')) {
             console.warn('JPDBreader: Extension context invalidated. Reconnection stopped. Please refresh the page.');
             return;
         }
         console.error('Failed to connect to background script:', e);
-        setTimeout(connect, 1000);
+        scheduleReconnect();
     }
 }
 

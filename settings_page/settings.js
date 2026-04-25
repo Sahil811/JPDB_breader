@@ -171,7 +171,7 @@ try {
           config[name] = newValue;
         }
       }
-      saveConfig(config);
+      await saveConfig(config);
       await requestUpdateConfig();
       unmarkUnsavedChanges();
     } catch (error) {
