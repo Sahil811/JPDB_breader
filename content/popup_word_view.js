@@ -245,6 +245,17 @@ export function createWordDetailsContent({
             card.spelling !== card.reading ? `(${card.reading})` : "",
           ),
         ),
+      ),
+      jsxCreateElement(
+        "div",
+        { class: "header-actions" },
+        jsxCreateElement(
+          "div",
+          { class: "state" },
+          card.state.map((state) =>
+            jsxCreateElement("span", { class: state }, state),
+          ),
+        ),
         jsxCreateElement(
           "div",
           { class: "utility-icons" },
@@ -274,13 +285,6 @@ export function createWordDetailsContent({
             },
             "ℹ️",
           ),
-        ),
-      ),
-      jsxCreateElement(
-        "div",
-        { class: "state" },
-        card.state.map((state) =>
-          jsxCreateElement("span", { class: state }, state),
         ),
       ),
     ),
