@@ -116,9 +116,18 @@ async function exportUnknownWords(tab) {
             return;
         }
 
-        const header = ['Word', 'Reading', 'Meaning', 'Part of Speech', 'Frequency Rank', 'State', 'Example Sentence'];
+        // Get source URL for the export
+        const tabInfo = await browser.tabs.get(tab.id);
+        const sourceUrl = tabInfo?.url || '';
+        let siteName = 'jpdb_words';
+        try {
+            const hostname = new URL(sourceUrl).hostname.replace(/^www\./, '');
+            siteName = hostname.replace(/[^a-zA-Z0-9.-]/g, '_');
+        } catch (_) {}
+
+        const header = ['Word', 'Reading', 'Meaning', 'Part of Speech', 'Frequency Rank', 'State', 'Example Sentence', 'Source'];
         const rows = words.map(w =>
-            [w.spelling, w.reading, w.meanings, w.partOfSpeech, w.frequency, w.state, w.sentence]
+            [w.spelling, w.reading, w.meanings, w.partOfSpeech, w.frequency, w.state, w.sentence, sourceUrl]
                 .map(v => String(v ?? '').replace(/\t/g, ' ').replace(/\n/g, ' '))
                 .join('\t')
         );
@@ -128,9 +137,8 @@ async function exportUnknownWords(tab) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        const pageTitle = (await browser.tabs.get(tab.id))?.title || 'jpdb-words';
-        const safeName = pageTitle.replace(/[^a-zA-Z0-9_\u3000-\u9fff\uff00-\uffef]/g, '_').substring(0, 50);
-        a.download = `${safeName}_unknown_words.tsv`;
+        const date = new Date().toISOString().slice(0, 10);
+        a.download = `${siteName}_${date}_unknown_words.tsv`;
         a.click();
         URL.revokeObjectURL(url);
 
@@ -157,7 +165,10 @@ function renderFlashcard() {
     container.innerHTML = '';
     const card = document.createElement('div');
     card.className = 'flashcard';
-    card.innerHTML = `<div class="fc-word">${word.spelling}</div>`;
+    card.innerHTML = `
+        <div class="fc-word">${word.spelling}</div>
+        <div class="fc-tap-hint">tap to reveal</div>
+    `;
     card.addEventListener('click', () => revealFlashcard(card, word));
     container.appendChild(card);
 }
@@ -220,7 +231,7 @@ nonNull(document.querySelector('#settings-link')).addEventListener('click', () =
 });
 
 browser.tabs.query({ active: true, currentWindow: true }, async tabs => {
-    const buttonContainer = nonNull(document.querySelector('#main-content'));
+    const buttonContainer = nonNull(document.querySelector('.popup-body'));
     const activeTab = tabs[0];
 
     // Collect stats for the active tab
