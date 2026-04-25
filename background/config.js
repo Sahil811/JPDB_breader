@@ -31,6 +31,7 @@ export const defaultConfig = {
   easyKey: null,
   geminiApiKey: null,
   theme: 'auto',
+  showReviewButtons: true,
   nextUnknownWordKey: null,
   prevUnknownWordKey: null,
 };

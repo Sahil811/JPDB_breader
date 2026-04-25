@@ -163,7 +163,7 @@ export class Popup extends ShadowComponent {
         (this.#mineButtons = jsxCreateElement("section", {
           id: "mine-buttons",
         })),
-        jsxCreateElement(
+        config?.showReviewButtons !== false ? jsxCreateElement(
           "section",
           { id: "review-buttons" },
           // SRS review buttons
@@ -176,7 +176,6 @@ export class Popup extends ShadowComponent {
               onclick: demoMode ? undefined : async (e) => { const btn = e.currentTarget; btn.disabled = true; try { await requestReview(this.#data.token.card, "nothing"); } finally { btn.disabled = false; } },
             },
             "Nothing",
-            jsxCreateElement("kbd", null, "1"),
           ),
           jsxCreateElement(
             "button",
@@ -187,7 +186,6 @@ export class Popup extends ShadowComponent {
               onclick: demoMode ? undefined : async (e) => { const btn = e.currentTarget; btn.disabled = true; try { await requestReview(this.#data.token.card, "something"); } finally { btn.disabled = false; } },
             },
             "Something",
-            jsxCreateElement("kbd", null, "2"),
           ),
           jsxCreateElement(
             "button",
@@ -198,7 +196,6 @@ export class Popup extends ShadowComponent {
               onclick: demoMode ? undefined : async (e) => { const btn = e.currentTarget; btn.disabled = true; try { await requestReview(this.#data.token.card, "hard"); } finally { btn.disabled = false; } },
             },
             "Hard",
-            jsxCreateElement("kbd", null, "3"),
           ),
           jsxCreateElement(
             "button",
@@ -209,7 +206,6 @@ export class Popup extends ShadowComponent {
               onclick: demoMode ? undefined : async (e) => { const btn = e.currentTarget; btn.disabled = true; try { await requestReview(this.#data.token.card, "good"); } finally { btn.disabled = false; } },
             },
             "Good",
-            jsxCreateElement("kbd", null, "4"),
           ),
           jsxCreateElement(
             "button",
@@ -220,9 +216,8 @@ export class Popup extends ShadowComponent {
               onclick: demoMode ? undefined : async (e) => { const btn = e.currentTarget; btn.disabled = true; try { await requestReview(this.#data.token.card, "easy"); } finally { btn.disabled = false; } },
             },
             "Easy",
-            jsxCreateElement("kbd", null, "5"),
           )
-        ),
+        ) : null,
         (this.#vocabSection = jsxCreateElement("section", {
           id: "vocab-content",
         }))

@@ -242,26 +242,6 @@ button:hover  { background: var(--c-hover); color: var(--c-on-surface); }
 button:active { background: var(--c-hover-dark); }
 button:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 1px; }
 
-/* Keyboard hint badges */
-kbd {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 14px;
-  height: 14px;
-  margin-left: 4px;
-  padding: 0 3px;
-  font-size: 9px;
-  font-family: inherit;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--c-secondary);
-  background: var(--c-hover);
-  border: 1px solid var(--c-border);
-  border-radius: 3px;
-  opacity: 0.7;
-}
-
 /* Mine buttons — ghost/outlined */
 button.add          { border-color: var(--c-primary); color: var(--c-primary); }
 button.add:hover    { background: var(--c-primary-bg); }
