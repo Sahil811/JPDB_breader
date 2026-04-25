@@ -55,9 +55,9 @@ async function collectStats(tab) {
             document.getElementById('stats-section').style.display = '';
             // Show mine button if there are unknown words
             if (stats.unknown > 0) {
-                const mineBtn = document.getElementById('mine-all-btn');
-                mineBtn.style.display = '';
-                mineBtn.textContent = `Mine all unknown words (${stats.unknown})`;
+                const exportBtn = document.getElementById('export-words-btn');
+                exportBtn.style.display = '';
+                exportBtn.textContent = `Export unknown words (${stats.unknown})`;
             }
         }
     } catch (_) {
@@ -65,11 +65,11 @@ async function collectStats(tab) {
     }
 }
 
-// Collect unknown words and batch-mine them
-async function mineAllUnknown(tab) {
-    const mineBtn = document.getElementById('mine-all-btn');
-    const progress = document.getElementById('mine-progress');
-    mineBtn.disabled = true;
+// Collect unknown words and export as Anki-compatible TSV
+async function exportUnknownWords(tab) {
+    const exportBtn = document.getElementById('export-words-btn');
+    const progress = document.getElementById('export-progress');
+    exportBtn.disabled = true;
     progress.style.display = '';
     progress.textContent = 'Collecting words…';
 
@@ -83,14 +83,26 @@ async function mineAllUnknown(tab) {
                 for (const el of elements) {
                     const data = el.jpdbData;
                     if (!data) continue;
-                    const key = `${data.token.card.vid}/${data.token.card.sid}`;
+                    const card = data.token.card;
+                    const key = `${card.vid}/${card.sid}`;
                     if (seen.has(key)) continue;
                     seen.add(key);
+
+                    // Get sentence context
+                    let sentence = '';
+                    try {
+                        const ctx = data.context || '';
+                        sentence = ctx.trim().substring(0, 200);
+                    } catch (_) {}
+
                     words.push({
-                        vid: data.token.card.vid,
-                        sid: data.token.card.sid,
-                        spelling: data.token.card.spelling,
-                        reading: data.token.card.reading,
+                        spelling: card.spelling || '',
+                        reading: card.reading || '',
+                        meanings: (card.meanings || []).join('; '),
+                        partOfSpeech: (card.partOfSpeech || []).join(', '),
+                        frequency: card.frequencyRank || '',
+                        state: (card.state || []).join(', '),
+                        sentence,
                     });
                 }
                 return words;
@@ -103,28 +115,31 @@ async function mineAllUnknown(tab) {
             return;
         }
 
-        progress.textContent = `Adding 0/${words.length} words…`;
+        // Build TSV content (Anki-compatible)
+        const header = ['Word', 'Reading', 'Meaning', 'Part of Speech', 'Frequency Rank', 'State', 'Example Sentence'];
+        const rows = words.map(w =>
+            [w.spelling, w.reading, w.meanings, w.partOfSpeech, w.frequency, w.state, w.sentence]
+                .map(v => String(v ?? '').replace(/\t/g, ' ').replace(/\n/g, ' '))
+                .join('\t')
+        );
+        const tsv = header.join('\t') + '\n' + rows.join('\n');
 
-        const response = await browser.runtime.sendMessage({
-            type: 'batchMine',
-            words,
-        });
+        // Download as file
+        const blob = new Blob(['\ufeff' + tsv], { type: 'text/tab-separated-values;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const pageTitle = (await browser.tabs.get(tab.id))?.title || 'jpdb-words';
+        const safeName = pageTitle.replace(/[^a-zA-Z0-9_\u3000-\u9fff\uff00-\uffef]/g, '_').substring(0, 50);
+        a.download = `${safeName}_unknown_words.tsv`;
+        a.click();
+        URL.revokeObjectURL(url);
 
-        if (response.success) {
-            const r = response.results;
-            progress.textContent = `Done! Added ${r.added}/${r.added + r.failed} words.`;
-            if (r.failed > 0) {
-                progress.textContent += ` (${r.failed} failed)`;
-            }
-            // Refresh stats
-            await collectStats(tab);
-        } else {
-            progress.textContent = `Error: ${response.error}`;
-        }
+        progress.textContent = `Exported ${words.length} words!`;
     } catch (error) {
         progress.textContent = `Error: ${error.message}`;
     } finally {
-        mineBtn.disabled = false;
+        exportBtn.disabled = false;
     }
 }
 
@@ -139,7 +154,7 @@ browser.tabs.query({ active: true, currentWindow: true }, async tabs => {
     // Collect stats for the active tab
     if (activeTab) {
         await collectStats(activeTab);
-        document.getElementById('mine-all-btn').addEventListener('click', () => mineAllUnknown(activeTab));
+        document.getElementById('export-words-btn').addEventListener('click', () => exportUnknownWords(activeTab));
     }
 
     // Add parse buttons for all active tabs
