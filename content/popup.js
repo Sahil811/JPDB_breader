@@ -563,7 +563,7 @@ export class Popup extends ShadowComponent {
   }
 
   #updateReviewButtonsVisibility(showReviewButtons = config?.showReviewButtons) {
-    const reviewSection = this.#element.shadowRoot.querySelector('#review-buttons');
+    const reviewSection = this.shadow.querySelector('#review-buttons');
     if (reviewSection) {
       reviewSection.style.display = showReviewButtons === false ? 'none' : '';
     }
