@@ -7,11 +7,16 @@
     <link rel="stylesheet" href="../common.css" />
 
     <style>
+      html {
+        scroll-behavior: smooth;
+      }
+
       body {
         padding: 0;
         margin: 0;
         visibility: hidden;
         opacity: 0;
+        background: var(--md-sys-color-surface-dim, var(--color-background));
       }
 
       body.ready {
@@ -21,11 +26,13 @@
       }
 
       article {
-        padding: 1em;
+        padding: 1.5em;
         display: flex;
         flex-direction: row;
-        gap: 1em;
+        gap: 1.5em;
         align-items: flex-start;
+        max-width: 72em;
+        margin: 0 auto;
       }
 
       h1 {
@@ -34,29 +41,66 @@
       }
 
       nav {
-        margin-right: 1em;
+        margin-right: 0.5em;
         display: flex;
         flex-direction: column;
-        gap: 0.5em;
+        gap: 0.3em;
         position: sticky;
-        top: 1em;
+        top: 1.5em;
         left: 1em;
+        background: var(--md-sys-color-surface-container, var(--color-background-alt));
+        border: 1px solid var(--md-sys-color-outline-variant, var(--border-color));
+        border-radius: 12px;
+        padding: 1em;
+        min-width: 10em;
+      }
+
+      nav h1 {
+        font-size: 0.7em;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--md-sys-color-on-surface-variant);
+        margin: 0 0 0.4em 0;
+        border: none;
+      }
+
+      nav a {
+        padding: 0.35em 0.7em;
+        border-radius: 8px;
+        font-size: 0.9em;
+        transition: background 0.15s, color 0.15s;
+      }
+
+      nav a:hover {
+        background: var(--md-sys-color-surface-container-high, rgba(0,0,0,0.05));
+        text-decoration: none;
+        opacity: 1;
       }
 
       nav a.active {
-        filter: var(--filter-more-contrast);
-        text-decoration-thickness: 2px;
+        background: var(--md-sys-color-primary-container);
+        color: var(--md-sys-color-on-primary-container);
+        filter: none;
+        text-decoration: none;
+        text-decoration-thickness: initial;
         font-weight: 600;
       }
 
       #save {
         margin-top: 1em;
+        width: 100%;
       }
 
       body.has-unsaved-changes #save {
         --color-button-border: rgb(199, 58, 79);
         color: rgb(199, 58, 79);
         box-shadow: 0px 0px 0.4em 0.25em rgba(232, 104, 123);
+        animation: pulse-save 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse-save {
+        0%, 100% { box-shadow: 0px 0px 0.4em 0.25em rgba(232, 104, 123, 0.4); }
+        50% { box-shadow: 0px 0px 0.6em 0.35em rgba(232, 104, 123, 0.7); }
       }
 
       #preview {
@@ -66,6 +110,7 @@
 
       #settings {
         max-width: 48em;
+        flex: 1;
         display: flex;
         flex-direction: column;
         gap: 1.5em;
@@ -81,10 +126,18 @@
         grid-auto-flow: dense;
         align-items: center;
         gap: 0.5em 1em;
+        background: var(--md-sys-color-surface-container, var(--color-background-alt));
+        border: 1px solid var(--md-sys-color-outline-variant, var(--border-color));
+        border-radius: 12px;
+        padding: 0.8em 1.2em 1.2em;
       }
 
       section h1 {
         grid-column: 1 / span 3;
+        font-size: 1.1em;
+        padding-bottom: 0.4em;
+        border-bottom: 2px solid var(--md-sys-color-primary-container, var(--border-color));
+        margin-bottom: 0.3em;
       }
 
       .explanation {
@@ -120,6 +173,21 @@
 
       .setting::part(reset-button) {
         grid-column: 3;
+      }
+
+      @media (max-width: 900px) {
+        article {
+          flex-direction: column;
+        }
+        nav {
+          flex-direction: row;
+          flex-wrap: wrap;
+          position: static;
+          min-width: auto;
+        }
+        nav h1 {
+          width: 100%;
+        }
       }
     </style>
     <title>Reader Settings</title>

@@ -12,8 +12,15 @@
   font-size: 60%;
 }
 
+:where(.jpdb-word:not(.unparsed)) {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  border-radius: 2px;
+}
+
 :where(.jpdb-word:not(.unparsed):hover) {
   text-decoration: underline;
+  background-color: rgba(128, 128, 128, 0.08);
 }
 
 /* :where(.jpdb-word.unparsed) { } */
@@ -108,7 +115,13 @@
 }
 
 :where(.jpdb-word.nav-highlight) {
-  outline: 2px solid rgba(75, 141, 255, 0.7);
-  outline-offset: 1px;
-  border-radius: 2px;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(75, 141, 255, 0.4), 0 0 8px rgba(75, 141, 255, 0.15);
+  border-radius: 3px;
+  animation: jpdb-nav-pulse 0.6s ease-out;
+}
+
+@keyframes jpdb-nav-pulse {
+  0% { box-shadow: 0 0 0 4px rgba(75, 141, 255, 0.5), 0 0 16px rgba(75, 141, 255, 0.3); }
+  100% { box-shadow: 0 0 0 2px rgba(75, 141, 255, 0.4), 0 0 8px rgba(75, 141, 255, 0.15); }
 }

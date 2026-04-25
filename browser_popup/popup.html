@@ -7,14 +7,59 @@
         <style>
             body {
                 min-width: min-content;
+                margin: 0;
+                padding: 0;
             }
             article {
                 display: flex;
                 flex-direction: column;
-                gap: 0.5em;
-                min-width: 20em;
+                gap: 0.6em;
+                min-width: 22em;
                 max-width: 100%;
                 align-items: stretch;
+                padding: 1em 1.2em;
+            }
+            /* Accent bar at top */
+            article::before {
+                content: '';
+                display: block;
+                height: 3px;
+                margin: -1em -1.2em 0.2em;
+                background: linear-gradient(90deg, var(--md-sys-color-primary), var(--md-sys-color-primary-container));
+                border-radius: 0 0 2px 2px;
+            }
+            #stats-section {
+                border-color: var(--md-sys-color-outline-variant, #ccc) !important;
+                background: var(--md-sys-color-surface-container, rgba(0,0,0,0.03));
+                border-radius: 8px !important;
+                padding: 0.6em 0.8em !important;
+            }
+            #stats-section strong {
+                font-size: 0.8em;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: var(--md-sys-color-on-surface-variant);
+            }
+            #stat-total, #stat-unknown, #stat-known {
+                font-weight: 700;
+                font-size: 1.05em;
+            }
+            #mine-all-btn {
+                font-size: 0.9em;
+                border-radius: 8px;
+            }
+            #mine-progress {
+                color: var(--md-sys-color-on-surface-variant);
+            }
+            #settings-link {
+                font-size: 0.85em;
+                opacity: 0.7;
+                order: 99;
+                align-self: center;
+                padding: 4px 12px;
+            }
+            #settings-link:hover {
+                opacity: 1;
             }
         </style>
     </head>
