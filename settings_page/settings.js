@@ -255,6 +255,26 @@ try {
         }
       }
       await saveConfig(config);
+
+      // Validate keybind conflicts
+      const keyBindNames = [
+        'showPopupKey', 'addKey', 'dialogKey', 'blacklistKey', 'neverForgetKey',
+        'nothingKey', 'somethingKey', 'hardKey', 'goodKey', 'easyKey',
+        'nextUnknownWordKey', 'prevUnknownWordKey',
+      ];
+      const seen = new Map();
+      for (const name of keyBindNames) {
+        const kb = config[name];
+        if (!kb || !kb.key) continue;
+        const sig = `${(kb.modifiers || []).sort().join('+')}+${kb.code || kb.key}`;
+        if (seen.has(sig)) {
+          const conflictLabel = (n) => n.replace(/Key$/, '').replace(/([A-Z])/g, ' $1').trim();
+          alert(`⚠️ Keybind conflict: "${conflictLabel(name)}" and "${conflictLabel(seen.get(sig))}" use the same key (${kb.key}).`);
+          break;
+        }
+        seen.set(sig, name);
+      }
+
       await requestUpdateConfig();
       applyTheme(config.theme);
       popup.updateStyle(config.customPopupCSS, config.theme);
