@@ -23,6 +23,6 @@ export function jsxCreateElement(name, props, ...content) {
             }
         }
     }
-    elem.append(...content.flat());
+    elem.append(...content.flat().filter(c => c != null));
     return elem;
 }

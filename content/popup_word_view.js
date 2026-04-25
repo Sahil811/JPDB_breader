@@ -239,13 +239,9 @@ export function createWordDetailsContent({
           "a",
           { lang: "ja", href: url, target: "_blank", class: "word-link" },
           jsxCreateElement("span", { class: "spelling" }, card.spelling),
-          jsxCreateElement(
-            "span",
-            { class: "reading" },
-            card.spelling !== card.reading && card.pitchAccent.length === 0
-              ? `(${card.reading})`
-              : "",
-          ),
+          card.spelling !== card.reading && card.pitchAccent.length === 0
+            ? jsxCreateElement("span", { class: "reading" }, `(${card.reading})`)
+            : null,
         ),
       ),
       jsxCreateElement(
