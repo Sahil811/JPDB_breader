@@ -90,7 +90,7 @@ try {
 
     // Apply theme to settings page and preview popup
     applyTheme(config.theme);
-    popup.updateStyle(config.customPopupCSS, config.theme, config.showReviewButtons);
+    popup.updateStyle(config.customPopupCSS, config.theme, config);
   })();
   
   defineCustomElements();
@@ -277,7 +277,7 @@ try {
 
       await requestUpdateConfig();
       applyTheme(config.theme);
-      popup.updateStyle(config.customPopupCSS, config.theme, config.showReviewButtons);
+      popup.updateStyle(config.customPopupCSS, config.theme, config);
       popup.render();
       unmarkUnsavedChanges();
     } catch (error) {

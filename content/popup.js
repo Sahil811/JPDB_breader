@@ -78,6 +78,7 @@ export class Popup extends ShadowComponent {
   #data;
   #renderVersion = 0;
   #explanationRequestId = 0;
+  #configOverride = null;
   static #popup;
   static get() {
     if (!this.#popup) {
@@ -93,6 +94,9 @@ export class Popup extends ShadowComponent {
     const popup = new this(true);
     parent.append(popup.element);
     return popup;
+  }
+  get #cfg() {
+    return this.#configOverride ?? config;
   }
     constructor(demoMode = false) {
     const hostElement = jsxCreateElement("div", {
@@ -332,16 +336,17 @@ export class Popup extends ShadowComponent {
     this.#outerStyle.pointerEvents = "";
     this.#outerStyle.userSelect = "";
   }
-  async render(renderVersion = this.#renderVersion) {
+   async render(renderVersion = this.#renderVersion) {
     if (this.#data === undefined) return;
     const data = this.#data;
     const card = data.token.card;
+    const c = this.#cfg;
     let popupCharacterDetails = null;
     let popupHindiMeaning = null;
     try {
       const result = await loadPopupSupplementalData(card, {
-        showKanji: config.showKanji,
-        showHindi: config.showHindi,
+        showKanji: c?.showKanji,
+        showHindi: c?.showHindi,
       });
       popupCharacterDetails = result.characterDetails;
       popupHindiMeaning = result.hindiMeaning;
@@ -362,7 +367,7 @@ export class Popup extends ShadowComponent {
 
     const popupBlacklisted = card.state.includes("blacklisted");
     const popupNeverForget = card.state.includes("never-forget");
-    const minimal = config?.minimalMineButtons === true;
+    const minimal = c?.minimalMineButtons === true;
 
     const allButtons = [];
     if (!minimal) {
@@ -561,22 +566,25 @@ export class Popup extends ShadowComponent {
     this.fadeIn();
     this.showExamplesAutomatically();
   }
-  updateStyle(newCSS = config?.customPopupCSS, theme = config?.theme, showReviewButtons = config?.showReviewButtons) {
-    this.#customStyle.textContent = newCSS ?? '';
+  updateStyle(newCSS, theme, cfgOverride) {
+    if (cfgOverride) this.#configOverride = cfgOverride;
+    const c = this.#cfg;
+    this.#customStyle.textContent = newCSS ?? c?.customPopupCSS ?? '';
     // Apply theme to popup host element
-    if (theme && theme !== 'auto') {
-      this.#element.setAttribute('data-theme', theme);
+    const t = theme ?? c?.theme;
+    if (t && t !== 'auto') {
+      this.#element.setAttribute('data-theme', t);
     } else {
       this.#element.removeAttribute('data-theme');
     }
     // Update review buttons visibility
-    this.#updateReviewButtonsVisibility(showReviewButtons);
+    this.#updateReviewButtonsVisibility();
   }
 
-  #updateReviewButtonsVisibility(showReviewButtons = config?.showReviewButtons) {
+  #updateReviewButtonsVisibility() {
     const reviewSection = this.shadow.querySelector('#review-buttons');
     if (reviewSection) {
-      reviewSection.style.display = showReviewButtons === false ? 'none' : '';
+      reviewSection.style.display = this.#cfg?.showReviewButtons === false ? 'none' : '';
     }
   }
 
