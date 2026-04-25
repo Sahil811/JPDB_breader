@@ -139,44 +139,6 @@
     });
   };
 
-  // --- Button Setup ---
-  const parsePageButton = document.createElement("button");
-  parsePageButton.textContent = "Parse selection";
-  Object.assign(parsePageButton.style, {
-    position: "fixed",
-    top: "8px",
-    right: "8px",
-    zIndex: "9999",
-    display: "none",
-    padding: "6px 12px",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    background: "#fff",
-    color: "#333",
-    fontSize: "13px",
-    cursor: "pointer",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-    opacity: "0.92",
-  });
-  document.body.appendChild(parsePageButton);
-
-  // Show button only when user has selected text
-  document.addEventListener("selectionchange", () => {
-    const sel = window.getSelection();
-    parsePageButton.style.display = sel && sel.toString().trim() ? "block" : "none";
-  });
-
-  parsePageButton.addEventListener("click", async () => {
-    try {
-      await browser.runtime.sendMessage({
-        type: "injectContentScript",
-        file: "/integrations/contextmenu.js",
-      });
-    } catch (error) {
-      showError(error);
-    }
-  });
-
   // --- Event Handling ---
   if (isSubtitleSite()) {
     setupSubtitleObserver();
