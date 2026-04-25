@@ -12,65 +12,58 @@
   font-size: 60%;
 }
 
-:where(.jpdb-word:not(.unparsed)) {
-  transition: all 0.15s ease;
-  cursor: pointer;
-}
-
 :where(.jpdb-word:not(.unparsed):hover) {
   text-decoration: underline;
-  background: rgba(currentColor, 0.08);
-  border-radius: 2px;
-  padding: 0 1px;
 }
 
 /* :where(.jpdb-word.unparsed) { } */
 
 :where(.jpdb-word.locked) {
-  color: #9e9e9e;
+  color: rgb(119, 119, 119);
 }
 
 :where(.jpdb-word.suspended) {
-  color: #9e9e9e;
+  color: rgb(119, 119, 119);
 }
 
 :where(.jpdb-word.blacklisted) {
-  color: #ffa726;
+  /* color: rgb(119, 119, 119); */
+  color: orange;
 }
 
 :where(.jpdb-word.never-forget) {
-  color: #26a69a;
+  color: rgb(112, 192, 0);
 }
 
 :where(.jpdb-word.not-in-deck) {
-  color: #e05555;
+  /* color: rgba(75, 141, 255, 0.5); */
+  color: crimson;
 }
 
 :where(.jpdb-word.new) {
-  color: #4a8df8;
+  color: rgb(75, 141, 255);
 }
 
 :where(.jpdb-word.learning) {
-  color: #4caf7d;
+  color: rgb(94, 167, 128);
 }
 
 :where(.jpdb-word.known) {
-  color: #66bb6a;
+  color: rgb(112, 192, 0);
 }
 
 :where(.jpdb-word.due) {
-  color: #ff7b33;
+  color: rgb(255, 69, 0);
 }
 
 :where(.jpdb-word.failed) {
-  color: #ef5350;
+  color: rgb(255, 0, 0);
 }
 
 /* Accessibility: non-color state indicators for colorblind users */
 :where(.jpdb-word.not-in-deck) {
   text-decoration: underline;
   text-decoration-style: dotted;
-  text-decoration-color: currentColor;
   text-underline-offset: 2px;
   text-decoration-thickness: 1px;
 }
@@ -78,7 +71,6 @@
 :where(.jpdb-word.new) {
   text-decoration: underline;
   text-decoration-style: dashed;
-  text-decoration-color: currentColor;
   text-underline-offset: 2px;
   text-decoration-thickness: 1px;
 }
@@ -86,7 +78,6 @@
 :where(.jpdb-word.learning) {
   text-decoration: underline;
   text-decoration-style: solid;
-  text-decoration-color: currentColor;
   text-underline-offset: 2px;
   text-decoration-thickness: 1px;
 }
@@ -98,7 +89,6 @@
 :where(.jpdb-word.never-forget) {
   text-decoration: underline;
   text-decoration-style: double;
-  text-decoration-color: currentColor;
   text-underline-offset: 2px;
   text-decoration-thickness: 1px;
 }
@@ -106,7 +96,6 @@
 :where(.jpdb-word.due) {
   text-decoration: underline;
   text-decoration-style: wavy;
-  text-decoration-color: currentColor;
   text-underline-offset: 2px;
   text-decoration-thickness: 1px;
 }
@@ -114,18 +103,12 @@
 :where(.jpdb-word.failed) {
   text-decoration: underline;
   text-decoration-style: wavy;
-  text-decoration-color: currentColor;
   text-underline-offset: 2px;
   text-decoration-thickness: 1px;
 }
 
-@keyframes nav-highlight-pulse {
-  0% { box-shadow: 0 0 0 2px rgba(74, 141, 248, 0.5), 0 0 12px rgba(74, 141, 248, 0.35); }
-  100% { box-shadow: 0 0 0 2px rgba(74, 141, 248, 0.4), 0 0 8px rgba(74, 141, 248, 0.2); }
-}
-
 :where(.jpdb-word.nav-highlight) {
-  box-shadow: 0 0 0 2px rgba(74, 141, 248, 0.4), 0 0 8px rgba(74, 141, 248, 0.2);
-  border-radius: 3px;
-  animation: nav-highlight-pulse 0.4s ease-out;
+  outline: 2px solid rgba(75, 141, 255, 0.7);
+  outline-offset: 1px;
+  border-radius: 2px;
 }

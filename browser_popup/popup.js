@@ -52,11 +52,11 @@ async function collectStats(tab) {
             document.getElementById('stat-total').textContent = stats.total;
             document.getElementById('stat-unknown').textContent = stats.unknown;
             document.getElementById('stat-known').textContent = stats.known;
-            document.getElementById('stats-section').style.display = 'block';
+            document.getElementById('stats-section').style.display = '';
             // Show mine button if there are unknown words
             if (stats.unknown > 0) {
                 const mineBtn = document.getElementById('mine-all-btn');
-                mineBtn.style.display = 'block';
+                mineBtn.style.display = '';
                 mineBtn.textContent = `Mine all unknown words (${stats.unknown})`;
             }
         }
@@ -70,7 +70,7 @@ async function mineAllUnknown(tab) {
     const mineBtn = document.getElementById('mine-all-btn');
     const progress = document.getElementById('mine-progress');
     mineBtn.disabled = true;
-    progress.style.display = 'block';
+    progress.style.display = '';
     progress.textContent = 'Collecting words…';
 
     try {
@@ -133,7 +133,7 @@ nonNull(document.querySelector('#settings-link')).addEventListener('click', () =
 });
 
 browser.tabs.query({ active: true, currentWindow: true }, async tabs => {
-    const buttonContainer = nonNull(document.querySelector('#parse-buttons'));
+    const buttonContainer = nonNull(document.querySelector('article'));
     const activeTab = tabs[0];
 
     // Collect stats for the active tab
