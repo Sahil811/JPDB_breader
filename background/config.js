@@ -30,6 +30,9 @@ export const defaultConfig = {
   goodKey: null,
   easyKey: null,
   geminiApiKey: null,
+  theme: 'auto',
+  nextUnknownWordKey: null,
+  prevUnknownWordKey: null,
 };
 
 // Cache for config

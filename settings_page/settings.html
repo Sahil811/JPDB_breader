@@ -154,6 +154,11 @@
           <setting-token class="setting" name="apiToken"
             >API Token</setting-token
           >
+          <div class="setting" style="display:contents">
+            <span></span>
+            <button id="test-api-token" style="grid-column: 2; justify-self: start;">Test Connection</button>
+            <span id="test-api-result" style="grid-column: 3; font-size: 85%;"></span>
+          </div>
           <setting-token class="setting" name="geminiApiKey"
             >Gemini API Key</setting-token
           >
@@ -248,6 +253,12 @@
           <setting-keybind class="setting" name="easyKey"
             >Review word as easy</setting-keybind
           >
+          <setting-keybind class="setting" name="nextUnknownWordKey"
+            >Next unknown word</setting-keybind
+          >
+          <setting-keybind class="setting" name="prevUnknownWordKey"
+            >Previous unknown word</setting-keybind
+          >
         </section>
         <section id="accessibility">
           <h1>Accessibility</h1>
@@ -272,6 +283,10 @@
         </section>
         <section id="appearance">
           <h1>Appearance</h1>
+          <setting-select class="setting" name="theme"
+            data-options='[["auto","Auto (system)"],["light","Light"],["dark","Dark"]]'
+            >Theme</setting-select
+          >
           <setting-string class="setting" name="customWordCSS"
             >Custom Word CSS</setting-string
           >

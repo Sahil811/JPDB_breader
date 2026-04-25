@@ -220,6 +220,31 @@ class SettingKeybind extends SettingElement {
         this.valueChanged();
     }
 }
+class SettingSelect extends SettingElement {
+    renderInputElem(name) {
+        const select = jsxCreateElement("select", { part: 'input', name: name, oninput: () => {
+                this.valueChanged();
+                markUnsavedChanges();
+            } });
+        // Parse options from data-options attribute
+        try {
+            const options = JSON.parse(this.getAttribute('data-options') || '[]');
+            for (const [value, label] of options) {
+                select.appendChild(jsxCreateElement("option", { value }, label));
+            }
+        } catch (e) {
+            console.error('Invalid data-options for setting-select:', e);
+        }
+        return select;
+    }
+    get value() {
+        return this.input.value;
+    }
+    set value(newValue) {
+        this.input.value = newValue ?? 'auto';
+        this.valueChanged();
+    }
+}
 export function defineCustomElements() {
     customElements.define('setting-number', SettingNumber);
     customElements.define('setting-boolean', SettingBoolean);
@@ -227,5 +252,6 @@ export function defineCustomElements() {
     customElements.define('setting-deck-id', SettingDeckId);
     customElements.define('setting-string', SettingString);
     customElements.define('setting-keybind', SettingKeybind);
+    customElements.define('setting-select', SettingSelect);
     document.body.classList.add('ready');
 }

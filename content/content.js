@@ -5,6 +5,49 @@ import { showError } from './toast.js';
 import { getSentences } from './word.js';
 export let currentHover = null;
 let popupKeyHeld = false;
+let currentUnknownWordIndex = -1;
+const UNKNOWN_WORD_SELECTORS = '.jpdb-word.new, .jpdb-word.not-in-deck, .jpdb-word.learning';
+
+function getUnknownWords() {
+    return Array.from(document.querySelectorAll(UNKNOWN_WORD_SELECTORS));
+}
+
+function navigateUnknownWord(direction) {
+    const words = getUnknownWords();
+    if (words.length === 0) return;
+
+    // Find closest word to current index
+    if (currentUnknownWordIndex < 0 || currentUnknownWordIndex >= words.length) {
+        currentUnknownWordIndex = direction > 0 ? 0 : words.length - 1;
+    } else {
+        currentUnknownWordIndex += direction;
+        if (currentUnknownWordIndex >= words.length) currentUnknownWordIndex = 0;
+        if (currentUnknownWordIndex < 0) currentUnknownWordIndex = words.length - 1;
+    }
+
+    const word = words[currentUnknownWordIndex];
+    word.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Remove previous highlight
+    document.querySelectorAll('.jpdb-word.nav-highlight').forEach(el => el.classList.remove('nav-highlight'));
+    word.classList.add('nav-highlight');
+
+    // Show popup for the navigated word
+    if (word.jpdbData) {
+        const rect = word.getBoundingClientRect();
+        currentHover = [word, rect.left + rect.width / 2, rect.top + rect.height / 2];
+        Popup.get().showForWord(word, rect.left, rect.top);
+    }
+}
+const lastTrigger = new Map();
+const HOTKEY_THROTTLE_MS = 300;
+function shouldThrottle(actionName) {
+    const now = Date.now();
+    const last = lastTrigger.get(actionName) || 0;
+    if (now - last < HOTKEY_THROTTLE_MS) return true;
+    lastTrigger.set(actionName, now);
+    return false;
+}
 function matchesHotkey(event, hotkey) {
     const code = event instanceof KeyboardEvent ? event.code : `Mouse${event.button}`;
     return hotkey && code === hotkey.code && hotkey.modifiers.every(name => event.getModifierState(name));
@@ -26,44 +69,53 @@ async function hotkeyListener(event) {
         if (currentHover) {
             const [word, x, y] = currentHover;
             const card = word.jpdbData.token.card;
-            if (matchesHotkey(event, config.addKey)) {
+            if (matchesHotkey(event, config.addKey) && !shouldThrottle('add')) {
                 await requestMine(word.jpdbData.token.card, config.forqOnMine, getSentences(word.jpdbData, config.contextWidth).trim() || undefined, undefined);
             }
-            if (matchesHotkey(event, config.dialogKey)) {
+            if (matchesHotkey(event, config.dialogKey) && !shouldThrottle('dialog')) {
                 Dialog.get().showForWord(word.jpdbData);
             }
-            if (matchesHotkey(event, config.showPopupKey)) {
+            if (matchesHotkey(event, config.showPopupKey) && !shouldThrottle('showPopup')) {
                 event.preventDefault();
                 Popup.get().showForWord(word, x, y);
             }
-            if (matchesHotkey(event, config.blacklistKey)) {
+            if (matchesHotkey(event, config.blacklistKey) && !shouldThrottle('blacklist')) {
                 event.preventDefault();
                 await requestSetFlag(card, 'blacklist', !card.state.includes('blacklisted'));
             }
-            if (matchesHotkey(event, config.neverForgetKey)) {
+            if (matchesHotkey(event, config.neverForgetKey) && !shouldThrottle('neverForget')) {
                 event.preventDefault();
                 await requestSetFlag(card, 'never-forget', !card.state.includes('never-forget'));
             }
-            if (matchesHotkey(event, config.nothingKey)) {
+            if (matchesHotkey(event, config.nothingKey) && !shouldThrottle('nothing')) {
                 event.preventDefault();
                 await requestReview(card, 'nothing');
             }
-            if (matchesHotkey(event, config.somethingKey)) {
+            if (matchesHotkey(event, config.somethingKey) && !shouldThrottle('something')) {
                 event.preventDefault();
                 await requestReview(card, 'something');
             }
-            if (matchesHotkey(event, config.hardKey)) {
+            if (matchesHotkey(event, config.hardKey) && !shouldThrottle('hard')) {
                 event.preventDefault();
                 await requestReview(card, 'hard');
             }
-            if (matchesHotkey(event, config.goodKey)) {
+            if (matchesHotkey(event, config.goodKey) && !shouldThrottle('good')) {
                 event.preventDefault();
                 await requestReview(card, 'good');
             }
-            if (matchesHotkey(event, config.easyKey)) {
+            if (matchesHotkey(event, config.easyKey) && !shouldThrottle('easy')) {
                 event.preventDefault();
                 await requestReview(card, 'easy');
             }
+        }
+        // Word navigation works regardless of hover state
+        if (matchesHotkey(event, config.nextUnknownWordKey)) {
+            event.preventDefault();
+            navigateUnknownWord(1);
+        }
+        if (matchesHotkey(event, config.prevUnknownWordKey)) {
+            event.preventDefault();
+            navigateUnknownWord(-1);
         }
     }
     catch (error) {

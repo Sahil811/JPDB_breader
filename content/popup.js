@@ -585,6 +585,11 @@ export class Popup extends ShadowComponent {
   }
   setData(data) {
     this.#data = data;
+    // Clear previous content immediately to prevent stale data flash
+    this.#vocabSection.replaceChildren(
+      jsxCreateElement("span", { class: "loading-placeholder" }, "Loading…")
+    );
+    this.#mineButtons.replaceChildren();
     const renderVersion = ++this.#renderVersion;
     void this.render(renderVersion);
   }
@@ -676,6 +681,14 @@ export class Popup extends ShadowComponent {
   }
   updateStyle(newCSS = config.customPopupCSS) {
     this.#customStyle.textContent = newCSS;
+    // Apply theme to popup host element
+    if (config && config.theme) {
+      if (config.theme === 'dark' || config.theme === 'light') {
+        this.#element.setAttribute('data-theme', config.theme);
+      } else {
+        this.#element.removeAttribute('data-theme');
+      }
+    }
   }
 
   async explainWord(word, meanings) {

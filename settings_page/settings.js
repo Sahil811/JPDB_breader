@@ -2,10 +2,20 @@ import { loadConfig, migrateSchema, saveConfig } from "../background/config.js";
 import { requestUpdateConfig } from "../content/background_comms.js";
 import { Popup } from "../content/popup.js";
 import { showError } from "../content/toast.js";
+import { jpdbApi } from "../integrations/api.js";
 import { assert, nonNull, wrap } from "../util.js";
 import { defineCustomElements } from "./elements.js";
 // Custom element definitions
 // Common behavior shared for all settings elements
+
+function applyTheme(theme) {
+  if (theme === 'dark' || theme === 'light') {
+    document.documentElement.setAttribute('data-theme', theme);
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+}
+
 const POPUP_EXAMPLE_DATA = {
   context: "",
   contextOffset: 0,
@@ -77,6 +87,9 @@ try {
     for (const elem of document.querySelectorAll("[name]")) {
       elem.value = config[elem.name] ?? null;
     }
+
+    // Apply theme to settings page
+    applyTheme(config.theme);
   })();
   
   defineCustomElements();
@@ -154,6 +167,13 @@ try {
       popup.updateStyle(newCSS);
     }
   );
+  // Update theme live when the select changes
+  const themeSelect = document.querySelector('[name="theme"]');
+  if (themeSelect) {
+    themeSelect.addEventListener("input", () => {
+      applyTheme(themeSelect.value);
+    });
+  }
   const popup = Popup.getDemoMode(nonNull(document.querySelector("#preview")));
   popup.setData(POPUP_EXAMPLE_DATA);
   popup.fadeIn();
@@ -173,11 +193,48 @@ try {
       }
       await saveConfig(config);
       await requestUpdateConfig();
+      applyTheme(config.theme);
       unmarkUnsavedChanges();
     } catch (error) {
       showError(error);
     }
   });
+  // Test API token connection
+  const testBtn = document.querySelector("#test-api-token");
+  const testResult = document.querySelector("#test-api-result");
+  if (testBtn && testResult) {
+    testBtn.addEventListener("click", async () => {
+      const tokenElem = document.querySelector('[name="apiToken"]');
+      const token = tokenElem?.value;
+      if (!token) {
+        testResult.textContent = "⚠ No token entered";
+        testResult.style.color = "var(--md-sys-color-warning, orange)";
+        return;
+      }
+      testBtn.disabled = true;
+      testResult.textContent = "Testing…";
+      testResult.style.color = "var(--md-sys-color-on-surface-variant, gray)";
+      try {
+        await jpdbApi.lookupVocabulary({
+          apiToken: token,
+          list: [[1386060, 1337383451]],
+          fields: ["vid"],
+        });
+        testResult.textContent = "✓ Connection successful";
+        testResult.style.color = "var(--md-sys-color-success, green)";
+      } catch (error) {
+        const status = error.status;
+        if (status === 403) {
+          testResult.textContent = "✗ Invalid API token";
+        } else {
+          testResult.textContent = `✗ ${error.message || "Connection failed"}`;
+        }
+        testResult.style.color = "var(--md-sys-color-error, red)";
+      } finally {
+        testBtn.disabled = false;
+      }
+    });
+  }
 } catch (error) {
   showError(error);
 }

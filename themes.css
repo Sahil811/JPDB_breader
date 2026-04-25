@@ -60,10 +60,11 @@
     --md-sys-elevation-3: 0px 4px 8px 3px rgba(0,0,0,0.15), 0px 1px 3px 0px rgba(0,0,0,0.05);
 }
 
+/* Auto dark mode: applies when system prefers dark AND theme is not forced to light */
 @media (prefers-color-scheme: dark) {
-    :root,
-    :host,
-    :host > * {
+    :root:not([data-theme="light"]),
+    :host(:not([data-theme="light"])),
+    :host(:not([data-theme="light"])) > * {
         /* Dark Theme */
         --md-sys-color-primary: #a8c7fa;
         --md-sys-color-on-primary: #062e6f;
@@ -118,6 +119,63 @@
         --md-sys-elevation-2: 0px 1px 2px 0px rgba(0,0,0,0.6), 0px 2px 6px 2px rgba(0,0,0,0.4);
         --md-sys-elevation-3: 0px 4px 8px 3px rgba(0,0,0,0.4), 0px 1px 3px 0px rgba(0,0,0,0.6);
     }
+}
+
+/* Explicit dark mode override */
+:root[data-theme="dark"],
+:host([data-theme="dark"]),
+:host([data-theme="dark"]) > * {
+    --md-sys-color-primary: #a8c7fa;
+    --md-sys-color-on-primary: #062e6f;
+    --md-sys-color-primary-container: #0842a0;
+    --md-sys-color-on-primary-container: #d3e3fd;
+    
+    --md-sys-color-error: #f2b8b5;
+    --md-sys-color-on-error: #601410;
+    --md-sys-color-error-container: #8c1d18;
+    --md-sys-color-on-error-container: #f9dedc;
+    
+    --md-sys-color-success: #6dd58c;
+    --md-sys-color-on-success: #0f5223;
+    --md-sys-color-success-container: #156d2f;
+    --md-sys-color-on-success-container: #c4eed0;
+
+    --md-sys-color-warning: #ffb4ab;
+    --md-sys-color-on-warning: #690005;
+    --md-sys-color-warning-container: #93000a;
+    --md-sys-color-on-warning-container: #ffdad6;
+    
+    --md-sys-color-surface: #1e1e1e;
+    --md-sys-color-surface-dim: #141414;
+    --md-sys-color-surface-bright: #383838;
+    --md-sys-color-surface-container: #282828;
+    --md-sys-color-surface-container-high: #333333;
+    
+    --md-sys-color-on-surface: #e3e3e3;
+    --md-sys-color-on-surface-variant: #c4c7c5;
+    
+    --md-sys-color-outline: #8e918f;
+    --md-sys-color-outline-variant: #444746;
+    
+    --color-input-background: var(--md-sys-color-surface-container);
+    --color-input-border: var(--md-sys-color-outline-variant);
+    --color-button-border: var(--md-sys-color-primary);
+    --color-link: var(--md-sys-color-primary);
+    --color-background: var(--md-sys-color-surface);
+    --color-background-alt: var(--md-sys-color-surface-container);
+    --color-text: var(--md-sys-color-on-surface);
+    --text-color: var(--md-sys-color-on-surface);
+    --text-color-secondary: var(--md-sys-color-on-surface-variant);
+    --border-color: var(--md-sys-color-outline-variant);
+
+    --filter-more-contrast: brightness(120%) saturate(80%);
+    --filter-less-contrast: brightness(85%) saturate(140%);
+    --filter-brighter: brightness(115%) saturate(85%);
+    --filter-darker: brightness(85%) saturate(115%);
+
+    --md-sys-elevation-1: 0px 1px 2px 0px rgba(0,0,0,0.6), 0px 1px 3px 1px rgba(0,0,0,0.4);
+    --md-sys-elevation-2: 0px 1px 2px 0px rgba(0,0,0,0.6), 0px 2px 6px 2px rgba(0,0,0,0.4);
+    --md-sys-elevation-3: 0px 4px 8px 3px rgba(0,0,0,0.4), 0px 1px 3px 0px rgba(0,0,0,0.6);
 }
 
 :root,
