@@ -349,10 +349,18 @@ export class Popup extends ShadowComponent {
     if (this.#data === undefined) return;
     const data = this.#data;
     const card = data.token.card;
-    const { characterDetails: popupCharacterDetails, hindiMeaning: popupHindiMeaning } = await loadPopupSupplementalData(card, {
-      showKanji: config.showKanji,
-      showHindi: config.showHindi,
-    });
+    let popupCharacterDetails = null;
+    let popupHindiMeaning = null;
+    try {
+      const result = await loadPopupSupplementalData(card, {
+        showKanji: config.showKanji,
+        showHindi: config.showHindi,
+      });
+      popupCharacterDetails = result.characterDetails;
+      popupHindiMeaning = result.hindiMeaning;
+    } catch (e) {
+      console.warn('JPDBreader: failed to load supplemental data', e);
+    }
     if (renderVersion !== this.#renderVersion || this.#data !== data) return;
 
     this.#vocabSection.replaceChildren(

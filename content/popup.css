@@ -29,7 +29,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :host {
+  :host:not([data-theme="light"]) {
     --c-surface:     #292a2d;
     --c-on-surface:  #e8eaed;
     --c-secondary:   #9aa0a6;
@@ -40,6 +40,19 @@
     --c-primary-bg:  #1c2f6b;
     --c-accent-bar:  #8ab4f8;
   }
+}
+
+/* Explicit dark mode override */
+:host([data-theme="dark"]) {
+  --c-surface:     #292a2d;
+  --c-on-surface:  #e8eaed;
+  --c-secondary:   #9aa0a6;
+  --c-border:      #3c4043;
+  --c-hover:       #3c4043;
+  --c-hover-dark:  #5f6368;
+  --c-primary:     #8ab4f8;
+  --c-primary-bg:  #1c2f6b;
+  --c-accent-bar:  #8ab4f8;
 }
 
 /* ── Scrollbar ── */
@@ -76,8 +89,9 @@ article {
 }
 
 @media (prefers-color-scheme: dark) {
-  article { box-shadow: 0 2px 6px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.4); }
+  :host:not([data-theme="light"]) article { box-shadow: 0 2px 6px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.4); }
 }
+:host([data-theme="dark"]) article { box-shadow: 0 2px 6px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.4); }
 
 @keyframes popup-enter {
   from { opacity: 0; transform: translateY(6px); }
@@ -144,11 +158,15 @@ button.show-examples:hover        { background: var(--c-primary-bg); }
 button.edit-add-review { display: none; }
 
 @media (prefers-color-scheme: dark) {
-  button.never-forget { border-color: #d7aefb; color: #d7aefb; }
-  button.never-forget:hover { background: #370d4f; }
-  button.forq { border-color: #ff8a65; color: #ff8a65; }
-  button.forq:hover { background: #3e1a00; }
+  :host:not([data-theme="light"]) button.never-forget { border-color: #d7aefb; color: #d7aefb; }
+  :host:not([data-theme="light"]) button.never-forget:hover { background: #370d4f; }
+  :host:not([data-theme="light"]) button.forq { border-color: #ff8a65; color: #ff8a65; }
+  :host:not([data-theme="light"]) button.forq:hover { background: #3e1a00; }
 }
+:host([data-theme="dark"]) button.never-forget { border-color: #d7aefb; color: #d7aefb; }
+:host([data-theme="dark"]) button.never-forget:hover { background: #370d4f; }
+:host([data-theme="dark"]) button.forq { border-color: #ff8a65; color: #ff8a65; }
+:host([data-theme="dark"]) button.forq:hover { background: #3e1a00; }
 
 /* Review buttons — solid fill, semantic traffic-light colors */
 button.nothing  { background: #c62828; color: #fff; border-color: #c62828; }
@@ -164,12 +182,17 @@ button.good:hover     { background: #1b5e20; border-color: #1b5e20; }
 button.easy:hover     { background: #0d47a1; border-color: #0d47a1; }
 
 @media (prefers-color-scheme: dark) {
-  button.nothing  { background: #a50e0e; border-color: #a50e0e; }
-  button.something{ background: #b23c00; border-color: #b23c00; }
-  button.hard     { background: #c85f00; border-color: #c85f00; }
-  button.good     { background: #1a6b2d; border-color: #1a6b2d; }
-  button.easy     { background: #1a4e9e; border-color: #1a4e9e; }
+  :host:not([data-theme="light"]) button.nothing  { background: #a50e0e; border-color: #a50e0e; }
+  :host:not([data-theme="light"]) button.something{ background: #b23c00; border-color: #b23c00; }
+  :host:not([data-theme="light"]) button.hard     { background: #c85f00; border-color: #c85f00; }
+  :host:not([data-theme="light"]) button.good     { background: #1a6b2d; border-color: #1a6b2d; }
+  :host:not([data-theme="light"]) button.easy     { background: #1a4e9e; border-color: #1a4e9e; }
 }
+:host([data-theme="dark"]) button.nothing  { background: #a50e0e; border-color: #a50e0e; }
+:host([data-theme="dark"]) button.something{ background: #b23c00; border-color: #b23c00; }
+:host([data-theme="dark"]) button.hard     { background: #c85f00; border-color: #c85f00; }
+:host([data-theme="dark"]) button.good     { background: #1a6b2d; border-color: #1a6b2d; }
+:host([data-theme="dark"]) button.easy     { background: #1a4e9e; border-color: #1a4e9e; }
 
 /* ──────────────────────────────────────────
    HEADER — word + state
@@ -258,10 +281,14 @@ a.word-link:hover .spelling { color: var(--c-primary); }
 }
 
 @media (prefers-color-scheme: dark) {
-  .util-btn:hover {
+  :host:not([data-theme="light"]) .util-btn:hover {
     border-color: rgba(138, 180, 248, 0.2);
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   }
+}
+:host([data-theme="dark"]) .util-btn:hover {
+  border-color: rgba(138, 180, 248, 0.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 /* State badge */
@@ -297,12 +324,17 @@ a.word-link:hover .spelling { color: var(--c-primary); }
 .state .not-in-deck  { background: var(--c-primary-bg); color: var(--c-primary); }
 
 @media (prefers-color-scheme: dark) {
-  .state .learning     { background: #0e3724; color: #81c995; }
-  .state .known        { background: #0d3b1e; color: #5bb974; }
-  .state .due,
-  .state .failed       { background: #4a0c0a; color: #f28b82; }
-  .state .never-forget { background: #370d4f; color: #d7aefb; }
+  :host:not([data-theme="light"]) .state .learning     { background: #0e3724; color: #81c995; }
+  :host:not([data-theme="light"]) .state .known        { background: #0d3b1e; color: #5bb974; }
+  :host:not([data-theme="light"]) .state .due,
+  :host:not([data-theme="light"]) .state .failed       { background: #4a0c0a; color: #f28b82; }
+  :host:not([data-theme="light"]) .state .never-forget { background: #370d4f; color: #d7aefb; }
 }
+:host([data-theme="dark"]) .state .learning     { background: #0e3724; color: #81c995; }
+:host([data-theme="dark"]) .state .known        { background: #0d3b1e; color: #5bb974; }
+:host([data-theme="dark"]) .state .due,
+:host([data-theme="dark"]) .state .failed       { background: #4a0c0a; color: #f28b82; }
+:host([data-theme="dark"]) .state .never-forget { background: #370d4f; color: #d7aefb; }
 
 /* ──────────────────────────────────────────
    META — frequency + pitch

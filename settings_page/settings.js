@@ -226,16 +226,19 @@ try {
       popup.updateStyle(newCSS);
     }
   );
+  const popup = Popup.getDemoMode(nonNull(document.querySelector("#preview")));
+  popup.setData(POPUP_EXAMPLE_DATA);
+  popup.fadeIn();
   // Update theme live when the select changes
   const themeSelect = document.querySelector('[name="theme"]');
   if (themeSelect) {
     themeSelect.addEventListener("input", () => {
       applyTheme(themeSelect.value);
+      // Also update the popup preview theme
+      config.theme = themeSelect.value;
+      popup.updateStyle(config.customPopupCSS);
     });
   }
-  const popup = Popup.getDemoMode(nonNull(document.querySelector("#preview")));
-  popup.setData(POPUP_EXAMPLE_DATA);
-  popup.fadeIn();
   const saveButton = nonNull(document.querySelector("input[type=submit]"));
   saveButton.addEventListener("click", async (event) => {
     event.preventDefault();
