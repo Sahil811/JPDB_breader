@@ -70,6 +70,12 @@ export class Dialog extends ShadowComponent {
                     jsxCreateElement("button", { class: 'hard', onclick: async () => await add('hard') }, "Hard"),
                     jsxCreateElement("button", { class: 'good', onclick: async () => await add('good') }, "Good"),
                     jsxCreateElement("button", { class: 'easy', onclick: async () => await add('easy') }, "Easy")))));
+        // Close dialog on Escape key
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && this.element.style.display !== 'none') {
+                this.closeModal();
+            }
+        });
     }
     render() {
         if (this.#data === undefined)

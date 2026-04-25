@@ -2,14 +2,21 @@ import { browser } from '../util.js';
 import { jsxCreateElement } from '../jsx.js';
 import { ShadowComponent } from './shadowbase.js';
 
-const toastContainerElement = jsxCreateElement("div", null);
-document.body.append(toastContainerElement);
+let toastContainerElement = null;
+let toastComponent = null;
 
-const toastComponent = new ShadowComponent(toastContainerElement, [
-  '/themes.css',
-  '/common.css',
-  '/content/toast.css'
-]);
+function ensureToastContainer() {
+    if (!toastComponent) {
+        toastContainerElement = jsxCreateElement("div", { role: 'alert', 'aria-live': 'polite' });
+        document.body.append(toastContainerElement);
+        toastComponent = new ShadowComponent(toastContainerElement, [
+            '/themes.css',
+            '/common.css',
+            '/content/toast.css'
+        ]);
+    }
+    return toastComponent;
+}
 
 export function showToast(kind, message, options = {}) {
     const toast = (jsxCreateElement("div", { class: 'toast' },
@@ -28,7 +35,7 @@ export function showToast(kind, message, options = {}) {
             toast.remove();
         }, options.timeout ?? 3000)
         : undefined;
-    toastComponent.append(toast);
+    ensureToastContainer().append(toast);
 }
 export function showError(error) {
     console.error(error);

@@ -59,3 +59,50 @@
 :where(.jpdb-word.failed) {
   color: rgb(255, 0, 0);
 }
+
+/* Accessibility: non-color state indicators for colorblind users */
+:where(.jpdb-word.not-in-deck) {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+:where(.jpdb-word.new) {
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+:where(.jpdb-word.learning) {
+  text-decoration: underline;
+  text-decoration-style: solid;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+:where(.jpdb-word.known) {
+  text-decoration: none;
+}
+
+:where(.jpdb-word.never-forget) {
+  text-decoration: underline;
+  text-decoration-style: double;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+:where(.jpdb-word.due) {
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+:where(.jpdb-word.failed) {
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}

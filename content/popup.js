@@ -335,6 +335,8 @@ export class Popup extends ShadowComponent {
             "button",
             {
               class: "nothing",
+              tabindex: "0",
+              "aria-label": "Review: Nothing (1)",
               onclick: demoMode ? undefined : async () => await requestReview(this.#data.token.card, "nothing"),
             },
             "Nothing"
@@ -343,6 +345,8 @@ export class Popup extends ShadowComponent {
             "button",
             {
               class: "something",
+              tabindex: "0",
+              "aria-label": "Review: Something (2)",
               onclick: demoMode ? undefined : async () => await requestReview(this.#data.token.card, "something"),
             },
             "Something"
@@ -351,6 +355,8 @@ export class Popup extends ShadowComponent {
             "button",
             {
               class: "hard",
+              tabindex: "0",
+              "aria-label": "Review: Hard (3)",
               onclick: demoMode ? undefined : async () => await requestReview(this.#data.token.card, "hard"),
             },
             "Hard"
@@ -359,6 +365,8 @@ export class Popup extends ShadowComponent {
             "button",
             {
               class: "good",
+              tabindex: "0",
+              "aria-label": "Review: Good (4)",
               onclick: demoMode ? undefined : async () => await requestReview(this.#data.token.card, "good"),
             },
             "Good"
@@ -367,6 +375,8 @@ export class Popup extends ShadowComponent {
             "button",
             {
               class: "easy",
+              tabindex: "0",
+              "aria-label": "Review: Easy (5)",
               onclick: demoMode ? undefined : async () => await requestReview(this.#data.token.card, "easy"),
             },
             "Easy"
@@ -379,6 +389,22 @@ export class Popup extends ShadowComponent {
     );
     this.#outerStyle = this.#element.style;
     this.immersionKit = new ImmersionKit(this.#vocabSection);
+
+    // Close popup on Escape key; number keys 1-5 activate review buttons
+    if (!demoMode) {
+      const reviewRatings = ['nothing', 'something', 'hard', 'good', 'easy'];
+      document.addEventListener('keydown', (event) => {
+        if (!this.isVisible()) return;
+        if (event.key === 'Escape') {
+          this.fadeOut();
+          return;
+        }
+        const num = parseInt(event.key);
+        if (num >= 1 && num <= 5 && this.#data) {
+          requestReview(this.#data.token.card, reviewRatings[num - 1]);
+        }
+      });
+    }
   }
 
   // Add debouncer property
@@ -593,9 +619,12 @@ export class Popup extends ShadowComponent {
     }
   }
 
-  showForWord(word, mouseX = 0, mouseY = 0) {
+  async showForWord(word, mouseX = 0, mouseY = 0) {
     const data = word.jpdbData;
     this.setData(data); // Because we need the dimensions of the popup with the new data
+    // Ensure stylesheets are loaded before measuring dimensions
+    await this.stylesReady;
+    await new Promise(r => requestAnimationFrame(r));
     const bbox = getClosestClientRect(word, mouseX, mouseY);
     const wordLeft = window.scrollX + bbox.left;
     const wordTop = window.scrollY + bbox.top;
