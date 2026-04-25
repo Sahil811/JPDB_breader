@@ -245,42 +245,42 @@ export function createWordDetailsContent({
             card.spelling !== card.reading ? `(${card.reading})` : "",
           ),
         ),
-        jsxCreateElement(
-          "div",
-          { class: "utility-icons" },
-          jsxCreateElement(
-            "button",
-            {
-              class: "util-btn audio-btn",
-              title: "Play pronunciation",
-              onclick: (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onPlayAudio();
-              },
-            },
-            "🔊",
-          ),
-          jsxCreateElement(
-            "button",
-            {
-              class: "util-btn",
-              title: "Explain word",
-              onclick: (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onExplainWord();
-              },
-            },
-            "ℹ️",
-          ),
-        ),
       ),
       jsxCreateElement(
         "div",
         { class: "state" },
         card.state.map((state) =>
           jsxCreateElement("span", { class: state }, state),
+        ),
+      ),
+      jsxCreateElement(
+        "div",
+        { class: "utility-icons" },
+        jsxCreateElement(
+          "button",
+          {
+            class: "util-btn audio-btn",
+            title: "Play pronunciation",
+            onclick: (event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onPlayAudio();
+            },
+          },
+          "🔊",
+        ),
+        jsxCreateElement(
+          "button",
+          {
+            class: "util-btn",
+            title: "Explain word",
+            onclick: (event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onExplainWord();
+            },
+          },
+          "ℹ️",
         ),
       ),
     ),

@@ -267,25 +267,21 @@ button.easy:hover     { background: #0d47a1; border-color: #0d47a1; }
 
 #header {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  flex-direction: column;
   padding: 10px 12px 4px;
 }
 
 .header-main-info {
-  flex: 1;
-  min-width: 0;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  align-items: center;
-  gap: 0 6px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 /* Word link */
 a.word-link {
-  grid-column: 1;
-  grid-row: 1;
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   text-decoration: none;
@@ -312,11 +308,10 @@ a.word-link:hover .spelling { color: var(--c-primary); }
 
 /* Utility buttons */
 .utility-icons {
-  grid-column: 2;
-  grid-row: 1;
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 0 2px;
 }
 
 .util-btn {
@@ -363,11 +358,9 @@ a.word-link:hover .spelling { color: var(--c-primary); }
 /* State badge */
 .state {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  flex-wrap: wrap;
   gap: 3px;
-  flex-shrink: 0;
-  padding-top: 4px;
+  padding: 4px 0 0;
 }
 
 .state span {
