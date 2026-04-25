@@ -2,6 +2,7 @@ import {
   requestFetchAudioBytes,
   requestFetchAudioHash,
 } from "./background_comms.js";
+import { showToast } from "./toast.js";
 
 const JPDB_XOR_KEY = [0x06, 0x23, 0x54, 0x0f];
 let currentAudio = null;
@@ -32,7 +33,10 @@ export const JpdbAudio = {
         this.cache.set(vid, result.hash);
         return result.hash;
       }
-    } catch (e) { console.warn('JPDBreader: audio error', e); }
+    } catch (e) {
+      console.warn('JPDBreader: audio error', e);
+      showToast('error', 'Audio not available for this word');
+    }
 
     return null;
   },

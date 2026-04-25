@@ -424,6 +424,60 @@
     --md-sys-elevation-3: none;
 }
 
+/* High Contrast — maximum readability */
+:root[data-theme="high-contrast"],
+:host([data-theme="high-contrast"]),
+:host([data-theme="high-contrast"]) > * {
+    --md-sys-color-primary: #0040dd;
+    --md-sys-color-on-primary: #ffffff;
+    --md-sys-color-primary-container: #cce0ff;
+    --md-sys-color-on-primary-container: #001a4d;
+
+    --md-sys-color-error: #cc0000;
+    --md-sys-color-on-error: #ffffff;
+    --md-sys-color-error-container: #ffcccc;
+    --md-sys-color-on-error-container: #4d0000;
+    --md-sys-color-success: #006600;
+    --md-sys-color-on-success: #ffffff;
+    --md-sys-color-success-container: #ccffcc;
+    --md-sys-color-on-success-container: #003300;
+    --md-sys-color-warning: #995200;
+    --md-sys-color-on-warning: #ffffff;
+    --md-sys-color-warning-container: #fff0cc;
+    --md-sys-color-on-warning-container: #4d2900;
+
+    --md-sys-color-surface: #ffffff;
+    --md-sys-color-surface-dim: #e0e0e0;
+    --md-sys-color-surface-bright: #ffffff;
+    --md-sys-color-surface-container: #f0f0f0;
+    --md-sys-color-surface-container-high: #e8e8e8;
+
+    --md-sys-color-on-surface: #000000;
+    --md-sys-color-on-surface-variant: #333333;
+    --md-sys-color-outline: #000000;
+    --md-sys-color-outline-variant: #666666;
+
+    --color-input-background: #ffffff;
+    --color-input-border: #000000;
+    --color-button-border: #0040dd;
+    --color-link: #0040dd;
+    --color-background: #ffffff;
+    --color-background-alt: #f0f0f0;
+    --color-text: #000000;
+    --text-color: #000000;
+    --text-color-secondary: #333333;
+    --border-color: #000000;
+
+    --filter-more-contrast: contrast(130%);
+    --filter-less-contrast: contrast(80%);
+    --filter-brighter: brightness(110%);
+    --filter-darker: brightness(90%);
+
+    --md-sys-elevation-1: 0 1px 3px rgba(0,0,0,0.3);
+    --md-sys-elevation-2: 0 2px 6px rgba(0,0,0,0.3);
+    --md-sys-elevation-3: 0 4px 12px rgba(0,0,0,0.3);
+}
+
 :root,
 :host,
 :host > * {

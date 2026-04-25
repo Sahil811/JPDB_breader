@@ -246,6 +246,28 @@
                 margin-top: 6px;
                 opacity: 0.7;
             }
+
+            /* Flashcard reveal animation */
+            .flashcard .fc-divider,
+            .flashcard .fc-reading,
+            .flashcard .fc-meaning,
+            .flashcard .fc-sentence {
+                animation: fc-reveal 0.3s ease-out both;
+            }
+            .flashcard .fc-divider  { animation-delay: 0s; }
+            .flashcard .fc-reading  { animation-delay: 0.05s; }
+            .flashcard .fc-meaning  { animation-delay: 0.1s; }
+            .flashcard .fc-sentence { animation-delay: 0.15s; }
+            @keyframes fc-reveal {
+                from { opacity: 0; transform: translateY(6px); }
+                to   { opacity: 1; transform: translateY(0); }
+            }
+
+            /* Focus indicators */
+            button:focus-visible, a:focus-visible {
+                outline: 2px solid var(--md-sys-color-primary, #1967d2);
+                outline-offset: 2px;
+            }
             .fc-hint {
                 text-align: center;
                 font-size: 11px;

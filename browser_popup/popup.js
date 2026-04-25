@@ -65,8 +65,13 @@ async function collectStats(tab) {
     }
 }
 
+// Cache for collected words per tab to avoid re-collecting
+let cachedWords = null;
+let cachedTabId = null;
+
 // Collect unknown words and export as Anki-compatible TSV
 async function collectUnknownWords(tab) {
+    if (cachedTabId === tab.id && cachedWords) return cachedWords;
     const results = await browser.scripting.executeScript({
         target: { tabId: tab.id },
         func: () => {
@@ -99,7 +104,10 @@ async function collectUnknownWords(tab) {
             return words;
         },
     });
-    return results?.[0]?.result || [];
+    const words = results?.[0]?.result || [];
+    cachedWords = words;
+    cachedTabId = tab.id;
+    return words;
 }
 
 async function exportUnknownWords(tab) {

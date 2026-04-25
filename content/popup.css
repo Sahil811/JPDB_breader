@@ -29,7 +29,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) {
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) {
     --c-surface:     #292a2d;
     --c-on-surface:  #e8eaed;
     --c-secondary:   #9aa0a6;
@@ -119,6 +119,18 @@
   --c-primary-bg:  #0a1a30;
   --c-accent-bar:  #a8c7fa;
 }
+
+:host([data-theme="high-contrast"]) {
+  --c-surface:     #ffffff;
+  --c-on-surface:  #000000;
+  --c-secondary:   #333333;
+  --c-border:      #000000;
+  --c-hover:       #e0e0e0;
+  --c-hover-dark:  #cccccc;
+  --c-primary:     #0040dd;
+  --c-primary-bg:  #cce0ff;
+  --c-accent-bar:  #0040dd;
+}
 }
 
 /* ── Scrollbar ── */
@@ -179,7 +191,7 @@ article::-webkit-scrollbar-thumb:hover {
 }
 
 @media (prefers-color-scheme: dark) {
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) article { box-shadow: 0 2px 6px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.4); }
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) article { box-shadow: 0 2px 6px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.4); }
 }
 :host([data-theme="dark"]) article { box-shadow: 0 2px 6px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.4); }
 
@@ -228,6 +240,27 @@ button {
 
 button:hover  { background: var(--c-hover); color: var(--c-on-surface); }
 button:active { background: var(--c-hover-dark); }
+button:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 1px; }
+
+/* Keyboard hint badges */
+kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  padding: 0 3px;
+  font-size: 9px;
+  font-family: inherit;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--c-secondary);
+  background: var(--c-hover);
+  border: 1px solid var(--c-border);
+  border-radius: 3px;
+  opacity: 0.7;
+}
 
 /* Mine buttons — ghost/outlined */
 button.add          { border-color: var(--c-primary); color: var(--c-primary); }
@@ -248,10 +281,10 @@ button.show-examples:hover        { background: var(--c-primary-bg); }
 button.edit-add-review { display: none; }
 
 @media (prefers-color-scheme: dark) {
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) button.never-forget { border-color: #d7aefb; color: #d7aefb; }
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) button.never-forget:hover { background: #370d4f; }
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) button.forq { border-color: #ff8a65; color: #ff8a65; }
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) button.forq:hover { background: #3e1a00; }
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) button.never-forget { border-color: #d7aefb; color: #d7aefb; }
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) button.never-forget:hover { background: #370d4f; }
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) button.forq { border-color: #ff8a65; color: #ff8a65; }
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) button.forq:hover { background: #3e1a00; }
 }
 :host([data-theme="dark"]) button.never-forget { border-color: #d7aefb; color: #d7aefb; }
 :host([data-theme="dark"]) button.never-forget:hover { background: #370d4f; }
@@ -272,11 +305,11 @@ button.good:hover     { background: #1b5e20; border-color: #1b5e20; }
 button.easy:hover     { background: #0d47a1; border-color: #0d47a1; }
 
 @media (prefers-color-scheme: dark) {
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) button.nothing  { background: #a50e0e; border-color: #a50e0e; }
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) button.something{ background: #b23c00; border-color: #b23c00; }
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) button.hard     { background: #c85f00; border-color: #c85f00; }
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) button.good     { background: #1a6b2d; border-color: #1a6b2d; }
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) button.easy     { background: #1a4e9e; border-color: #1a4e9e; }
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) button.nothing  { background: #a50e0e; border-color: #a50e0e; }
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) button.something{ background: #b23c00; border-color: #b23c00; }
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) button.hard     { background: #c85f00; border-color: #c85f00; }
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) button.good     { background: #1a6b2d; border-color: #1a6b2d; }
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) button.easy     { background: #1a4e9e; border-color: #1a4e9e; }
 }
 :host([data-theme="dark"]) button.nothing  { background: #a50e0e; border-color: #a50e0e; }
 :host([data-theme="dark"]) button.something{ background: #b23c00; border-color: #b23c00; }
@@ -375,7 +408,7 @@ a.word-link:hover .spelling { color: var(--c-primary); }
 }
 
 @media (prefers-color-scheme: dark) {
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) .util-btn:hover {
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) .util-btn:hover {
     border-color: rgba(138, 180, 248, 0.2);
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   }
@@ -416,11 +449,11 @@ a.word-link:hover .spelling { color: var(--c-primary); }
 .state .not-in-deck  { background: var(--c-primary-bg); color: var(--c-primary); }
 
 @media (prefers-color-scheme: dark) {
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) .state .learning     { background: #0e3724; color: #81c995; }
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) .state .known        { background: #0d3b1e; color: #5bb974; }
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) .state .due,
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) .state .failed       { background: #4a0c0a; color: #f28b82; }
-  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]) .state .never-forget { background: #370d4f; color: #d7aefb; }
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) .state .learning     { background: #0e3724; color: #81c995; }
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) .state .known        { background: #0d3b1e; color: #5bb974; }
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) .state .due,
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) .state .failed       { background: #4a0c0a; color: #f28b82; }
+  :host:not([data-theme="light"]):not([data-theme="sakura"]):not([data-theme="ocean"]):not([data-theme="forest"]):not([data-theme="sunset"]):not([data-theme="high-contrast"]) .state .never-forget { background: #370d4f; color: #d7aefb; }
 }
 :host([data-theme="dark"]) .state .learning     { background: #0e3724; color: #81c995; }
 :host([data-theme="dark"]) .state .known        { background: #0d3b1e; color: #5bb974; }

@@ -59,19 +59,6 @@ function getClosestClientRect(elem, x, y) {
       }
     }
   }
-  // Debugging this was a nightmare, so I'm leaving this debug code here
-  // console.log(rects);
-  // console.log(mergedRects);
-  // document.querySelectorAll('Rect').forEach(x => x.parentElement?.removeChild(x));
-  // document.body.insertAdjacentHTML(
-  //     'beforeend',
-  //     mergedRects
-  //         .map(
-  //             (rect, i) =>
-  //                 `<Rect style="position:fixed;top:${rect.top}px;left:${rect.left}px;width:${rect.width}px;height:${rect.height}px;background-color:rgba(255,0,0,0.3);box-sizing:border-box;border:solid black 1px;pointer-events:none;">${i}</Rect>`,
-  //         )
-  //         .join(''),
-  // );
   return mergedRects
     .map((rect) => ({
       rect,
@@ -188,7 +175,8 @@ export class Popup extends ShadowComponent {
               "aria-label": "Review: Nothing (1)",
               onclick: demoMode ? undefined : async (e) => { const btn = e.currentTarget; btn.disabled = true; try { await requestReview(this.#data.token.card, "nothing"); } finally { btn.disabled = false; } },
             },
-            "Nothing"
+            "Nothing",
+            jsxCreateElement("kbd", null, "1"),
           ),
           jsxCreateElement(
             "button",
@@ -198,7 +186,8 @@ export class Popup extends ShadowComponent {
               "aria-label": "Review: Something (2)",
               onclick: demoMode ? undefined : async (e) => { const btn = e.currentTarget; btn.disabled = true; try { await requestReview(this.#data.token.card, "something"); } finally { btn.disabled = false; } },
             },
-            "Something"
+            "Something",
+            jsxCreateElement("kbd", null, "2"),
           ),
           jsxCreateElement(
             "button",
@@ -208,7 +197,8 @@ export class Popup extends ShadowComponent {
               "aria-label": "Review: Hard (3)",
               onclick: demoMode ? undefined : async (e) => { const btn = e.currentTarget; btn.disabled = true; try { await requestReview(this.#data.token.card, "hard"); } finally { btn.disabled = false; } },
             },
-            "Hard"
+            "Hard",
+            jsxCreateElement("kbd", null, "3"),
           ),
           jsxCreateElement(
             "button",
@@ -218,7 +208,8 @@ export class Popup extends ShadowComponent {
               "aria-label": "Review: Good (4)",
               onclick: demoMode ? undefined : async (e) => { const btn = e.currentTarget; btn.disabled = true; try { await requestReview(this.#data.token.card, "good"); } finally { btn.disabled = false; } },
             },
-            "Good"
+            "Good",
+            jsxCreateElement("kbd", null, "4"),
           ),
           jsxCreateElement(
             "button",
@@ -228,7 +219,8 @@ export class Popup extends ShadowComponent {
               "aria-label": "Review: Easy (5)",
               onclick: demoMode ? undefined : async (e) => { const btn = e.currentTarget; btn.disabled = true; try { await requestReview(this.#data.token.card, "easy"); } finally { btn.disabled = false; } },
             },
-            "Easy"
+            "Easy",
+            jsxCreateElement("kbd", null, "5"),
           )
         ),
         (this.#vocabSection = jsxCreateElement("section", {
