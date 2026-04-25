@@ -243,6 +243,16 @@ export function createWordDetailsContent({
             ? jsxCreateElement("span", { class: "reading" }, `(${card.reading})`)
             : null,
         ),
+        jsxCreateElement(
+          "div",
+          { class: "metainfo" },
+          jsxCreateElement(
+            "span",
+            { class: "freq" },
+            card.frequencyRank ? `Top ${card.frequencyRank}` : "",
+          ),
+          card.pitchAccent.map((pitch) => renderPitch(card.reading, pitch)),
+        ),
       ),
       jsxCreateElement(
         "div",
@@ -285,16 +295,6 @@ export function createWordDetailsContent({
           ),
         ),
       ),
-    ),
-    jsxCreateElement(
-      "div",
-      { class: "metainfo" },
-      jsxCreateElement(
-        "span",
-        { class: "freq" },
-        card.frequencyRank ? `Top ${card.frequencyRank}` : "",
-      ),
-      card.pitchAccent.map((pitch) => renderPitch(card.reading, pitch)),
     ),
     characterDetails
       ? jsxCreateElement(
