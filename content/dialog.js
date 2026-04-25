@@ -82,7 +82,6 @@ export class Dialog extends ShadowComponent {
             throw Error("Can't render Dialog without data");
         const card = this.#data.token.card;
         const url = `https://jpdb.io/vocabulary/${card.vid}/${encodeURIComponent(card.spelling)}/${encodeURIComponent(card.reading)}`;
-        // FIXME(Security) not escaped
         this.#header.replaceChildren(jsxCreateElement("a", { href: url, target: '_blank' },
             jsxCreateElement("span", { class: 'spelling' }, card.spelling),
             jsxCreateElement("span", { class: 'reading' }, card.spelling !== card.reading ? card.reading : '')));

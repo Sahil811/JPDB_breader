@@ -159,16 +159,20 @@ function renderFlashcard() {
     const container = document.getElementById('flashcard-container');
     const counter = document.getElementById('flashcard-counter');
     const word = flashcardWords[flashcardIndex];
+    if (!word) return;
     counter.textContent = `${flashcardIndex + 1} / ${flashcardWords.length}`;
     flashcardRevealed = false;
 
     container.innerHTML = '';
     const card = document.createElement('div');
     card.className = 'flashcard';
-    card.innerHTML = `
-        <div class="fc-word">${word.spelling}</div>
-        <div class="fc-tap-hint">tap to reveal</div>
-    `;
+    const wordEl = document.createElement('div');
+    wordEl.className = 'fc-word';
+    wordEl.textContent = word.spelling;
+    const hintEl = document.createElement('div');
+    hintEl.className = 'fc-tap-hint';
+    hintEl.textContent = 'tap to reveal';
+    card.append(wordEl, hintEl);
     card.addEventListener('click', () => revealFlashcard(card, word));
     container.appendChild(card);
 }
@@ -176,13 +180,25 @@ function renderFlashcard() {
 function revealFlashcard(card, word) {
     if (flashcardRevealed) return;
     flashcardRevealed = true;
-    card.innerHTML = `
-        <div class="fc-word">${word.spelling}</div>
-        <div class="fc-divider"></div>
-        <div class="fc-reading">${word.reading}</div>
-        <div class="fc-meaning">${word.meanings}</div>
-        ${word.sentence ? `<div class="fc-sentence">${word.sentence}</div>` : ''}
-    `;
+    card.innerHTML = '';
+    const wordEl = document.createElement('div');
+    wordEl.className = 'fc-word';
+    wordEl.textContent = word.spelling;
+    const divider = document.createElement('div');
+    divider.className = 'fc-divider';
+    const readingEl = document.createElement('div');
+    readingEl.className = 'fc-reading';
+    readingEl.textContent = word.reading;
+    const meaningEl = document.createElement('div');
+    meaningEl.className = 'fc-meaning';
+    meaningEl.textContent = word.meanings;
+    card.append(wordEl, divider, readingEl, meaningEl);
+    if (word.sentence) {
+        const sentenceEl = document.createElement('div');
+        sentenceEl.className = 'fc-sentence';
+        sentenceEl.textContent = word.sentence;
+        card.appendChild(sentenceEl);
+    }
 }
 
 async function startFlashcardReview(tab) {

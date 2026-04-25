@@ -8,19 +8,16 @@ export const [browser, isChrome] = (() => {
 })();
 export function assert(condition, message) {
     if (!condition) {
-        debugger;
         throw Error(`Failed assertion: ${message}`);
     }
 }
 export function assertNonNull(obj) {
     if (obj === null || obj === undefined) {
-        debugger;
         throw Error(`Failed assertion: expected object to not be null/undefined`);
     }
 }
 export function nonNull(obj) {
     if (obj === null || obj === undefined) {
-        debugger;
         throw Error(`Failed assertion: expected object to not be null/undefined`);
     }
     return obj;
