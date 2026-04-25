@@ -140,7 +140,7 @@ const messageHandlers = {
     },
     async updateConfig(request, port) {
         const oldCSS = config.customWordCSS;
-        config = await loadConfig();
+        config = await loadConfig(true);
         if (config.customWordCSS !== oldCSS) {
             for (const port of ports) {
                 await browser.scripting.insertCSS({
@@ -299,6 +299,25 @@ async function insertCSS(tabId) {
         });
     }
 }
+// Handle one-shot messages from content scripts
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === 'injectContentScript' && sender.tab?.id) {
+        const tabId = sender.tab.id;
+        const port = portForTab(tabId);
+        const injectAndExecute = async () => {
+            if (port === undefined) {
+                await insertCSS(tabId);
+            }
+            await browser.scripting.executeScript({
+                target: { tabId },
+                files: [message.file],
+            });
+        };
+        injectAndExecute().then(() => sendResponse({ success: true }))
+            .catch(err => sendResponse({ success: false, error: err.message }));
+        return true; // keep the message channel open for async response
+    }
+});
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
     if (info.menuItemId === 'parse-selection') {
         const port = portForTab(tab.id);

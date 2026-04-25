@@ -151,12 +151,13 @@
   document.body.appendChild(parsePageButton);
 
   parsePageButton.addEventListener("click", async () => {
-    const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-    if (tab?.id) {
-      await browser.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ["/integrations/contextmenu.js"]
+    try {
+      await browser.runtime.sendMessage({
+        type: "injectContentScript",
+        file: "/integrations/contextmenu.js",
       });
+    } catch (error) {
+      showError(error);
     }
   });
 

@@ -56,8 +56,8 @@ export function migrateSchema(config) {
   }
 }
 
-export async function loadConfig() {
-  if (configCache) return configCache;
+export async function loadConfig(forceReload = false) {
+  if (configCache && !forceReload) return configCache;
   
   try {
     const result = await browser.storage.local.get(Object.keys(defaultConfig));
@@ -74,22 +74,23 @@ export async function loadConfig() {
     // If the schema version is not the current version after applying all migrations, 
     // use the default as a fallback.
     if (config.schemaVersion !== CURRENT_SCHEMA_VERSION) {
-      configCache = defaultConfig;
-      return defaultConfig;
+      configCache = Object.freeze(defaultConfig);
+      return configCache;
     }
     
-    configCache = config;
-    return config;
+    configCache = Object.freeze(config);
+    return configCache;
   } catch (error) {
     console.error('Failed to load config:', error);
-    return defaultConfig;
+    return Object.freeze(defaultConfig);
   }
 }
 
-export async function saveConfig(config) {
+export async function saveConfig(newConfig) {
   try {
-    await browser.storage.local.set(config);
-    configCache = config;
+    const frozenConfig = Object.freeze({ ...newConfig });
+    await browser.storage.local.set(frozenConfig);
+    configCache = frozenConfig;
   } catch (error) {
     console.error('Failed to save config:', error);
   }
