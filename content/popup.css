@@ -152,6 +152,30 @@ article {
 
   -webkit-overflow-scrolling: touch;
   animation: popup-enter 0.2s cubic-bezier(0.2, 0, 0, 1) both;
+
+  /* Thin themed scrollbar (Firefox) */
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-border) transparent;
+}
+
+/* Themed scrollbar (Chromium / WebKit) */
+article::-webkit-scrollbar {
+  width: 6px;
+}
+
+article::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+
+article::-webkit-scrollbar-thumb {
+  background: var(--c-border);
+  border-radius: 999px;
+  transition: background 0.2s;
+}
+
+article::-webkit-scrollbar-thumb:hover {
+  background: var(--c-secondary);
 }
 
 @media (prefers-color-scheme: dark) {
