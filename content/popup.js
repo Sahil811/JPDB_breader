@@ -452,10 +452,7 @@ export class Popup extends ShadowComponent {
     );
 
     // Toggle review buttons visibility based on config
-    const reviewSection = this.#element.shadowRoot.querySelector('#review-buttons');
-    if (reviewSection) {
-      reviewSection.style.display = config?.showReviewButtons === false ? 'none' : '';
-    }
+    this.#updateReviewButtonsVisibility();
   }
   setData(data) {
     this.#data = data;
@@ -553,13 +550,22 @@ export class Popup extends ShadowComponent {
     this.fadeIn();
     this.showExamplesAutomatically();
   }
-  updateStyle(newCSS = config.customPopupCSS, theme = config?.theme) {
-    this.#customStyle.textContent = newCSS;
+  updateStyle(newCSS = config?.customPopupCSS, theme = config?.theme, showReviewButtons = config?.showReviewButtons) {
+    this.#customStyle.textContent = newCSS ?? '';
     // Apply theme to popup host element
     if (theme && theme !== 'auto') {
       this.#element.setAttribute('data-theme', theme);
     } else {
       this.#element.removeAttribute('data-theme');
+    }
+    // Update review buttons visibility
+    this.#updateReviewButtonsVisibility(showReviewButtons);
+  }
+
+  #updateReviewButtonsVisibility(showReviewButtons = config?.showReviewButtons) {
+    const reviewSection = this.#element.shadowRoot.querySelector('#review-buttons');
+    if (reviewSection) {
+      reviewSection.style.display = showReviewButtons === false ? 'none' : '';
     }
   }
 
