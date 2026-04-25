@@ -560,12 +560,12 @@ export class Popup extends ShadowComponent {
     this.fadeIn();
     this.showExamplesAutomatically();
   }
-  updateStyle(newCSS = config.customPopupCSS) {
+  updateStyle(newCSS = config.customPopupCSS, theme = config?.theme) {
     this.#customStyle.textContent = newCSS;
     // Apply theme to popup host element
-    if (config && config.theme && config.theme !== 'auto') {
-      this.#element.setAttribute('data-theme', config.theme);
-    } else if (config) {
+    if (theme && theme !== 'auto') {
+      this.#element.setAttribute('data-theme', theme);
+    } else {
       this.#element.removeAttribute('data-theme');
     }
   }

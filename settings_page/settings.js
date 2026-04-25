@@ -90,7 +90,7 @@ try {
 
     // Apply theme to settings page and preview popup
     applyTheme(config.theme);
-    popup.updateStyle(config.customPopupCSS);
+    popup.updateStyle(config.customPopupCSS, config.theme);
   })();
   
   defineCustomElements();
@@ -227,17 +227,17 @@ try {
     "input",
     (event) => {
       const newCSS = event.target.value;
-      popup.updateStyle(newCSS);
+      const currentTheme = themeSelect?.value || config?.theme;
+      popup.updateStyle(newCSS, currentTheme);
     }
   );
   // Update theme live when the select changes
   const themeSelect = document.querySelector('[name="theme"]');
   if (themeSelect) {
     themeSelect.addEventListener("input", () => {
-      applyTheme(themeSelect.value);
-      // Also update the popup preview theme
-      config.theme = themeSelect.value;
-      popup.updateStyle(config.customPopupCSS);
+      const theme = themeSelect.value;
+      applyTheme(theme);
+      popup.updateStyle(undefined, theme);
     });
   }
   const saveButton = nonNull(document.querySelector("input[type=submit]"));
@@ -257,7 +257,7 @@ try {
       await saveConfig(config);
       await requestUpdateConfig();
       applyTheme(config.theme);
-      popup.updateStyle(config.customPopupCSS);
+      popup.updateStyle(config.customPopupCSS, config.theme);
       popup.render();
       unmarkUnsavedChanges();
     } catch (error) {
