@@ -160,6 +160,65 @@ try {
   nonNull(document.querySelector("#import")).addEventListener("click", () => {
     inputFilePicker.click();
   });
+  // Export Vocabulary as CSV
+  nonNull(document.querySelector("#export-vocab")).addEventListener("click", async () => {
+    try {
+      const tabs = await new Promise(resolve => {
+        (globalThis.browser ?? chrome).tabs.query({ active: true, currentWindow: true }, resolve);
+      });
+      const tab = tabs?.[0];
+      let words = [];
+      if (tab) {
+        try {
+          const results = await (globalThis.browser ?? chrome).scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => {
+              const elements = document.querySelectorAll('.jpdb-word:not(.unparsed)');
+              const seen = new Set();
+              const rows = [];
+              for (const el of elements) {
+                const data = el.jpdbData;
+                if (!data) continue;
+                const card = data.token.card;
+                const key = `${card.vid}/${card.sid}`;
+                if (seen.has(key)) continue;
+                seen.add(key);
+                const meaning = card.meanings?.[0]?.glosses?.join('; ') ?? '';
+                rows.push({
+                  word: card.spelling,
+                  reading: card.reading,
+                  meaning,
+                  state: card.state?.join(', ') ?? 'unknown',
+                  date_added: new Date().toISOString().split('T')[0],
+                });
+              }
+              return rows;
+            },
+          });
+          words = results?.[0]?.result ?? [];
+        } catch (_) {
+          // No content script on this tab
+        }
+      }
+      if (words.length === 0) {
+        alert('No parsed vocabulary found on the current page. Make sure a page with parsed Japanese text is active.');
+        return;
+      }
+      const csvHeader = 'word,reading,meaning,state,date_added';
+      const escape = (s) => `"${String(s).replace(/"/g, '""')}"`;
+      const csvRows = words.map(w => [escape(w.word), escape(w.reading), escape(w.meaning), escape(w.state), escape(w.date_added)].join(','));
+      const csv = [csvHeader, ...csvRows].join('\n');
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `jpdb-vocabulary-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      showError(error);
+    }
+  });
   nonNull(document.querySelector('[name="customPopupCSS"]')).addEventListener(
     "input",
     (event) => {

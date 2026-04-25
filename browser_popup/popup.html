@@ -21,6 +21,19 @@
     <body>
         <article>
             <a id="settings-link" class="button" target="_blank" href="../settings_page/settings.html">Settings</a>
+
+            <section id="stats-section" style="display:none; border:1px solid var(--color-border, #ccc); border-radius:6px; padding:0.5em; font-size:0.9em;">
+                <strong>Page Stats</strong>
+                <div style="display:grid; grid-template-columns:1fr auto; gap:0.2em 0.5em;">
+                    <span>Total words parsed:</span><span id="stat-total">—</span>
+                    <span>Unknown words:</span><span id="stat-unknown">—</span>
+                    <span>Known words:</span><span id="stat-known">—</span>
+                </div>
+            </section>
+
+            <button id="mine-all-btn" style="display:none;">Mine all unknown words</button>
+            <span id="mine-progress" style="display:none; font-size:0.85em;"></span>
+
             <span>Parse currently open tabs:</span>
         </article>
         <script type="module" src="popup.js"></script>

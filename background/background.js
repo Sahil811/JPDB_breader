@@ -241,6 +241,7 @@ const messageHandlers = {
 };
 async function onPortMessage(message, port) {
     try {
+        await configReady;
         await messageHandlers[message.type](message, port);
     }
     catch (error) {
@@ -299,8 +300,39 @@ async function insertCSS(tabId) {
         });
     }
 }
-// Handle one-shot messages from content scripts
+// Handle one-shot messages from content scripts and popup
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === 'batchMine') {
+        const { words } = message;
+        if (!config.miningDeckId) {
+            sendResponse({ success: false, error: 'No mining deck ID set, check the settings page' });
+            return false;
+        }
+        (async () => {
+            const results = { added: 0, failed: 0, errors: [] };
+            for (const word of words) {
+                try {
+                    await addToDeck(word.vid, word.sid, config.miningDeckId);
+                    if (config.forqOnMine && config.forqDeckId) {
+                        await addToDeck(word.vid, word.sid, config.forqDeckId);
+                    }
+                    results.added++;
+                } catch (error) {
+                    results.failed++;
+                    results.errors.push(`${word.spelling}: ${error.message}`);
+                }
+            }
+            // Broadcast updated word states
+            for (const word of words) {
+                try {
+                    const [state] = await getCardState(word.vid, word.sid);
+                    broadcast({ type: 'updateWordState', words: [[word.vid, word.sid, state]] });
+                } catch (_) { /* ignore state refresh errors */ }
+            }
+            sendResponse({ success: true, results });
+        })();
+        return true; // keep channel open for async response
+    }
     if (message.type === 'injectContentScript' && sender.tab?.id) {
         const tabId = sender.tab.id;
         const port = portForTab(tabId);
