@@ -248,6 +248,37 @@ export class ExplanationPopup extends ShadowComponent {
     }
   }
 
+  sanitizeHTML(html) {
+    const ALLOWED_TAGS = new Set([
+      'b', 'i', 'em', 'strong', 'br', 'p', 'ul', 'ol', 'li',
+      'code', 'pre', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a', 'hr',
+    ]);
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    const walk = (node) => {
+      const children = [...node.childNodes];
+      for (const child of children) {
+        if (child.nodeType === Node.ELEMENT_NODE) {
+          if (!ALLOWED_TAGS.has(child.tagName.toLowerCase())) {
+            child.remove();
+            continue;
+          }
+          const attrs = [...child.attributes];
+          for (const attr of attrs) {
+            if (attr.name.startsWith('on') || (child.tagName.toLowerCase() === 'a' && attr.name !== 'href')) {
+              child.removeAttribute(attr.name);
+            } else if (child.tagName.toLowerCase() !== 'a' || attr.name !== 'href') {
+              // keep non-event attributes on non-anchor tags
+            }
+          }
+          walk(child);
+        }
+      }
+    };
+    walk(temp);
+    return temp.innerHTML;
+  }
+
   formatExplanation(text) {
     let parsed = text
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -289,7 +320,7 @@ export class ExplanationPopup extends ShadowComponent {
   }
 
   show(explanation) {
-    this.content.innerHTML = this.formatExplanation(explanation);
+    this.content.innerHTML = this.sanitizeHTML(this.formatExplanation(explanation));
     this.element.style.opacity = "1";
     this.element.style.visibility = "visible";
     if (this.article) {

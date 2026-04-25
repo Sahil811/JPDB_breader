@@ -121,7 +121,28 @@
         "dictionary.js",
         "integrations/parse_selection.js"
       ],
-      "matches": ["<all_urls>"]
+      "matches": [
+        "*://reader.ttsu.app/*",
+        "*://ttu-ebook.web.app/*",
+        "*://anacreondjt.gitlab.io/texthooker.html",
+        "*://learnjapanese.moe/texthooker.html",
+        "*://kamwithk.github.io/exSTATic/tracker.html",
+        "*://renji-xd.github.io/texthooker-ui/",
+        "file:///*mokuro*.html",
+        "*://*/*mokuro*/*",
+        "*://www.mokuro.moe/*",
+        "*://mokuro.moe/*",
+        "*://app.readwok.com/*",
+        "*://ja.wikipedia.org/*",
+        "*://ja.m.wikipedia.org/*",
+        "*://ncode.syosetu.com/*",
+        "*://*.youtube.com/*",
+        "*://bunpro.jp/*",
+        "*://www.nhk.or.jp/*",
+        "*://www3.nhk.or.jp/*",
+        "*://jpdb.io/*",
+        "*://ankiuser.net/*"
+      ]
     }
   ],
   "permissions": [
