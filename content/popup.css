@@ -203,6 +203,7 @@ button {
   line-height: 1.6;
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0;
   background: transparent;
   color: var(--c-secondary);
   transition: background 0.1s, color 0.1s;
