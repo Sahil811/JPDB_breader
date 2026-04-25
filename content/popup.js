@@ -163,7 +163,7 @@ export class Popup extends ShadowComponent {
         (this.#mineButtons = jsxCreateElement("section", {
           id: "mine-buttons",
         })),
-        config?.showReviewButtons !== false ? jsxCreateElement(
+        jsxCreateElement(
           "section",
           { id: "review-buttons" },
           // SRS review buttons
@@ -217,7 +217,7 @@ export class Popup extends ShadowComponent {
             },
             "Easy",
           )
-        ) : null,
+        ),
         (this.#vocabSection = jsxCreateElement("section", {
           id: "vocab-content",
         }))
@@ -450,6 +450,12 @@ export class Popup extends ShadowComponent {
         "Examples"
       )
     );
+
+    // Toggle review buttons visibility based on config
+    const reviewSection = this.#element.shadowRoot.querySelector('#review-buttons');
+    if (reviewSection) {
+      reviewSection.style.display = config?.showReviewButtons === false ? 'none' : '';
+    }
   }
   setData(data) {
     this.#data = data;
