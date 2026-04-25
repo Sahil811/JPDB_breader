@@ -219,6 +219,9 @@ try {
       showError(error);
     }
   });
+  const popup = Popup.getDemoMode(nonNull(document.querySelector("#preview")));
+  popup.setData(POPUP_EXAMPLE_DATA);
+  popup.fadeIn();
   nonNull(document.querySelector('[name="customPopupCSS"]')).addEventListener(
     "input",
     (event) => {
@@ -226,9 +229,6 @@ try {
       popup.updateStyle(newCSS);
     }
   );
-  const popup = Popup.getDemoMode(nonNull(document.querySelector("#preview")));
-  popup.setData(POPUP_EXAMPLE_DATA);
-  popup.fadeIn();
   // Update theme live when the select changes
   const themeSelect = document.querySelector('[name="theme"]');
   if (themeSelect) {
@@ -256,6 +256,8 @@ try {
       await saveConfig(config);
       await requestUpdateConfig();
       applyTheme(config.theme);
+      popup.updateStyle(config.customPopupCSS);
+      popup.render();
       unmarkUnsavedChanges();
     } catch (error) {
       showError(error);
