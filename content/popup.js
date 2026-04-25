@@ -563,12 +563,10 @@ export class Popup extends ShadowComponent {
   updateStyle(newCSS = config.customPopupCSS) {
     this.#customStyle.textContent = newCSS;
     // Apply theme to popup host element
-    if (config && config.theme) {
-      if (config.theme === 'dark' || config.theme === 'light') {
-        this.#element.setAttribute('data-theme', config.theme);
-      } else {
-        this.#element.removeAttribute('data-theme');
-      }
+    if (config && config.theme && config.theme !== 'auto') {
+      this.#element.setAttribute('data-theme', config.theme);
+    } else if (config) {
+      this.#element.removeAttribute('data-theme');
     }
   }
 

@@ -9,7 +9,7 @@ import { defineCustomElements } from "./elements.js";
 // Common behavior shared for all settings elements
 
 function applyTheme(theme) {
-  if (theme === 'dark' || theme === 'light') {
+  if (theme && theme !== 'auto') {
     document.documentElement.setAttribute('data-theme', theme);
   } else {
     document.documentElement.removeAttribute('data-theme');
@@ -88,8 +88,9 @@ try {
       elem.value = config[elem.name] ?? null;
     }
 
-    // Apply theme to settings page
+    // Apply theme to settings page and preview popup
     applyTheme(config.theme);
+    popup.updateStyle(config.customPopupCSS);
   })();
   
   defineCustomElements();
