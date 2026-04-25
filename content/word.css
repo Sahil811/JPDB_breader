@@ -67,22 +67,12 @@
   color: rgb(255, 0, 0);
 }
 
-/* Accessibility: non-color state indicators for colorblind users.
-   Only visible on hover to keep the reading experience clean. */
-:where(.jpdb-word.not-in-deck:hover) {
-  text-decoration-style: dotted;
-  text-underline-offset: 2px;
-  text-decoration-thickness: 1px;
-}
-
-:where(.jpdb-word.new:hover) {
-  text-decoration-style: dashed;
-  text-underline-offset: 2px;
-  text-decoration-thickness: 1px;
-}
-
-:where(.jpdb-word.learning:hover) {
-  text-decoration-style: solid;
+/* Accessibility: underline on hover to indicate interactive words */
+:where(.jpdb-word.not-in-deck:hover),
+:where(.jpdb-word.new:hover),
+:where(.jpdb-word.learning:hover),
+:where(.jpdb-word.never-forget:hover) {
+  text-decoration: underline;
   text-underline-offset: 2px;
   text-decoration-thickness: 1px;
 }
@@ -91,18 +81,7 @@
   text-decoration: none;
 }
 
-:where(.jpdb-word.never-forget:hover) {
-  text-decoration-style: double;
-  text-underline-offset: 2px;
-  text-decoration-thickness: 1px;
-}
-
-:where(.jpdb-word.due:hover) {
-  text-decoration-style: wavy;
-  text-underline-offset: 2px;
-  text-decoration-thickness: 1px;
-}
-
+:where(.jpdb-word.due:hover),
 :where(.jpdb-word.failed:hover) {
   text-decoration-style: wavy;
   text-underline-offset: 2px;
