@@ -12,8 +12,15 @@
         }
     }
     try {
+        const PRIMARY_SELECTOR = '.book-content p, .book-content div.calibre1';
+        const FALLBACK_SELECTOR = '[class*="book"] p, [class*="book"] div';
+        let selector = PRIMARY_SELECTOR;
+        if (!document.querySelector(PRIMARY_SELECTOR) && document.querySelector(FALLBACK_SELECTOR)) {
+            console.warn('JPDBreader: primary selector not found, using fallback');
+            selector = FALLBACK_SELECTOR;
+        }
         const visible = parseVisibleObserver(shouldParse);
-        const added = addedObserver('.book-content p, .book-content div.calibre1', elements => {
+        const added = addedObserver(selector, elements => {
             for (const element of elements) {
                 visible.observe(element);
             }

@@ -18,6 +18,7 @@
         for (const page of elements) {
           if (pendingBatches.get(page) !== undefined) continue;
           // Manually create fragments, since mokuro puts every line in a separate <p>aragraph
+          const modifiedNodes = [];
           const paragraphs = [...page.querySelectorAll(".textBox")].map(
             (box) => {
               const fragments = [];
@@ -25,11 +26,17 @@
               for (const p of box.children) {
                 if (p.tagName !== "P") continue;
                 const text = p.firstChild;
-                text.data = text.data
+                const originalData = text.data;
+                const replacedData = originalData
                   .replaceAll("．．．", "…")
                   .replaceAll("．．", "…")
                   .replaceAll("！！", "‼")
                   .replaceAll("！？", "“⁉");
+                // Apply to DOM only for parsing offset consistency
+                if (replacedData !== originalData) {
+                  text.data = replacedData;
+                  modifiedNodes.push({ node: text, originalData });
+                }
                 const start = offset;
                 const length = text.length;
                 const end = (offset += length);
@@ -45,19 +52,28 @@
             }
           );
           if (paragraphs.length === 0) {
+            // Restore original text since we will not parse
+            for (const { node, originalData } of modifiedNodes) {
+              node.data = originalData;
+            }
             visible.unobserve(page);
             continue;
           }
           const [pageBatches, applied] = parseParagraphs(paragraphs);
           Promise.all(applied)
             .then((_) => visible.unobserve(page))
+            .catch(() => {
+              // Restore original DOM text on parse failure
+              for (const { node, originalData } of modifiedNodes) {
+                if (node.parentNode) node.data = originalData;
+              }
+            })
             .finally(() => {
               pendingBatches.delete(page);
               page.style.backgroundColor = "";
             });
           pendingBatches.set(page, pageBatches);
           batches.push(...pageBatches);
-          page.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
         }
         requestParse(batches);
       },
@@ -68,7 +84,7 @@
             for (const { abort } of batches) {
               abort.abort();
             }
-            element.style.backgroundColor = "rgba(0, 255, 0, 0.3)";
+            element.style.backgroundColor = "";
           }
         }
       }
