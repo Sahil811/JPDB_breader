@@ -3,7 +3,7 @@ import { ExplanationPopup } from './explanation.js';
 import { JpdbAudio as PopupJpdbAudio } from './popup_audio.js';
 import { loadPopupSupplementalData } from './popup_resources.js';
 import { ShadowComponent } from './shadowbase.js';
-import { browser, clamp, nonNull } from "../util.js";
+import { browser, clamp } from "../util.js";
 import { createWordDetailsContent } from './popup_word_view.js';
 import { jsxCreateElement } from "../jsx.js";
 import {
@@ -20,118 +20,6 @@ import {
   geminiApi,
   showRequestErrorToast,
 } from "../integrations/api.js";
-const PARTS_OF_SPEECH = {
-  n: "Noun",
-  pn: "Pronoun",
-  pref: "Prefix",
-  suf: "Suffix",
-  // 'n-adv': '', // Not used in jpdb: n + adv instead. JMDict: "adverbial noun (fukushitekimeishi)"
-  // 'n-pr': '', // Not used in jpdb: name instead. JMDict: "proper noun"
-  // 'n-pref': '', // Not used in jpdb: n + pref instead. JMDict: "noun, used as a prefix"
-  // 'n-suf': '', // Not used in jpdb: n + suf instead. JMDict: "noun, used as a suffix"
-  // 'n-t': '', // Not used in jpdb: n instead. JMDict: "noun (temporal) (jisoumeishi)"
-  // 'n-pr': '', // JMDict: "proper noun"
-  name: "Name",
-  "name-fem": "Name (Feminine)",
-  "name-male": "Name (Masculine)",
-  "name-surname": "Surname",
-  "name-person": "Personal Name",
-  "name-place": "Place Name",
-  "name-company": "Company Name",
-  "name-product": "Product Name",
-  "adj-i": "Adjective",
-  "adj-na": "な-Adjective",
-  "adj-no": "の-Adjective",
-  "adj-pn": "Adjectival",
-  "adj-nari": "なり-Adjective (Archaic/Formal)",
-  "adj-ku": "く-Adjective (Archaic)",
-  "adj-shiku": "しく-Adjective (Archaic)",
-  // 'adj-ix': 'Adjective (いい/よい irregular)', // Not used in jpdb, adj-i instead. JMDict: "adjective (keiyoushi) - yoi/ii class"
-  // 'adj-f': '', // Not used in jpdb. JMDict: "noun or verb acting prenominally"
-  // 'adj-t': '', // Not used in jpdb. JMDict: "'taru' adjective"
-  // 'adj-kari': '', // Not used in jpdb. JMDict: "'kari' adjective (archaic)"
-  adv: "Adverb",
-  // 'adv-to': '', // Not used in jpdb: adv instead. JMDict: "adverb taking the `to' particle"
-  aux: "Auxiliary",
-  "aux-v": "Auxiliary Verb",
-  "aux-adj": "Auxiliary Adjective",
-  conj: "Conjunction",
-  cop: "Copula",
-  ctr: "Counter",
-  exp: "Expression",
-  int: "Interjection",
-  num: "Numeric",
-  prt: "Particle",
-  // 'cop-da': '',  // Not used in jpdb: cop instead. JMDict: "copula"
-  vt: "Transitive Verb",
-  vi: "Intransitive Verb",
-  v1: "Ichidan Verb",
-  "v1-s": "Ichidan Verb (くれる Irregular)",
-  v5: "Godan Verb",
-  v5u: "う Godan Verb",
-  "v5u-s": "う Godan Verb (Irregular)",
-  v5k: "く Godan Verb",
-  "v5k-s": "く Godan Verb (いく/ゆく Irregular)",
-  v5g: "ぐ Godan Verb",
-  v5s: "す Godan Verb",
-  v5t: "つ Godan Verb",
-  v5n: "ぬ Godan Verb",
-  v5b: "ぶ Godan Verb",
-  v5m: "む Godan Verb",
-  v5r: "る Godan Verb",
-  "v5r-i": "る Godan Verb (Irregular)",
-  v5aru: "る Godan Verb (-ある Irregular)",
-  // 'v5uru': '', // JMDict: "Godan verb - Uru old class verb (old form of Eru)"
-  vk: "Irregular Verb (くる)",
-  // vn: '', // Not used in jpdb. JMDict: "irregular nu verb"
-  // vr: '', // Not used in jpdb. JMDict: "irregular ru verb, plain form ends with -ri"
-  vs: "する Verb",
-  vz: "ずる Verb",
-  "vs-c": "す Verb (Archaic)",
-  // 'vs-s': '', // Not used in jpdb. JMDict: "suru verb - special class"
-  // 'vs-i': '', // JMDict: "suru verb - included"
-  // iv: '',  // Not used in jpdb. JMDict: "irregular verb"
-  // 'v-unspec': '', // Not used in jpdb. JMDIct: "verb unspecified"
-  v2: "Nidan Verb (Archaic)",
-  // 'v2a-s': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb with 'u' ending (archaic)"
-  // 'v2b-k': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (upper class) with 'bu' ending (archaic)"
-  // 'v2b-s': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (lower class) with 'bu' ending (archaic)"
-  // 'v2d-k': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (upper class) with 'dzu' ending (archaic)"
-  // 'v2d-s': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (lower class) with 'dzu' ending (archaic)"
-  // 'v2g-k': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (upper class) with 'gu' ending (archaic)"
-  // 'v2g-s': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (lower class) with 'gu' ending (archaic)"
-  // 'v2h-k': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (upper class) with 'hu/fu' ending (archaic)"
-  // 'v2h-s': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (lower class) with 'hu/fu' ending (archaic)"
-  // 'v2k-k': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (upper class) with 'ku' ending (archaic)"
-  // 'v2k-s': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (lower class) with 'ku' ending (archaic)"
-  // 'v2m-k': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (upper class) with 'mu' ending (archaic)"
-  // 'v2m-s': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (lower class) with 'mu' ending (archaic)"
-  // 'v2n-s': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (lower class) with 'nu' ending (archaic)"
-  // 'v2r-k': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (upper class) with 'ru' ending (archaic)"
-  // 'v2r-s': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (lower class) with 'ru' ending (archaic)"
-  // 'v2s-s': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (lower class) with 'su' ending (archaic)"
-  // 'v2t-k': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (upper class) with 'tsu' ending (archaic)"
-  // 'v2t-s': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (lower class) with 'tsu' ending (archaic)"
-  // 'v2w-s': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (lower class) with 'u' ending and 'we' conjugation (archaic)"
-  // 'v2y-k': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (upper class) with 'yu' ending (archaic)"
-  // 'v2y-s': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (lower class) with 'yu' ending (archaic)"
-  // 'v2z-s': '', // Not used in jpdb: v2 instead. JMDict: "Nidan verb (lower class) with 'zu' ending (archaic)"
-  v4: "Yodan Verb (Archaic)",
-  v4k: "",
-  v4g: "",
-  v4s: "",
-  v4t: "",
-  v4h: "",
-  v4b: "",
-  v4m: "",
-  v4r: "",
-  // v4n: '', // Not used in jpdb. JMDict: "Yodan verb with 'nu' ending (archaic)"
-  va: "Archaic", // Not from JMDict? TODO Don't understand this one, seems identical to #v4n ?
-  // 'unc': '', // Not used in jpdb: empty list instead. JMDict: "unclassified"
-};
-
-
-
 function getClosestClientRect(elem, x, y) {
   const rects = elem.getClientRects();
   if (rects.length === 1) return rects[0];
@@ -193,47 +81,6 @@ function getClosestClientRect(elem, x, y) {
     }))
     .reduce((a, b) => (a.distance <= b.distance ? a : b)).rect;
 }
-function renderPitch(reading, pitch) {
-  if (reading.length != pitch.length - 1) {
-    return jsxCreateElement("span", null, "Error: invalid pitch");
-  }
-  try {
-    const parts = [];
-    let lastBorder = 0;
-    const borders = Array.from(
-      pitch.matchAll(/L(?=H)|H(?=L)/g),
-      (x) => nonNull(x.index) + 1
-    );
-    let low = pitch[0] === "L";
-    for (const border of borders) {
-      parts.push(
-        jsxCreateElement(
-          "span",
-          { class: low ? "low" : "high" },
-          reading.slice(lastBorder, border)
-        )
-      );
-      lastBorder = border;
-      low = !low;
-    }
-    if (lastBorder != reading.length) {
-      // No switch after last part
-      parts.push(
-        jsxCreateElement(
-          "span",
-          { class: low ? "low-final" : "high-final" },
-          reading.slice(lastBorder)
-        )
-      );
-    }
-    return jsxCreateElement("span", { class: "pitch" }, parts);
-  } catch (error) {
-    console.error(error);
-    return jsxCreateElement("span", null, "Error: invalid pitch");
-  }
-}
-
-
 export class Popup extends ShadowComponent {
   #demoMode;
   #element;
@@ -263,6 +110,8 @@ export class Popup extends ShadowComponent {
     constructor(demoMode = false) {
     const hostElement = jsxCreateElement("div", {
       id: "jpdb-popup",
+      role: "dialog",
+      "aria-label": "Word details",
       onmousedown: (event) => {
         event.stopPropagation();
       },
@@ -337,7 +186,7 @@ export class Popup extends ShadowComponent {
               class: "nothing",
               tabindex: "0",
               "aria-label": "Review: Nothing (1)",
-              onclick: demoMode ? undefined : async () => await requestReview(this.#data.token.card, "nothing"),
+              onclick: demoMode ? undefined : async (e) => { const btn = e.currentTarget; btn.disabled = true; try { await requestReview(this.#data.token.card, "nothing"); } finally { btn.disabled = false; } },
             },
             "Nothing"
           ),
@@ -347,7 +196,7 @@ export class Popup extends ShadowComponent {
               class: "something",
               tabindex: "0",
               "aria-label": "Review: Something (2)",
-              onclick: demoMode ? undefined : async () => await requestReview(this.#data.token.card, "something"),
+              onclick: demoMode ? undefined : async (e) => { const btn = e.currentTarget; btn.disabled = true; try { await requestReview(this.#data.token.card, "something"); } finally { btn.disabled = false; } },
             },
             "Something"
           ),
@@ -357,7 +206,7 @@ export class Popup extends ShadowComponent {
               class: "hard",
               tabindex: "0",
               "aria-label": "Review: Hard (3)",
-              onclick: demoMode ? undefined : async () => await requestReview(this.#data.token.card, "hard"),
+              onclick: demoMode ? undefined : async (e) => { const btn = e.currentTarget; btn.disabled = true; try { await requestReview(this.#data.token.card, "hard"); } finally { btn.disabled = false; } },
             },
             "Hard"
           ),
@@ -367,7 +216,7 @@ export class Popup extends ShadowComponent {
               class: "good",
               tabindex: "0",
               "aria-label": "Review: Good (4)",
-              onclick: demoMode ? undefined : async () => await requestReview(this.#data.token.card, "good"),
+              onclick: demoMode ? undefined : async (e) => { const btn = e.currentTarget; btn.disabled = true; try { await requestReview(this.#data.token.card, "good"); } finally { btn.disabled = false; } },
             },
             "Good"
           ),
@@ -377,7 +226,7 @@ export class Popup extends ShadowComponent {
               class: "easy",
               tabindex: "0",
               "aria-label": "Review: Easy (5)",
-              onclick: demoMode ? undefined : async () => await requestReview(this.#data.token.card, "easy"),
+              onclick: demoMode ? undefined : async (e) => { const btn = e.currentTarget; btn.disabled = true; try { await requestReview(this.#data.token.card, "easy"); } finally { btn.disabled = false; } },
             },
             "Easy"
           )
@@ -525,13 +374,23 @@ export class Popup extends ShadowComponent {
           class: "add",
           onclick: this.#demoMode
             ? undefined
-            : () =>
-                requestMine(
-                  data.token.card,
-                  config.forqOnMine,
-                  getSentences(data, config.contextWidth).trim() || undefined,
-                  undefined
-                ),
+            : async (e) => {
+                const btn = e.currentTarget;
+                btn.disabled = true;
+                const originalText = btn.textContent;
+                btn.textContent = "Adding...";
+                try {
+                  await requestMine(
+                    data.token.card,
+                    config.forqOnMine,
+                    getSentences(data, config.contextWidth).trim() || undefined,
+                    undefined
+                  );
+                } finally {
+                  btn.disabled = false;
+                  btn.textContent = originalText;
+                }
+              },
         },
         "Add"
       ),
@@ -549,12 +408,19 @@ export class Popup extends ShadowComponent {
           class: "blacklist",
           onclick: this.#demoMode
             ? undefined
-            : async () =>
-                await requestSetFlag(
-                  this.#data.token.card,
-                  "blacklist",
-                  !popupBlacklisted
-                ),
+            : async (e) => {
+                const btn = e.currentTarget;
+                btn.disabled = true;
+                try {
+                  await requestSetFlag(
+                    this.#data.token.card,
+                    "blacklist",
+                    !popupBlacklisted
+                  );
+                } finally {
+                  btn.disabled = false;
+                }
+              },
         },
         !popupBlacklisted ? "Blacklist" : "Remove from blacklist"
       ),
@@ -564,12 +430,19 @@ export class Popup extends ShadowComponent {
           class: "never-forget",
           onclick: this.#demoMode
             ? undefined
-            : async () =>
-                await requestSetFlag(
-                  this.#data.token.card,
-                  "never-forget",
-                  !popupNeverForget
-                ),
+            : async (e) => {
+                const btn = e.currentTarget;
+                btn.disabled = true;
+                try {
+                  await requestSetFlag(
+                    this.#data.token.card,
+                    "never-forget",
+                    !popupNeverForget
+                  );
+                } finally {
+                  btn.disabled = false;
+                }
+              },
         },
         !popupNeverForget ? "Never forget" : "Unmark as never forget"
       ),

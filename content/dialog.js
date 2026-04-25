@@ -18,7 +18,7 @@ export class Dialog extends ShadowComponent {
         return this.#dialog;
     }
     constructor() {
-        const hostElement = jsxCreateElement("div", { id: 'jpdb-dialog', style: 'all:initial;display:none', onclick: event => {
+        const hostElement = jsxCreateElement("div", { id: 'jpdb-dialog', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Sentence details', style: 'all:initial;display:none', onclick: event => {
                 event.stopPropagation();
             } });
         super(hostElement, ['/content/dialog.css']);

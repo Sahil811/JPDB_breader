@@ -2,8 +2,14 @@ import { assertNonNull, truncate } from "../util.js";
 import { addErrorContext, jpdbApi } from "../integrations/api.js";
 import { getConfigAsync } from "./background.js";
 
-// Get config at runtime (not at import time)
-const getConfig = () => getConfigAsync();
+// Get config at runtime (not at import time), with null guard for API token
+function getConfig() {
+  const cfg = getConfigAsync();
+  if (!cfg?.apiToken) {
+    throw new Error('JPDB API token not configured. Please set your API token in the extension settings.');
+  }
+  return cfg;
+}
 
 const API_RATELIMIT = 0.2; // seconds between requests
 const SCRAPE_RATELIMIT = 1.1; // seconds between requests
