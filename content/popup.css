@@ -147,15 +147,17 @@ article {
   flex-direction: column;
   margin: 0;
   padding: 0;
-  width: 340px;
-  max-height: 54vh;
+  /* Scales from 300px on small screens up to 480px on wide monitors */
+  width: clamp(300px, 20vw, 480px);
+  max-height: 62vh;
   overflow-y: auto;
   overflow-x: clip;
 
   background: var(--c-surface);
   color: var(--c-on-surface);
   font-family: 'Google Sans', 'Inter', 'Roboto', 'Noto Sans JP', sans-serif;
-  font-size: 13px;
+  /* Scales from 12px on laptops to 16px on large monitors */
+  font-size: clamp(12px, 0.85vw, 16px);
   line-height: 1.5;
 
   border-radius: 12px;
@@ -207,21 +209,21 @@ article::-webkit-scrollbar-thumb:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px 2px;
+  gap: 0.31em;
+  padding: 0.31em 0.77em 0.15em;
 }
 
 #mine-buttons.minimal {
   justify-content: center;
-  gap: 8px;
-  padding: 6px 10px 4px;
+  gap: 0.62em;
+  padding: 0.46em 0.77em 0.31em;
 }
 
 #mine-buttons.minimal button {
   flex: 1;
   min-width: 0;
-  padding: 4px 12px;
-  font-size: 11.5px;
+  padding: 0.31em 0.92em;
+  font-size: 0.88em;
   border: 1px solid var(--c-border);
   border-radius: 6px;
 }
@@ -229,8 +231,8 @@ article::-webkit-scrollbar-thumb:hover {
 #review-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  padding: 3px 10px 6px;
+  gap: 0.31em;
+  padding: 0.23em 0.77em 0.46em;
   border-bottom: 1px solid var(--c-border);
 }
 
@@ -239,10 +241,10 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 2px 7px;
+  padding: 0.15em 0.54em;
   border: 1px solid transparent;
   border-radius: 4px;
-  font-size: 10.5px;
+  font-size: 0.81em;
   font-weight: 600;
   font-family: inherit;
   line-height: 1.6;
@@ -320,8 +322,8 @@ button.easy:hover     { background: #0d47a1; border-color: #0d47a1; }
 #header {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 10px 12px 4px;
+  gap: 0.62em;
+  padding: 0.77em 0.92em 0.31em;
 }
 
 .header-main-info {
@@ -348,9 +350,9 @@ a.word-link:hover .spelling { color: var(--c-primary); }
 }
 
 .word-link .reading {
-  font-size: 13px;
+  font-size: 1em;
   color: var(--c-secondary);
-  margin-top: 1px;
+  margin-top: 0.08em;
 }
 
 .word-link .reading:empty { display: none; }
@@ -376,12 +378,12 @@ a.word-link:hover .spelling { color: var(--c-primary); }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 2.15em;
+  height: 2.15em;
   padding: 0;
   border: 1px solid transparent;
   border-radius: 50%;
-  font-size: 14px;
+  font-size: 1.08em;
   cursor: pointer;
   background: transparent;
   color: var(--c-secondary);
@@ -422,11 +424,11 @@ a.word-link:hover .spelling { color: var(--c-primary); }
 }
 
 .state span {
-  font-size: 9.5px;
+  font-size: 0.73em;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  padding: 2px 8px;
+  padding: 0.15em 0.62em;
   border-radius: 999px;
   white-space: nowrap;
 }
@@ -463,20 +465,20 @@ a.word-link:hover .spelling { color: var(--c-primary); }
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
-  padding: 2px 0 0;
-  font-size: 11.5px;
+  gap: 0.46em;
+  padding: 0.15em 0 0;
+  font-size: 0.88em;
   color: var(--c-secondary);
 }
 
 .metainfo:empty { display: none; }
 
 .freq {
-  font-size: 11px;
+  font-size: 0.85em;
   font-weight: 700;
   color: var(--c-primary);
   background: var(--c-primary-bg);
-  padding: 1px 8px;
+  padding: 0.08em 0.62em;
   border-radius: 999px;
 }
 
@@ -493,8 +495,8 @@ a.word-link:hover .spelling { color: var(--c-primary); }
 .kanji-meanings {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
-  padding: 0 12px 8px;
+  gap: 0.38em;
+  padding: 0 0.92em 0.62em;
 }
 
 .kanji-meanings:empty { display: none; }
@@ -502,12 +504,12 @@ a.word-link:hover .spelling { color: var(--c-primary); }
 .kanji-item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
+  gap: 0.46em;
+  padding: 0.23em 0.77em;
   background: var(--c-hover);
   border: 1px solid var(--c-border);
   border-radius: 999px;
-  font-size: 12.5px;
+  font-size: 0.96em;
   transition: background 0.15s, border-color 0.15s;
 }
 
@@ -538,34 +540,34 @@ a.word-link:hover .spelling { color: var(--c-primary); }
    SECONDARY MEANINGS (Hindi)
    ────────────────────────────────────────── */
 .hindi-meanings {
-  padding: 6px 12px 8px;
+  padding: 0.46em 0.92em 0.62em;
   border-top: 1px solid var(--c-border);
 }
 
-.meaning-list { font-size: 12.5px; color: var(--c-on-surface); }
-.meaning-set  { display: flex; align-items: flex-start; gap: 4px; margin-bottom: 2px; }
+.meaning-list { font-size: 0.96em; color: var(--c-on-surface); }
+.meaning-set  { display: flex; align-items: flex-start; gap: 0.31em; margin-bottom: 0.15em; }
 .set-number   { color: var(--c-primary); font-weight: 700; flex-shrink: 0; min-width: 1.3em; }
 
 /* ──────────────────────────────────────────
    PART-OF-SPEECH + MEANINGS
    ────────────────────────────────────────── */
 h2 {
-  font-size: 10px;
+  font-size: 0.77em;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.09em;
   color: var(--c-secondary);
-  margin: 6px 0 2px;
-  padding: 0 12px;
+  margin: 0.46em 0 0.15em;
+  padding: 0 0.92em;
 }
 
-ol { margin: 0 0 6px; padding: 0 12px 0 calc(12px + 1.3em); }
+ol { margin: 0 0 0.46em; padding: 0 0.92em 0 calc(0.92em + 1.3em); }
 
 ol li {
   color: var(--c-on-surface);
-  font-size: 13px;
+  font-size: 1em;
   line-height: 1.55;
-  margin-bottom: 1px;
+  margin-bottom: 0.08em;
 }
 
 /* ── Show more toggle ── */
@@ -595,29 +597,29 @@ button.toggle-more:hover { background: var(--c-hover-dark); color: var(--c-on-su
    ────────────────────────────────────────── */
 .immersion-example {
   border-top: 1px solid var(--c-border);
-  padding: 8px 14px 10px;
+  padding: 0.62em 1.08em 0.77em;
 }
 
-.example-content { display: flex; flex-direction: column; gap: 6px; }
+.example-content { display: flex; flex-direction: column; gap: 0.46em; }
 
 .example-nav {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11.5px;
+  gap: 0.38em;
+  font-size: 0.88em;
   color: var(--c-secondary);
-  height: 28px;
+  height: 2.15em;
 }
 
 .example-counter {
-  min-width: 36px;
+  min-width: 2.77em;
   text-align: center;
 }
 
 .ik-btn {
-  font-size: 12px;
-  height: 24px;
-  padding: 0 10px;
+  font-size: 0.92em;
+  height: 1.85em;
+  padding: 0 0.77em;
   border-radius: 6px;
   background: var(--c-hover);
   color: var(--c-on-surface);
@@ -639,7 +641,8 @@ button.toggle-more:hover { background: var(--c-hover-dark); color: var(--c-on-su
   border-radius: 8px;
   overflow: hidden;
   background: var(--c-hover);
-  height: 180px; /* Fixed dimension prevents glitchy jumping when navigating */
+  /* em-based height scales with the popup font-size */
+  height: 13.8em;
   display: flex;
   align-items: center;
   justify-content: center;
