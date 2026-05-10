@@ -230,6 +230,11 @@ export class Popup extends ShadowComponent {
     this.#outerStyle = this.#element.style;
     this.immersionKit = new ImmersionKit(this.#vocabSection);
 
+    // Apply initial style/scale/theme as soon as the popup is created.
+    // Without this, --popup-scale is only set when the user changes settings,
+    // so the real popup (not the demo) would never pick up the saved scale.
+    this.updateStyle();
+
     // Close popup on Escape key; number keys 1-5 activate review buttons
     if (!demoMode) {
       const reviewRatings = ['nothing', 'something', 'hard', 'good', 'easy'];
@@ -569,7 +574,14 @@ export class Popup extends ShadowComponent {
   updateStyle(newCSS, theme, cfgOverride) {
     if (cfgOverride) this.#configOverride = cfgOverride;
     const c = this.#cfg;
-    this.#customStyle.textContent = newCSS ?? c?.customPopupCSS ?? '';
+
+    // Inject scale directly into the shadow DOM style element.
+    // CSS variables set on the outer host don't reliably cascade in here,
+    // so we write the zoom rule into #customStyle which lives inside the shadow root.
+    const scale = ((c?.popupScale ?? 100) / 100).toFixed(4);
+    const zoomCSS = `article { zoom: ${scale}; }\n`;
+    this.#customStyle.textContent = zoomCSS + (newCSS ?? c?.customPopupCSS ?? '');
+
     // Apply theme to popup host element
     const t = theme ?? c?.theme;
     if (t && t !== 'auto') {

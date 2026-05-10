@@ -35,6 +35,7 @@ export const defaultConfig = {
   minimalMineButtons: false,
   nextUnknownWordKey: null,
   prevUnknownWordKey: null,
+  popupScale: 100, // percentage (50–200), applied on top of the responsive base size
 };
 
 // Cache for config
