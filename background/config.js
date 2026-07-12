@@ -17,6 +17,7 @@ export const defaultConfig = {
   customWordCSS: "",
   customPopupCSS: "",
   showPopupOnHover: false,
+  playSoundOnHover: false,
   touchscreenSupport: false,
   disableFadeAnimation: false,
   showPopupKey: { key: "Shift", code: "ShiftLeft", modifiers: [] },

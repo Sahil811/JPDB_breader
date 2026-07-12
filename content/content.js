@@ -1,10 +1,12 @@
 import { config, requestMine, requestReview, requestSetFlag } from './background_comms.js';
 import { Dialog } from './dialog.js';
+import { JpdbAudio } from './popup_audio.js';
 import { Popup } from './popup.js';
 import { showError } from './toast.js';
 import { getSentences } from './word.js';
 export let currentHover = null;
 let popupKeyHeld = false;
+let hoverAudioTimer = null;
 let currentUnknownWordIndex = -1;
 const UNKNOWN_WORD_SELECTORS = '.jpdb-word.new, .jpdb-word.not-in-deck, .jpdb-word.learning';
 
@@ -163,6 +165,18 @@ export function onWordHoverStart({ target, x, y }) {
             }, 400);
         }
         Popup.get().showForWord(target, x, y);
+    }
+    // Play pronunciation audio on hover (independent of popup visibility)
+    // Debounced to avoid spamming audio when sweeping the mouse across text
+    if (hoverAudioTimer) clearTimeout(hoverAudioTimer);
+    if (config.playSoundOnHover) {
+        const card = target.jpdbData?.token?.card;
+        if (card?.vid && card?.spelling) {
+            hoverAudioTimer = setTimeout(() => {
+                hoverAudioTimer = null;
+                JpdbAudio.speak(card.vid, card.spelling);
+            }, 250);
+        }
     }
 }
 export function onWordHoverStop() {
