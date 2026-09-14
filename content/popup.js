@@ -548,6 +548,45 @@ export class Popup extends ShadowComponent {
 
   async showForWord(word, mouseX = 0, mouseY = 0) {
     const data = word.jpdbData;
+    // P1: Dedup — hovering different char of same word (same vid/sid) shouldn't re-render skeleton / re-fetch kanji
+    const isSameWord = this.#data
+      && this.#data.token.card.vid === data.token.card.vid
+      && this.#data.token.card.sid === data.token.card.sid;
+    if (isSameWord && this.isVisible()) {
+      // Just reposition without re-processing — keep current card, avoid flicker
+      await this.stylesReady;
+      await new Promise(r => requestAnimationFrame(r));
+      const bbox = getClosestClientRect(word, mouseX, mouseY);
+      const wordLeft = window.scrollX + bbox.left;
+      const wordTop = window.scrollY + bbox.top;
+      const wordRight = window.scrollX + bbox.right;
+      const wordBottom = window.scrollY + bbox.bottom;
+      const leftSpace = bbox.left;
+      const topSpace = bbox.top;
+      const rightSpace = window.innerWidth - bbox.right;
+      const bottomSpace = window.innerHeight - bbox.bottom;
+      const popupHeight = this.#element.offsetHeight;
+      const popupWidth = this.#element.offsetWidth;
+      const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+      const minLeft = window.scrollX;
+      const maxLeft = window.scrollX + window.innerWidth - popupWidth - scrollbarW;
+      const minTop = window.scrollY;
+      const maxTop = window.scrollY + window.innerHeight - popupHeight;
+      const _wmCache2 = Popup._wmCache ?? (Popup._wmCache = new WeakMap());
+      let writingMode2 = _wmCache2.get(word);
+      if (!writingMode2) { writingMode2 = getComputedStyle(word).writingMode; _wmCache2.set(word, writingMode2); }
+      const gap = 8;
+      let popupLeft, popupTop;
+      if (writingMode2.startsWith("horizontal")) {
+        popupTop = clamp(bottomSpace > topSpace ? wordBottom + gap : wordTop - popupHeight - gap, minTop, maxTop);
+        popupLeft = clamp(rightSpace > leftSpace ? wordLeft : wordRight - popupWidth, minLeft, maxLeft);
+      } else {
+        popupTop = clamp(bottomSpace > topSpace ? wordTop : wordBottom - popupHeight, minTop, maxTop);
+        popupLeft = clamp(rightSpace > leftSpace ? wordRight + gap : wordLeft - popupWidth - gap, minLeft, maxLeft);
+      }
+      this.#outerStyle.transform = `translate(${popupLeft}px,${popupTop}px)`;
+      return;
+    }
     this.setData(data); // Because we need the dimensions of the popup with the new data
     // Ensure stylesheets are loaded before measuring dimensions
     await this.stylesReady;
