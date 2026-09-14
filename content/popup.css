@@ -1191,16 +1191,6 @@ a.word-link:hover .spelling {
   }
 }
 
-.kanji-rtk-disclaimer {
-  font-size: 0.66em;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--c-secondary);
-  margin-bottom: 0.35em;
-  opacity: 0.9;
-}
-
 .kanji-rtk-text {
   margin: 0;
   font-size: 0.84em;

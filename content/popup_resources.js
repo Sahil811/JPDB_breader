@@ -100,13 +100,23 @@ async function getKanjiDetails(char, kanjiMap) {
   }
 }
 
+function dedupeComponents(arr) {
+  if (!arr || !arr.length) return [];
+  const seen = new Set();
+  return arr.filter((c) => !seen.has(c) && seen.add(c));
+}
+
 async function getKanjiComponentsMap() {
   if (kanjiComponentsPromise) return kanjiComponentsPromise;
 
   kanjiComponentsPromise = (async () => {
     const data = await readExtJson("kanji_components.json");
-    // data is { kanji: [components] }
-    return new Map(Object.entries(data));
+    // data is { kanji: [components] } — dedupe to avoid ugly duplicate rows like 準: 氵 隼 隼
+    const map = new Map();
+    for (const [k, v] of Object.entries(data)) {
+      map.set(k, dedupeComponents(v));
+    }
+    return map;
   })().catch((error) => {
     console.error("Failed to load kanji_components.json:", error);
     kanjiComponentsPromise = null;
@@ -139,8 +149,8 @@ export async function getComponentsForKanji(char) {
     getKanjiComponentsMap(),
   ]);
 
-  const comps = kanjiCompMap.get(char);
-  if (!comps || !comps.length) return [];
+  const comps = dedupeComponents(kanjiCompMap.get(char) || []);
+  if (!comps.length) return [];
 
   return comps.map((component) => {
     const meaning =
@@ -183,7 +193,7 @@ export async function loadPopupSupplementalData(card, options = {}) {
     if (characterDetails) {
       kanjiComponents = new Map();
       for (const details of characterDetails) {
-        const comps = kanjiCompMap.get(details.kanji) || [];
+        const comps = dedupeComponents(kanjiCompMap.get(details.kanji) || []);
         const enriched = comps.map((component) => {
           const meaning =
             kanjiMap.get(component) || compMeaningsMap.get(component) || "";

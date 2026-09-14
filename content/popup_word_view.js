@@ -266,7 +266,6 @@ function createKanjiBreakdown(characterDetails, kanjiComponents, kanjiUrl) {
       jsxCreateElement(
         "div",
         { class: "kanji-rtk-body" },
-        jsxCreateElement("div", { class: "kanji-rtk-disclaimer" }, "Heisig story — mnemonic, not etymology"),
         jsxCreateElement("p", { class: "kanji-rtk-text" }, rtkText),
       ),
     );
