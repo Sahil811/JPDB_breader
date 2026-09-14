@@ -28,25 +28,65 @@ function getKanjiFromMap(map, char) {
   return meaning ? { kanji: char, meaning } : null;
 }
 
-async function getKanjiMeaningsPromise() {
-  if (kanjiMeaningsPromise) return kanjiMeaningsPromise;
+let kanjiFullDataPromise = null;
+let kanjiRtkPromise = null;
 
-  kanjiMeaningsPromise = (async () => {
+async function getKanjiFullData() {
+  if (kanjiFullDataPromise) return kanjiFullDataPromise;
+  kanjiFullDataPromise = (async () => {
     const data = await readExtJson("kanji_meanings.json");
-    const map = new Map();
+    const meaningMap = new Map();
+    const rtkMap = new Map();
     for (const entry of data) {
-      if (entry.kanji && entry.meaning) {
-        map.set(entry.kanji, entry.meaning);
-      }
+      if (entry.kanji && entry.meaning) meaningMap.set(entry.kanji, entry.meaning);
+      if (entry.kanji && entry.rtk) rtkMap.set(entry.kanji, entry.rtk);
     }
-    return map;
+    return { meaningMap, rtkMap };
   })().catch((error) => {
     console.error("Failed to load kanji_meanings.json:", error);
-    kanjiMeaningsPromise = null;
-    return new Map();
+    kanjiFullDataPromise = null;
+    return { meaningMap: new Map(), rtkMap: new Map() };
   });
+  return kanjiFullDataPromise;
+}
 
+async function getKanjiMeaningsPromise() {
+  if (kanjiMeaningsPromise) return kanjiMeaningsPromise;
+  kanjiMeaningsPromise = getKanjiFullData()
+    .then((d) => d.meaningMap)
+    .catch((error) => {
+      console.error("Failed to load kanji_meanings.json:", error);
+      kanjiMeaningsPromise = null;
+      return new Map();
+    });
   return kanjiMeaningsPromise;
+}
+
+async function getKanjiRtkMap() {
+  if (kanjiRtkPromise) return kanjiRtkPromise;
+  kanjiRtkPromise = getKanjiFullData()
+    .then((d) => d.rtkMap)
+    .catch((error) => {
+      console.error("Failed to load RTK data:", error);
+      kanjiRtkPromise = null;
+      return new Map();
+    });
+  return kanjiRtkPromise;
+}
+
+function cleanRtkText(rtk) {
+  if (!rtk || typeof rtk !== "string") return "";
+  // Remove RTK markup: # # * * { } but keep inner text
+  // Also collapse whitespace
+  return rtk
+    .replace(/#\*/g, "")
+    .replace(/\*#/g, "")
+    .replace(/#/g, "")
+    .replace(/\*/g, "")
+    .replace(/\{/g, "")
+    .replace(/\}/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 async function getKanjiDetails(char, kanjiMap) {
@@ -110,16 +150,17 @@ export async function getComponentsForKanji(char) {
 }
 
 export async function loadPopupSupplementalData(card, options = {}) {
-  const { showKanji = true, showHindi = false } = options;
+  const { showKanji = true, showHindi = false, showRtk = false } = options;
   let characterDetails = null;
   let hindiMeaning = null;
   let kanjiComponents = null;
 
   if (showKanji) {
-    const [kanjiMap, compMeaningsMap, kanjiCompMap] = await Promise.all([
+    const [kanjiMap, compMeaningsMap, kanjiCompMap, rtkMap] = await Promise.all([
       getKanjiMeaningsPromise(),
       getComponentMeaningsMap(),
       getKanjiComponentsMap(),
+      showRtk ? getKanjiRtkMap() : Promise.resolve(null),
     ]);
 
     characterDetails = (
@@ -151,6 +192,11 @@ export async function loadPopupSupplementalData(card, options = {}) {
         kanjiComponents.set(details.kanji, enriched);
         // Attach directly for convenient rendering
         details.components = enriched;
+        if (showRtk && rtkMap) {
+          const raw = rtkMap.get(details.kanji) || "";
+          details.rtk = cleanRtkText(raw);
+          details.rtkRaw = raw;
+        }
       }
       if (kanjiComponents.size === 0) kanjiComponents = new Map();
     }

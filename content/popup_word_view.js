@@ -251,6 +251,35 @@ function createKanjiBreakdown(characterDetails, kanjiComponents, kanjiUrl) {
     });
   }
 
+  function createRtkNode(rtkText) {
+    if (!rtkText) return null;
+    const detailsEl = jsxCreateElement(
+      "details",
+      { class: "kanji-rtk" },
+      jsxCreateElement(
+        "summary",
+        { class: "kanji-rtk-summary" },
+        jsxCreateElement("span", { class: "kanji-rtk-icon" }, "💡"),
+        " Mnemonic",
+        jsxCreateElement("span", { class: "kanji-rtk-chevron", "aria-hidden": "true" }, "▾"),
+      ),
+      jsxCreateElement(
+        "div",
+        { class: "kanji-rtk-body" },
+        jsxCreateElement("div", { class: "kanji-rtk-disclaimer" }, "Heisig story — mnemonic, not etymology"),
+        jsxCreateElement("p", { class: "kanji-rtk-text" }, rtkText),
+      ),
+    );
+    detailsEl.addEventListener("toggle", () => {
+      requestAnimationFrame(() => {
+        if (detailPanel.classList.contains("is-expanded")) {
+          detailPanel.style.maxHeight = detailPanel.scrollHeight + "px";
+        }
+      });
+    });
+    return detailsEl;
+  }
+
   function expandDetailFor(details, chipEl) {
     const comps =
       details.components ||
@@ -333,6 +362,12 @@ function createKanjiBreakdown(characterDetails, kanjiComponents, kanjiUrl) {
           ),
         ),
       );
+    }
+
+    // RTK mnemonic — Google-level progressive disclosure: collapsed <details>, only if showRtk enabled (details.rtk exists)
+    if (details.rtk) {
+      const rtkNode = createRtkNode(details.rtk);
+      if (rtkNode) detailInner.append(rtkNode);
     }
 
     detailPanel.classList.add("is-expanded");

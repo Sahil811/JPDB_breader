@@ -353,6 +353,7 @@ export class Popup extends ShadowComponent {
       const result = await loadPopupSupplementalData(card, {
         showKanji: c?.showKanji,
         showHindi: c?.showHindi,
+        showRtk: c?.showRtk,
       });
       popupCharacterDetails = result.characterDetails;
       popupKanjiComponents = result.kanjiComponents;

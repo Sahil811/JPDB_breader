@@ -37,6 +37,7 @@ export const defaultConfig = {
   nextUnknownWordKey: null,
   prevUnknownWordKey: null,
   popupScale: 100, // percentage (50–200), applied on top of the responsive base size
+  showRtk: false, // show Heisig RTK mnemonics in kanji breakdown
 };
 
 // Cache for config

@@ -1113,6 +1113,103 @@ a.word-link:hover .spelling {
   padding: 0.2em 0;
 }
 
+/* ── RTK mnemonic (Heisig) — progressive disclosure ── */
+.kanji-rtk {
+  margin-top: 0.65em;
+  border-top: 1px dashed var(--c-border);
+  padding-top: 0.5em;
+}
+
+.kanji-rtk-summary {
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32em;
+  font-size: 0.8em;
+  font-weight: 600;
+  color: var(--c-secondary);
+  cursor: pointer;
+  user-select: none;
+  padding: 0.18em 0.5em 0.18em 0.35em;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.kanji-rtk-summary::-webkit-details-marker {
+  display: none;
+}
+
+.kanji-rtk-summary:hover {
+  background: var(--c-hover);
+  color: var(--c-on-surface);
+  border-color: var(--c-border);
+}
+
+.kanji-rtk[open] .kanji-rtk-summary {
+  background: var(--c-primary-bg);
+  color: var(--c-primary);
+  border-color: color-mix(in srgb, var(--c-primary) 20%, transparent);
+}
+
+.kanji-rtk-icon {
+  font-size: 1.05em;
+  line-height: 1;
+}
+
+.kanji-rtk-chevron {
+  font-size: 0.68em;
+  margin-left: 0.15em;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+  line-height: 1;
+}
+
+.kanji-rtk[open] .kanji-rtk-chevron {
+  transform: rotate(180deg);
+}
+
+.kanji-rtk-body {
+  margin-top: 0.5em;
+  padding: 0.6em 0.75em;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 8px;
+  animation: rtk-in 0.2s cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+@keyframes rtk-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.kanji-rtk-disclaimer {
+  font-size: 0.66em;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--c-secondary);
+  margin-bottom: 0.35em;
+  opacity: 0.9;
+}
+
+.kanji-rtk-text {
+  margin: 0;
+  font-size: 0.84em;
+  line-height: 1.55;
+  color: var(--c-on-surface);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
 /* Fallback for browsers without color-mix */
 @supports not (background: color-mix(in srgb, red, blue)) {
   .kanji-detail.is-expanded {
