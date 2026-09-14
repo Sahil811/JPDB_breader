@@ -117,6 +117,8 @@
         "common.css",
         "themes.css",
         "kanji_meanings.json",
+        "kanji_components.json",
+        "component_meanings.json",
         "japanese_dictionary_hindi.json",
         "dictionary.js",
         "integrations/parse_selection.js"

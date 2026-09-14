@@ -216,9 +216,231 @@ export function renderHindiMeanings(meanings) {
   );
 }
 
+function createKanjiBreakdown(characterDetails, kanjiComponents, kanjiUrl) {
+  if (!characterDetails || !characterDetails.length) return "";
+
+  // Deduplicate by kanji char (preserves order) — critical for long words like 朝鮮民主主義人民共和国
+  const seen = new Set();
+  const unique = [];
+  for (const d of characterDetails) {
+    if (!d || !d.kanji || !d.meanings) continue;
+    if (seen.has(d.kanji)) continue;
+    seen.add(d.kanji);
+    unique.push(d);
+  }
+  if (!unique.length) return "";
+
+  const chipRow = jsxCreateElement("div", { class: "kanji-chip-row" });
+  const detailPanel = jsxCreateElement("div", { class: "kanji-detail" });
+  const detailInner = jsxCreateElement("div", { class: "kanji-detail-inner" });
+  detailPanel.append(detailInner);
+
+  // Hidden by default
+  detailPanel.style.maxHeight = "0";
+  detailPanel.style.opacity = "0";
+
+  function collapseDetail() {
+    detailPanel.style.maxHeight = "0";
+    detailPanel.style.opacity = "0";
+    detailPanel.classList.remove("is-expanded");
+    chipRow.querySelectorAll(".kanji-chip.is-active").forEach((c) => {
+      c.classList.remove("is-active");
+      c.setAttribute("aria-expanded", "false");
+      const ar = c.querySelector(".kanji-chip-arrow");
+      if (ar) ar.textContent = "▾";
+    });
+  }
+
+  function expandDetailFor(details, chipEl) {
+    const comps =
+      details.components ||
+      (kanjiComponents instanceof Map
+        ? kanjiComponents.get(details.kanji) || []
+        : []) ||
+      [];
+
+    // Build inner content
+    if (!comps.length) {
+      detailInner.replaceChildren(
+        jsxCreateElement(
+          "div",
+          { class: "kanji-detail-header" },
+          jsxCreateElement("span", { class: "kanji-detail-kanji" }, details.kanji),
+          jsxCreateElement("span", { class: "kanji-detail-sep" }, "·"),
+          jsxCreateElement("span", { class: "kanji-detail-mean" }, details.meanings),
+          jsxCreateElement(
+            "button",
+            {
+              class: "kanji-detail-close",
+              "aria-label": "Close",
+              onclick: (e) => {
+                e.stopPropagation();
+                collapseDetail();
+              },
+            },
+            "×",
+          ),
+        ),
+        jsxCreateElement("div", { class: "kanji-detail-empty" }, "No decomposition available"),
+      );
+    } else {
+      detailInner.replaceChildren(
+        jsxCreateElement(
+          "div",
+          { class: "kanji-detail-header" },
+          jsxCreateElement("span", { class: "kanji-detail-kanji" }, details.kanji),
+          jsxCreateElement("span", { class: "kanji-detail-sep" }, "·"),
+          jsxCreateElement("span", { class: "kanji-detail-mean" }, details.meanings),
+          jsxCreateElement(
+            "button",
+            {
+              class: "kanji-detail-close",
+              "aria-label": "Close",
+              onclick: (e) => {
+                e.stopPropagation();
+                collapseDetail();
+              },
+            },
+            "×",
+          ),
+        ),
+        jsxCreateElement("div", { class: "kanji-detail-label" }, "Composed of"),
+        jsxCreateElement(
+          "div",
+          { class: "kanji-detail-grid" },
+          comps.map(({ component, meaning }) =>
+            jsxCreateElement(
+              "div",
+              { class: "component-card" },
+              jsxCreateElement(
+                "a",
+                {
+                  lang: "ja",
+                  href: kanjiUrl(component),
+                  target: "_blank",
+                  class: "component-card-char",
+                  title: meaning ? `${component}: ${meaning}` : component,
+                  onclick: (e) => e.stopPropagation(),
+                },
+                component,
+              ),
+              jsxCreateElement(
+                "span",
+                { class: "component-card-mean" },
+                meaning || "—",
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    detailPanel.classList.add("is-expanded");
+    // Measure after paint for smooth height transition
+    requestAnimationFrame(() => {
+      // Need scrollHeight of inner; use panel's scrollHeight
+      const h = detailPanel.scrollHeight;
+      detailPanel.style.maxHeight = h + "px";
+      detailPanel.style.opacity = "1";
+    });
+  }
+
+  for (const details of unique) {
+    const comps =
+      details.components ||
+      (kanjiComponents instanceof Map
+        ? kanjiComponents.get(details.kanji) || []
+        : []) ||
+      [];
+    const hasComps = comps.length > 0;
+
+    const chip = jsxCreateElement(
+      "div",
+      {
+        class: hasComps ? "kanji-chip kanji-chip--interactive" : "kanji-chip",
+        role: hasComps ? "button" : undefined,
+        tabindex: hasComps ? "0" : undefined,
+        "aria-expanded": "false",
+        "data-kanji": details.kanji,
+        title: hasComps ? `Tap to see components of ${details.kanji}` : details.meanings,
+        onclick: hasComps
+          ? (e) => {
+              if (e.target.closest("a")) return;
+              const isActive = chip.classList.contains("is-active");
+              // deactivate others
+              chipRow.querySelectorAll(".kanji-chip.is-active").forEach((c) => {
+                if (c !== chip) {
+                  c.classList.remove("is-active");
+                  c.setAttribute("aria-expanded", "false");
+                  const ar = c.querySelector(".kanji-chip-arrow");
+                  if (ar) ar.textContent = "▾";
+                }
+              });
+              if (isActive) {
+                collapseDetail();
+                return;
+              }
+              // activate this
+              chip.classList.add("is-active");
+              chip.setAttribute("aria-expanded", "true");
+              const ar = chip.querySelector(".kanji-chip-arrow");
+              if (ar) ar.textContent = "▴";
+              expandDetailFor(details, chip);
+            }
+          : undefined,
+        onkeydown: hasComps
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                chip.click();
+              }
+            }
+          : undefined,
+      },
+      jsxCreateElement(
+        "a",
+        {
+          lang: "ja",
+          href: kanjiUrl(details.kanji),
+          target: "_blank",
+          class: "kanji-chip-kanji",
+          onclick: (e) => e.stopPropagation(),
+        },
+        details.kanji,
+      ),
+      jsxCreateElement("span", { class: "kanji-chip-colon" }, ":"),
+      jsxCreateElement("span", { class: "kanji-chip-mean" }, details.meanings),
+      hasComps
+        ? jsxCreateElement("span", { class: "kanji-chip-arrow", "aria-hidden": "true" }, "▾")
+        : null,
+    );
+
+    chipRow.append(chip);
+  }
+
+  // Optional header with count for many kanji (Google-style subtle section title)
+  const header = unique.length > 3
+    ? jsxCreateElement(
+        "div",
+        { class: "kanji-breakdown-header" },
+        jsxCreateElement("span", null, "Kanji"),
+        jsxCreateElement("span", { class: "kanji-breakdown-count" }, `${unique.length}`),
+      )
+    : null;
+
+  return jsxCreateElement(
+    "div",
+    { class: "kanji-breakdown" },
+    header,
+    chipRow,
+    detailPanel,
+  );
+}
+
 export function createWordDetailsContent({
   card,
   characterDetails,
+  kanjiComponents,
   hindiMeaning,
   onPlayAudio,
   onExplainWord,
@@ -296,45 +518,7 @@ export function createWordDetailsContent({
         ),
       ),
     ),
-    characterDetails
-      ? jsxCreateElement(
-          "div",
-          { class: "kanji-meanings" },
-          characterDetails
-            .filter((details) => details && details.meanings)
-            .map((details) => {
-              if (!details || !details.kanji) return null;
-
-              return jsxCreateElement(
-                "div",
-                { class: "kanji-item" },
-                jsxCreateElement(
-                  "a",
-                  {
-                    lang: "ja",
-                    href: kanjiUrl(details.kanji),
-                    target: "_blank",
-                    class: "kanji-link",
-                  },
-                  jsxCreateElement("span", {}, `${details.kanji}:`),
-                ),
-                jsxCreateElement(
-                  "a",
-                  {
-                    href: `https://kanji.koohii.com/study/kanji/${details.kanji}`,
-                    target: "_blank",
-                    class: "kanji-meaning-link",
-                  },
-                  jsxCreateElement(
-                    "span",
-                    { class: "reading" },
-                    details.meanings,
-                  ),
-                ),
-              );
-            }),
-        )
-      : "",
+    createKanjiBreakdown(characterDetails, kanjiComponents, kanjiUrl),
     hindiMeaning?.meaning?.length
       ? renderHindiMeanings(hindiMeaning.meaning)
       : "",
