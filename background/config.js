@@ -2,7 +2,7 @@
 import { browser } from '../util.js';
 
 export const CURRENT_SCHEMA_VERSION = 1;
-export const defaultConfig = {
+export const defaultConfig = Object.freeze({
   schemaVersion: CURRENT_SCHEMA_VERSION,
   apiToken: null,
   showKanji: true,
@@ -37,7 +37,7 @@ export const defaultConfig = {
   prevUnknownWordKey: null,
   popupScale: 100, // percentage (50–200), applied on top of the responsive base size
   showRtk: false, // show Heisig RTK mnemonics in kanji breakdown
-};
+});
 
 // Cache for config
 let configCache = null;

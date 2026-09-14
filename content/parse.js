@@ -55,8 +55,8 @@ export function displayCategory(node) {
             cat = 'none';
         }
         displayCategoryCache.set(cacheKey, cat);
-        if (displayCategoryCache.size > 300) {
-            // Prevent unbounded growth on pages with many unique class combos
+        if (displayCategoryCache.size > 1000) {
+            // P0: True LRU via delete+set, larger cap for Wikipedia (500+ classes)
             const firstKey = displayCategoryCache.keys().next().value;
             displayCategoryCache.delete(firstKey);
         }
@@ -102,9 +102,19 @@ function wrap(node, wrapper) {
 }
 export const reverseIndex = new Map();
 const REVERSE_INDEX_MAX_SIZE = 10000;
+// P0: Auto-clean on navigation — prevents leak on SPA (ttu-reader)
+if (typeof window !== 'undefined') {
+    window.addEventListener('beforeunload', () => reverseIndex.clear());
+    // Also clean when URL changes via history API (SPA)
+    const _pushState = history.pushState;
+    history.pushState = function(...args) { reverseIndex.clear(); return _pushState.apply(this, args); };
+}
 export function applyTokens(fragments, tokens) {
     if (reverseIndex.size > REVERSE_INDEX_MAX_SIZE) {
-        reverseIndex.clear();
+        // P0: LRU evict half instead of clear all — preserves recent words during long novel parse
+        const toDelete = Math.floor(REVERSE_INDEX_MAX_SIZE / 2);
+        let i = 0;
+        for (const k of reverseIndex.keys()) { if (i++ >= toDelete) break; reverseIndex.delete(k); }
     }
     let fragmentIndex = 0;
     let curOffset = 0;

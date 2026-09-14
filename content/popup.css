@@ -166,11 +166,12 @@ article {
   flex-direction: column;
   margin: 0;
   padding: 0;
-  /* P0: Fixed readable width, max 90vw on small screens */
+  /* P0: Fixed readable width, max 90vw on small screens + contain for paint perf */
   width: min(380px, 90vw);
   max-height: min(62vh, 520px);
   overflow-y: auto;
   overflow-x: clip;
+  contain: layout paint style;
 
   background: var(--c-surface);
   color: var(--c-on-surface);

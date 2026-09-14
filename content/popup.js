@@ -566,13 +566,18 @@ export class Popup extends ShadowComponent {
     const popupHeight = this.#element.offsetHeight;
     const popupWidth = this.#element.offsetWidth;
     const minLeft = window.scrollX;
-    const maxLeft = window.scrollX + window.innerWidth - popupWidth;
+    const maxLeft = window.scrollX + window.innerWidth - popupWidth - scrollbarW;
     const minTop = window.scrollY;
     const maxTop = window.scrollY + window.innerHeight - popupHeight;
     let popupLeft;
     let popupTop;
-    const { writingMode } = getComputedStyle(word);
-    const gap = 8; // Spacing to prevent obscuring the underline/word
+    // P0: Cache writingMode per element (getComputedStyle forces reflow)
+    const _wmCache = Popup._wmCache ?? (Popup._wmCache = new WeakMap());
+    let writingMode = _wmCache.get(word);
+    if (!writingMode) { writingMode = getComputedStyle(word).writingMode; _wmCache.set(word, writingMode); }
+    // P0: Account for scrollbar width (was window.innerWidth includes scrollbar)
+    const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+    const gap = 8; // Spacing to prevent obscuring the word
 
     if (writingMode.startsWith("horizontal")) {
       popupTop = clamp(

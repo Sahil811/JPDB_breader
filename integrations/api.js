@@ -317,8 +317,8 @@ export const jpdbApi = {
       }),
       parseAs: "json",
       timeoutMs: DEFAULT_TIMEOUTS.jpdbApi,
-      safeToRetry: true,
-      retries: 2,
+      safeToRetry: false, // P0: POST parse is not idempotent — never retry (could double-charge?)
+      retries: 0,
       signal,
       extractErrorMessage: jpdbErrorMessage,
     });

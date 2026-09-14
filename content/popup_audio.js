@@ -25,9 +25,15 @@ export const JpdbAudio = {
 
   async scrapeHash(vid, spelling) {
     try {
+      // P0: LRU — move to end on hit
+      if (this.cache.has(vid)) {
+        const h = this.cache.get(vid);
+        this.cache.delete(vid); this.cache.set(vid, h);
+        return h;
+      }
       const result = await requestFetchAudioHash(vid, spelling);
       if (result?.hash) {
-        if (this.cache.size > 200) {
+        if (this.cache.size >= 100) { // P0: 200→100, audio hashes small
           this.cache.delete(this.cache.keys().next().value);
         }
         this.cache.set(vid, result.hash);
@@ -54,16 +60,20 @@ export const JpdbAudio = {
       const blobUrl = URL.createObjectURL(new Blob([buffer], { type: "audio/ogg" }));
       const audio = new Audio(blobUrl);
       currentAudio = audio;
+      // P0: Auto-revoke after 60s even if onended/onerror never fires (leak)
+      const revokeTimer = setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
 
       audio.onended = () => {
+        clearTimeout(revokeTimer);
         URL.revokeObjectURL(blobUrl);
         currentAudio = null;
       };
       audio.onerror = () => {
+        clearTimeout(revokeTimer);
         URL.revokeObjectURL(blobUrl);
         currentAudio = null;
       };
-      audio.play().catch(() => URL.revokeObjectURL(blobUrl));
+      audio.play().catch(() => { clearTimeout(revokeTimer); URL.revokeObjectURL(blobUrl); });
     } catch (e) { console.warn('JPDBreader: audio error', e); }
   },
 };

@@ -49,6 +49,7 @@ class RequestQueue {
     }
 }
 const apiQueue = new RequestQueue();
+const parseQueue = new RequestQueue(); // P0: separate queue — parses can run parallel to mutations, faster first paint
 export async function addToDeck(vid, sid, deckId) {
     return apiQueue.run(() => backend.addToDeck(vid, sid, deckId));
 }
@@ -64,7 +65,8 @@ export async function review(vid, sid, rating) {
 export async function getCardState(vid, sid) {
     return apiQueue.run(() => backend.getCardState(vid, sid));
 }
-const maxParseLength = 16384;
+// P0: 8192 bytes → faster first paint (was 16384), syosetu 50k = 7 batches pipelined vs 4 serial
+const maxParseLength = 8192;
 const pendingParagraphs = new Map();
 async function batchParses() {
     // Greedily take as many paragraphs as can fit
@@ -108,7 +110,7 @@ export function enqueueParse(seq, text) {
     });
 }
 export function startParse() {
-    apiQueue.enqueue(batchParses);
+    parseQueue.enqueue(batchParses);
 }
 // Content script communication
 const ports = new Set();

@@ -61,6 +61,7 @@ export function paragraphsInNode(node, filter = () => true) {
   return paragraphs;
 }
 export function visibleObserver(enterCallback, exitCallback) {
+  // P0: 200px margin + threshold 0 → fewer observations than 50% (triggers for all 2000 nodes on load)
   const elementVisibleObserver = new IntersectionObserver(
     (entries, _observer) => {
       try {
@@ -77,7 +78,8 @@ export function visibleObserver(enterCallback, exitCallback) {
       }
     },
     {
-      rootMargin: "50% 50% 50% 50%",
+      rootMargin: "200px",
+      threshold: 0,
     }
   );
   return elementVisibleObserver;
@@ -127,7 +129,7 @@ export function parseVisibleObserver(filter = () => true) {
         pendingBatches.set(element, elemBatches);
         batches.push(...elemBatches);
       }
-      requestParse(batches);
+      if (batches.length) requestParse(batches);
     },
     (elements) => {
       for (const element of elements) {

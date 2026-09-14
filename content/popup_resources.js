@@ -145,6 +145,12 @@ export async function getComponentsForKanji(char) {
   });
 }
 
+// P0: Preload on idle — warm cache before first hover (~40ms saved)
+if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+  requestIdleCallback(() => { void getKanjiMeaningsPromise(); void getKanjiComponentsMap(); void getComponentMeaningsMap(); }, { timeout: 2000 });
+} else if (typeof window !== 'undefined') {
+  setTimeout(() => { void getKanjiMeaningsPromise(); void getKanjiComponentsMap(); void getComponentMeaningsMap(); }, 800);
+}
 export async function loadPopupSupplementalData(card, options = {}) {
   const { showKanji = true, showRtk = false } = options;
   let characterDetails = null;
