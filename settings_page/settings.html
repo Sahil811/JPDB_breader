@@ -89,18 +89,33 @@
       #save {
         margin-top: 1em;
         width: 100%;
+        transition: background 0.2s, box-shadow 0.2s, opacity 0.2s;
       }
-
+      /* P0: Calm save — no error red pulse. Tonal enabled, muted when saved */
       body.has-unsaved-changes #save {
-        --color-button-border: rgb(199, 58, 79);
-        color: rgb(199, 58, 79);
-        box-shadow: 0px 0px 0.4em 0.25em rgba(232, 104, 123);
-        animation: pulse-save 2s ease-in-out infinite;
+        background: var(--md-sys-color-primary);
+        color: var(--md-sys-color-on-primary);
+        box-shadow: var(--md-sys-elevation-1);
+        animation: save-ready 0.35s cubic-bezier(0.2,0,0,1) both;
       }
-
-      @keyframes pulse-save {
-        0%, 100% { box-shadow: 0px 0px 0.4em 0.25em rgba(232, 104, 123, 0.4); }
-        50% { box-shadow: 0px 0px 0.6em 0.35em rgba(232, 104, 123, 0.7); }
+      body:not(.has-unsaved-changes) #save {
+        opacity: 0.72;
+        box-shadow: none;
+      }
+      body:not(.has-unsaved-changes) #save::after {
+        content: ' ✓';
+        font-weight: 700;
+      }
+      @keyframes save-ready {
+        from { transform: translateY(2px); opacity:0.85; }
+        to { transform: translateY(0); opacity:1; }
+      }
+      #autosave-hint {
+        font-size: 11px;
+        color: var(--md-sys-color-on-surface-variant);
+        text-align: center;
+        margin-top: 6px;
+        min-height: 1.2em;
       }
 
       #preview {
@@ -206,6 +221,7 @@
         <a href="#import-export">Import/Export</a>
 
         <input type="submit" id="save" value="Save settings" />
+        <div id="autosave-hint" aria-live="polite"></div>
       </nav>
       <div id="settings">
         <section id="general">

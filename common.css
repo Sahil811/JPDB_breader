@@ -5,7 +5,11 @@
     background-color: var(--color-background);
     color: var(--color-text);
     -webkit-font-smoothing: antialiased;
-    letter-spacing: 0.2px;
+    letter-spacing: 0.15px;
+}
+:host([lang="ja"]), :host([lang="ja"]) > * {
+    letter-spacing: 0;
+    line-height: 1.7;
 }
 
 a {
@@ -91,7 +95,7 @@ button:enabled:hover,
 a.button:hover,
 input[type='submit']:hover {
     box-shadow: var(--md-sys-elevation-2);
-    filter: brightness(1.1);
+    background-color: color-mix(in srgb, var(--md-sys-color-primary) 92%, black);
 }
 
 button:enabled:active,

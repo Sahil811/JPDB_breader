@@ -178,7 +178,7 @@ function createKanjiBreakdown(characterDetails, kanjiComponents, kanjiUrl) {
       jsxCreateElement(
         "summary",
         { class: "kanji-rtk-summary" },
-        jsxCreateElement("span", { class: "kanji-rtk-icon" }, "💡"),
+        jsxCreateElement("span", { class: "kanji-rtk-icon", "aria-hidden": "true" }, "✦"),
         " Mnemonic",
         jsxCreateElement("span", { class: "kanji-rtk-chevron", "aria-hidden": "true" }, "▾"),
       ),
@@ -251,7 +251,6 @@ function createKanjiBreakdown(characterDetails, kanjiComponents, kanjiUrl) {
             "×",
           ),
         ),
-        jsxCreateElement("div", { class: "kanji-detail-label" }, "Composed of"),
         jsxCreateElement(
           "div",
           { class: "kanji-detail-grid" },
@@ -445,27 +444,29 @@ export function createWordDetailsContent({
             "button",
             {
               class: "util-btn audio-btn",
-              title: "Play pronunciation",
+              title: "Play pronunciation (A)",
+              "aria-label": "Play pronunciation",
               onclick: (event) => {
                 event.preventDefault();
                 event.stopPropagation();
                 onPlayAudio();
               },
             },
-            "🔊",
+            jsxCreateElement("span", { "aria-hidden": "true", style: "font-size:15px;line-height:1;" }, "♪"),
           ),
           jsxCreateElement(
             "button",
             {
               class: "util-btn",
-              title: "Explain word",
+              title: "Explain word (AI)",
+              "aria-label": "Explain word",
               onclick: (event) => {
                 event.preventDefault();
                 event.stopPropagation();
                 onExplainWord();
               },
             },
-            "ℹ️",
+            jsxCreateElement("span", { "aria-hidden": "true", style: "font-size:12px;font-weight:800;line-height:1;" }, "AI"),
           ),
         ),
       ),

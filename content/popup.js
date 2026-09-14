@@ -501,12 +501,16 @@ export class Popup extends ShadowComponent {
     // Toggle review buttons visibility based on config
     this.#updateReviewButtonsVisibility();
   }
-  setData(data) {
+   setData(data) {
     this.#data = data;
-    // Clear previous content immediately to prevent stale data flash
-    this.#vocabSection.replaceChildren(
-      jsxCreateElement("span", { class: "loading-placeholder" }, "Loading…")
+    // P0: Skeleton shimmer prevents layout shift vs "Loading…" text
+    const skeleton = jsxCreateElement("div", { class: "skeleton-wrap", style: "padding:0.92em;display:flex;flex-direction:column;gap:0.6em;min-width:280px;" },
+      jsxCreateElement("div", { style: "height:1.6em;width:42%;background:var(--c-hover);border-radius:6px;animation:skeleton-pulse 1.2s ease-in-out infinite;" }),
+      jsxCreateElement("div", { style: "height:0.9em;width:68%;background:var(--c-hover);border-radius:6px;animation:skeleton-pulse 1.2s ease-in-out infinite 0.15s;" }),
+      jsxCreateElement("div", { style: "height:0.9em;width:88%;background:var(--c-hover);border-radius:6px;animation:skeleton-pulse 1.2s ease-in-out infinite 0.3s;" }),
+      jsxCreateElement("div", { style: "height:0.9em;width:76%;background:var(--c-hover);border-radius:6px;animation:skeleton-pulse 1.2s ease-in-out infinite 0.45s;" }),
     );
+    this.#vocabSection.replaceChildren(skeleton);
     this.#mineButtons.replaceChildren();
     const renderVersion = ++this.#renderVersion;
     void this.render(renderVersion);

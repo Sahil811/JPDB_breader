@@ -23,26 +23,28 @@ article {
     flex-direction: column;
     gap: 0.8rem;
 
-    max-width: 44em;
-    min-width: 28em;
+    width: min(44em, 90vw);
+    max-height: min(85vh, 640px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     margin: 0;
-    padding: 1.5rem;
+    padding: 1.25rem;
 
     font-size: 14px;
     font-family: var(--font-family, 'Inter', 'Roboto', 'Noto Sans CJK JP', sans-serif);
     
-    /* Modern Surface (solid for high contrast) */
     background-color: var(--color-background);
     color: var(--color-text);
-    
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
     
     border: 1px solid var(--border-color);
     border-radius: 20px;
     box-shadow: var(--md-sys-elevation-3);
     
-    animation: dialog-enter 0.4s cubic-bezier(0.2, 0, 0, 1) both;
+    animation: dialog-enter 0.35s cubic-bezier(0.2, 0, 0, 1) both;
+}
+@media (max-width: 480px) {
+    article { width: 92vw; padding: 1rem; border-radius: 16px; }
+    #modal-wrapper { padding: 12px; align-items: flex-end; }
 }
 
 @keyframes dialog-enter {

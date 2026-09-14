@@ -55,7 +55,7 @@
                 gap: 10px;
             }
 
-            /* Stats card */
+            /* Stats — P0: single progress bar replaces 3 boxes */
             #stats-section {
                 background: var(--md-sys-color-surface-container, rgba(0,0,0,0.03));
                 border-radius: 12px;
@@ -69,33 +69,32 @@
                 letter-spacing: 0.06em;
                 color: var(--md-sys-color-on-surface-variant);
                 margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
             }
-            .stats-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr;
-                gap: 6px;
-                text-align: center;
-            }
-            .stat-item {
+            .stats-header span:last-child { font-variant-numeric: tabular-nums; }
+            .progress-track {
+                height: 8px;
                 background: var(--md-sys-color-surface, #fff);
-                border-radius: 10px;
-                padding: 8px 4px;
+                border-radius: 999px;
+                overflow: hidden;
+                display: flex;
             }
-            .stat-value {
-                font-size: 20px;
-                font-weight: 700;
-                line-height: 1.2;
-                color: var(--md-sys-color-on-surface);
-            }
-            .stat-value.unknown { color: var(--md-sys-color-error, #d93025); }
-            .stat-value.known { color: #1e8e3e; }
-            .stat-label {
-                font-size: 10px;
+            .progress-fill-known { background: #1e8e3e; transition: width 0.4s cubic-bezier(0.2,0,0,1); }
+            .progress-fill-unknown { background: var(--md-sys-color-error, #d93025); transition: width 0.4s cubic-bezier(0.2,0,0,1); }
+            .progress-legend {
+                display: flex;
+                gap: 12px;
+                margin-top: 8px;
+                font-size: 11px;
                 color: var(--md-sys-color-on-surface-variant);
-                text-transform: uppercase;
-                letter-spacing: 0.04em;
-                margin-top: 2px;
             }
+            .progress-legend b { color: var(--md-sys-color-on-surface); font-weight: 700; }
+            .progress-legend .dot { width:8px;height:8px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:4px; }
+            /* legacy grid kept hidden for compat */
+            .stats-grid { display: none; }
+            .stat-item { display: none; }
 
             /* Action buttons row */
             .word-actions-row {
@@ -286,30 +285,31 @@
 
                 <div class="popup-body">
                     <section id="stats-section" style="display:none;">
-                        <div class="stats-header">Page Stats</div>
-                        <div class="stats-grid">
-                            <div class="stat-item">
-                                <div class="stat-value" id="stat-total">—</div>
-                                <div class="stat-label">Total</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value unknown" id="stat-unknown">—</div>
-                                <div class="stat-label">Unknown</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value known" id="stat-known">—</div>
-                                <div class="stat-label">Known</div>
-                            </div>
+                        <div class="stats-header"><span>Page Stats</span><span id="stats-pct">—</span></div>
+                        <div class="progress-track" aria-hidden="true">
+                            <div id="progress-known" class="progress-fill-known" style="width:0%"></div>
+                            <div id="progress-unknown" class="progress-fill-unknown" style="width:0%"></div>
                         </div>
+                        <div class="progress-legend">
+                            <span><i class="dot" style="background:#1e8e3e"></i><b id="stat-known">—</b> known</span>
+                            <span><i class="dot" style="background:var(--md-sys-color-error,#d93025)"></i><b id="stat-unknown">—</b> unknown</span>
+                            <span style="margin-left:auto"><b id="stat-total">—</b> total</span>
+                        </div>
+                        <!-- legacy grid for fallback -->
+                        <div class="stats-grid" aria-hidden="true"></div>
                     </section>
 
                     <div id="word-actions" class="word-actions-row" style="display:none;">
-                        <button id="review-words-btn">🎴 Review</button>
-                        <button id="export-words-btn">📥 Export</button>
+                        <button id="review-words-btn">Review</button>
+                        <button id="export-words-btn">Export</button>
                     </div>
                     <span id="action-progress" style="display:none;"></span>
 
-                    <div class="parse-label">Parse open tabs</div>
+                    <div id="primary-parse-wrap" style="display:flex;flex-direction:column;gap:8px;">
+                        <div class="parse-label" id="parse-label">Parse this page</div>
+                        <div id="parse-buttons"></div>
+                        <div id="empty-hint" style="display:none;font-size:11px;color:var(--md-sys-color-on-surface-variant);line-height:1.4;background:var(--md-sys-color-surface-container);padding:8px 10px;border-radius:8px;">No Japanese detected yet. Click Parse to analyze this page, or paste a JPDB token in Settings first.</div>
+                    </div>
                 </div>
             </div>
 

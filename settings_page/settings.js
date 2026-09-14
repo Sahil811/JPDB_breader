@@ -58,13 +58,24 @@ const POPUP_EXAMPLE_DATA = {
   },
 };
 let hasUnsavedChanges = false;
+let autosaveTimer = null;
+let lastSavedAt = 0;
+let config = null;
+let popup = null;
 export function markUnsavedChanges() {
   document.body.classList.add("has-unsaved-changes");
   hasUnsavedChanges = true;
+  const hint = document.getElementById('autosave-hint');
+  if (hint) hint.textContent = 'Unsaved changes — saving…';
+  // P0: Debounced auto-save (700ms)
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(() => { void doSaveConfig({ silent: true }); }, 700);
 }
 export function unmarkUnsavedChanges() {
   document.body.classList.remove("has-unsaved-changes");
   hasUnsavedChanges = false;
+  const hint = document.getElementById('autosave-hint');
+  if (hint) hint.textContent = lastSavedAt ? `Saved at ${new Date(lastSavedAt).toLocaleTimeString()}` : '';
 }
 addEventListener(
   "beforeunload",
@@ -76,10 +87,64 @@ addEventListener(
   },
   { capture: true }
 );
+// P0: Centralized save with conflict check, used by auto-save and manual Save
+async function doSaveConfig({ silent = false } = {}) {
+  try {
+    if (!config) config = await loadConfig();
+    for (const name of Object.keys(config)) {
+      const elem = document.querySelector(`[name="${name}"]`);
+      if (elem !== null) {
+        const newValue = elem.value;
+        config[name] = newValue;
+      }
+    }
+    await saveConfig(config);
+    // Validate keybind conflicts — inline hint instead of alert for silent saves
+    const keyBindNames = ['showPopupKey','addKey','dialogKey','blacklistKey','neverForgetKey','nothingKey','somethingKey','hardKey','goodKey','easyKey','nextUnknownWordKey','prevUnknownWordKey'];
+    const seen = new Map();
+    let conflictMsg = '';
+    for (const name of keyBindNames) {
+      const kb = config[name];
+      if (!kb || !kb.key) continue;
+      const sig = `${(kb.modifiers || []).sort().join('+')}+${kb.code || kb.key}`;
+      if (seen.has(sig)) {
+        const label = (n) => n.replace(/Key$/,'').replace(/([A-Z])/g,' $1').trim();
+        conflictMsg = `Keybind conflict: "${label(name)}" ↔ "${label(seen.get(sig))}" (${kb.key})`;
+        break;
+      }
+      seen.set(sig, name);
+    }
+    await requestUpdateConfig();
+    applyTheme(config.theme);
+    popup.updateStyle(config.customPopupCSS, config.theme, config);
+    popup.render();
+    lastSavedAt = Date.now();
+    unmarkUnsavedChanges();
+    if (conflictMsg) {
+      if (silent) {
+        const hint = document.getElementById('autosave-hint');
+        if (hint) { hint.textContent = '⚠️ ' + conflictMsg; hint.style.color = 'var(--md-sys-color-error)'; }
+      } else {
+        alert('⚠️ ' + conflictMsg);
+      }
+    } else {
+      const hint = document.getElementById('autosave-hint');
+      if (hint) hint.style.color = '';
+    }
+    if (!silent) {
+      const hint = document.getElementById('autosave-hint');
+      if (hint) hint.textContent = 'Saved ✓';
+      setTimeout(() => { if (!hasUnsavedChanges && hint) hint.textContent = lastSavedAt ? `Saved at ${new Date(lastSavedAt).toLocaleTimeString()}` : ''; }, 1800);
+    }
+  } catch (error) {
+    const hint = document.getElementById('autosave-hint');
+    if (hint) hint.textContent = 'Save failed — try Save button';
+    if (!silent) showError(error);
+    else console.error(error);
+  }
+}
 try {
   // Load config asynchronously
-  let config = null;
-  
   (async () => {
     config = await loadConfig();
     
@@ -220,7 +285,7 @@ try {
       showError(error);
     }
   });
-  const popup = Popup.getDemoMode(nonNull(document.querySelector("#preview")));
+  popup = Popup.getDemoMode(nonNull(document.querySelector("#preview")));
   popup.setData(POPUP_EXAMPLE_DATA);
   popup.fadeIn();
   nonNull(document.querySelector('[name="customPopupCSS"]')).addEventListener(
@@ -243,46 +308,7 @@ try {
   const saveButton = nonNull(document.querySelector("input[type=submit]"));
   saveButton.addEventListener("click", async (event) => {
     event.preventDefault();
-    try {
-      if (!config) {
-        config = await loadConfig();
-      }
-      for (const name of Object.keys(config)) {
-        const elem = document.querySelector(`[name="${name}"]`);
-        if (elem !== null) {
-          const newValue = elem.value;
-          config[name] = newValue;
-        }
-      }
-      await saveConfig(config);
-
-      // Validate keybind conflicts
-      const keyBindNames = [
-        'showPopupKey', 'addKey', 'dialogKey', 'blacklistKey', 'neverForgetKey',
-        'nothingKey', 'somethingKey', 'hardKey', 'goodKey', 'easyKey',
-        'nextUnknownWordKey', 'prevUnknownWordKey',
-      ];
-      const seen = new Map();
-      for (const name of keyBindNames) {
-        const kb = config[name];
-        if (!kb || !kb.key) continue;
-        const sig = `${(kb.modifiers || []).sort().join('+')}+${kb.code || kb.key}`;
-        if (seen.has(sig)) {
-          const conflictLabel = (n) => n.replace(/Key$/, '').replace(/([A-Z])/g, ' $1').trim();
-          alert(`⚠️ Keybind conflict: "${conflictLabel(name)}" and "${conflictLabel(seen.get(sig))}" use the same key (${kb.key}).`);
-          break;
-        }
-        seen.set(sig, name);
-      }
-
-      await requestUpdateConfig();
-      applyTheme(config.theme);
-      popup.updateStyle(config.customPopupCSS, config.theme, config);
-      popup.render();
-      unmarkUnsavedChanges();
-    } catch (error) {
-      showError(error);
-    }
+    await doSaveConfig({ silent: false });
   });
   // Test API token connection
   const testBtn = document.querySelector("#test-api-token");

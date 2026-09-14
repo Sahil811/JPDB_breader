@@ -1,32 +1,40 @@
 :host {
     all: initial;
     position: fixed;
-    top: 1rem;
-    right: 1rem;
-    z-index: 2147483647;
+    bottom: 24px;
+    left: 50%;
+    right: auto;
+    top: auto;
+    transform: translateX(-50%);
+    z-index: 2147483646; /* below popup 2147483647, so it stays visible */
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    align-items: center;
+    min-width: 280px;
+    max-width: min(420px, 90vw);
+    pointer-events: none;
     font-family: var(--font-family, 'Inter', 'Roboto', sans-serif);
 }
 
 .toast {
-    background-color: var(--color-background);
+    background-color: var(--md-sys-color-surface-container, var(--color-background));
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     
     border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 0.8rem 1.2rem;
+    border-radius: 999px;
+    padding: 0.7rem 1rem 0.7rem 1.2rem;
     display: flex;
     flex-direction: row;
     gap: 0.8rem;
     align-items: center;
     
     color: var(--color-text, #fff);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--md-sys-elevation-2, 0 4px 15px rgba(0,0,0,0.15));
+    pointer-events: auto;
     
     animation: toast-enter 0.3s cubic-bezier(0.2, 0, 0, 1) both;
 }
@@ -34,11 +42,11 @@
 @keyframes toast-enter {
     from { 
         opacity: 0;
-        transform: translateX(20px) scale(0.95);
+        transform: translateY(10px) scale(0.97);
     }
     to { 
         opacity: 1;
-        transform: translateX(0) scale(1);
+        transform: translateY(0) scale(1);
     }
 }
 

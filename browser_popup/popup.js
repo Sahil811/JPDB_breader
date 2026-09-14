@@ -31,7 +31,7 @@ async function parsePage(tab) {
     setTimeout(() => window.close(), 10);
 }
 
-// Collect stats from the active tab
+// P0: Progress bar + debounced stats
 async function collectStats(tab) {
     try {
         const results = await browser.scripting.executeScript({
@@ -49,19 +49,33 @@ async function collectStats(tab) {
         });
         const stats = results?.[0]?.result;
         if (stats && stats.total > 0) {
+            const pct = stats.total ? Math.round((stats.known / stats.total) * 100) : 0;
             document.getElementById('stat-total').textContent = stats.total;
             document.getElementById('stat-unknown').textContent = stats.unknown;
             document.getElementById('stat-known').textContent = stats.known;
+            const pctEl = document.getElementById('stats-pct');
+            if (pctEl) pctEl.textContent = pct + '% known';
+            const knownBar = document.getElementById('progress-known');
+            const unknownBar = document.getElementById('progress-unknown');
+            if (knownBar) knownBar.style.width = (stats.total ? (stats.known / stats.total * 100) : 0) + '%';
+            if (unknownBar) unknownBar.style.width = (stats.total ? (stats.unknown / stats.total * 100) : 0) + '%';
             document.getElementById('stats-section').style.display = '';
-            // Show mine button if there are unknown words
+            document.getElementById('parse-label').textContent = '✓ Parsed';
+            // Show actions if there are unknown words
             if (stats.unknown > 0) {
                 document.getElementById('word-actions').style.display = '';
-                document.getElementById('export-words-btn').textContent = `📥 Export (${stats.unknown})`;
-                document.getElementById('review-words-btn').textContent = `🎴 Review (${stats.unknown})`;
+                document.getElementById('export-words-btn').textContent = `Export (${stats.unknown})`;
+                document.getElementById('review-words-btn').textContent = `Review (${stats.unknown})`;
             }
+        } else {
+            // No parsed words — show empty hint
+            const hint = document.getElementById('empty-hint');
+            if (hint) hint.style.display = '';
+            document.getElementById('parse-label').textContent = 'Parse this page';
         }
     } catch (_) {
-        // Tab may not have content script injected — stats section stays hidden
+        const hint = document.getElementById('empty-hint');
+        if (hint) hint.style.display = '';
     }
 }
 
@@ -255,7 +269,7 @@ nonNull(document.querySelector('#settings-link')).addEventListener('click', () =
 });
 
 browser.tabs.query({ active: true, currentWindow: true }, async tabs => {
-    const buttonContainer = nonNull(document.querySelector('.popup-body'));
+    const parseWrap = nonNull(document.getElementById('parse-buttons'));
     const activeTab = tabs[0];
 
     // Collect stats for the active tab
@@ -284,10 +298,30 @@ browser.tabs.query({ active: true, currentWindow: true }, async tabs => {
         else if (e.key === 'Escape') exitFlashcards();
     });
 
-    // Add parse buttons for all active tabs
-    browser.tabs.query({ active: true }, allTabs => {
-        for (const tab of allTabs) {
-            buttonContainer.append(jsxCreateElement("button", { onclick: () => parsePage(tab) }, `Parse "${tab.title ?? 'Untitled'}"`));
-        }
-    });
+    // P0: Single primary Parse CTA — not one per tab
+    if (activeTab) {
+        const hasParsed = document.getElementById('stats-section').style.display !== 'none';
+        const btn = jsxCreateElement("button", {
+            style: hasParsed ? "background:var(--md-sys-color-surface-container);color:var(--md-sys-color-on-surface);border:1px solid var(--md-sys-color-outline-variant);width:100%;" : "width:100%;",
+            onclick: async () => {
+                btn.disabled = true;
+                const orig = btn.textContent;
+                btn.textContent = "Parsing…";
+                try { await parsePage(activeTab); } finally { btn.disabled = false; btn.textContent = orig; }
+            }
+        }, hasParsed ? "Re-parse page" : `Parse "${(activeTab.title || 'this page').slice(0,28)}"`);
+        parseWrap.append(btn);
+        // Secondary: Parse all tabs if >1 tab
+        browser.tabs.query({ active: true }, allTabs => {
+            if (allTabs.length > 1) {
+                const more = jsxCreateElement("button", {
+                    style: "width:100%;margin-top:6px;background:transparent;color:var(--md-sys-color-on-surface-variant);border:1px dashed var(--md-sys-color-outline-variant);font-size:12px;",
+                    onclick: async () => {
+                        for (const t of allTabs) await parsePage(t);
+                    }
+                }, `Parse all ${allTabs.length} tabs`);
+                parseWrap.append(more);
+            }
+        });
+    }
 });
