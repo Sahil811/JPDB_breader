@@ -1,26 +1,12 @@
-import { JapaneseDictionary } from "../dictionary.js";
 import { readExtJson } from "../util.js";
 import { kanjiApi } from "../integrations/api.js";
 
-const dictionary = new JapaneseDictionary();
-let dictionaryLoaded = false;
 let kanjiMeaningsPromise = null;
 let kanjiComponentsPromise = null;
 let componentMeaningsPromise = null;
 
 function isKanji(char) {
   return /\p{Script=Han}/u.test(char) && char !== "。";
-}
-
-async function loadDictionary() {
-  if (dictionaryLoaded) return;
-
-  try {
-    await dictionary.loadDictionary();
-    dictionaryLoaded = true;
-  } catch (error) {
-    console.error("Failed to load dictionary:", error);
-  }
 }
 
 function getKanjiFromMap(map, char) {
@@ -160,9 +146,8 @@ export async function getComponentsForKanji(char) {
 }
 
 export async function loadPopupSupplementalData(card, options = {}) {
-  const { showKanji = true, showHindi = false, showRtk = false } = options;
+  const { showKanji = true, showRtk = false } = options;
   let characterDetails = null;
-  let hindiMeaning = null;
   let kanjiComponents = null;
 
   if (showKanji) {
@@ -212,10 +197,5 @@ export async function loadPopupSupplementalData(card, options = {}) {
     }
   }
 
-  if (showHindi) {
-    await loadDictionary();
-    hindiMeaning = dictionary.search(card.spelling);
-  }
-
-  return { characterDetails, hindiMeaning, kanjiComponents };
+  return { characterDetails, kanjiComponents };
 }

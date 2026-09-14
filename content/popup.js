@@ -348,16 +348,13 @@ export class Popup extends ShadowComponent {
     const c = this.#cfg;
     let popupCharacterDetails = null;
     let popupKanjiComponents = null;
-    let popupHindiMeaning = null;
     try {
       const result = await loadPopupSupplementalData(card, {
         showKanji: c?.showKanji,
-        showHindi: c?.showHindi,
         showRtk: c?.showRtk,
       });
       popupCharacterDetails = result.characterDetails;
       popupKanjiComponents = result.kanjiComponents;
-      popupHindiMeaning = result.hindiMeaning;
     } catch (e) {
       console.warn('JPDBreader: failed to load supplemental data', e);
     }
@@ -368,7 +365,6 @@ export class Popup extends ShadowComponent {
         card,
         characterDetails: popupCharacterDetails,
         kanjiComponents: popupKanjiComponents,
-        hindiMeaning: popupHindiMeaning,
         onPlayAudio: () => PopupJpdbAudio.speak(card.vid, card.spelling),
         onExplainWord: () => this.explainWord(card.spelling, card.meanings),
       })

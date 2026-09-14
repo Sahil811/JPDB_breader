@@ -6,7 +6,6 @@ export const defaultConfig = {
   schemaVersion: CURRENT_SCHEMA_VERSION,
   apiToken: null,
   showKanji: true,
-  showHindi: false,
   showExamplesAutomatically: false,
   miningDeckId: null,
   forqDeckId: "forq",

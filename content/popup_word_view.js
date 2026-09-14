@@ -135,87 +135,6 @@ export function groupMeanings(card) {
   return groupedMeanings;
 }
 
-function createMeaningChunks(meanings, chunkSize = 3) {
-  const validMeanings = meanings.filter(
-    (meaning) => typeof meaning === "string" && meaning.trim().length > 0,
-  );
-
-  return validMeanings.reduce((chunks, meaning, index) => {
-    const chunkIndex = Math.floor(index / chunkSize);
-    if (!chunks[chunkIndex]) chunks[chunkIndex] = [];
-    chunks[chunkIndex].push(meaning);
-    return chunks;
-  }, []);
-}
-
-export function renderHindiMeanings(meanings) {
-  if (!meanings?.length) return "";
-
-  const uniqueMeanings = [...new Set(meanings)].filter(
-    (meaning) => typeof meaning === "string" && meaning.trim().length > 0,
-  );
-  const meaningChunks = createMeaningChunks(uniqueMeanings);
-  if (!meaningChunks.length) return "";
-
-  const hasMoreMeanings = meaningChunks.length > 1;
-
-  return jsxCreateElement(
-    "div",
-    { class: "hindi-meanings" },
-    jsxCreateElement("h2", null, "Hindi Meaning"),
-    jsxCreateElement(
-      "div",
-      { class: "meaning-list" },
-      [
-        jsxCreateElement("div", { class: "meaning-set" }, [
-          jsxCreateElement("span", { class: "set-number" }, "1. "),
-          jsxCreateElement(
-            "span",
-            { class: "primary-meanings" },
-            meaningChunks[0].join("; "),
-          ),
-          ...(hasMoreMeanings
-            ? [
-                jsxCreateElement(
-                  "button",
-                  {
-                    class: "toggle-more",
-                    onclick: (e) => {
-                      const container = e.target.closest(".hindi-meanings");
-                      const moreMeanings =
-                        container.querySelector(".more-meanings");
-                      const isExpanded =
-                        moreMeanings.classList.toggle("expanded");
-                      e.target.textContent = isExpanded ? "-" : "+";
-                    },
-                  },
-                  "+",
-                ),
-              ]
-            : []),
-        ]),
-        hasMoreMeanings &&
-          jsxCreateElement(
-            "div",
-            { class: "more-meanings" },
-            meaningChunks
-              .slice(1)
-              .map((chunk, index) =>
-                jsxCreateElement("div", { class: "meaning-set" }, [
-                  jsxCreateElement(
-                    "span",
-                    { class: "set-number" },
-                    `${index + 2}. `,
-                  ),
-                  chunk.join("; "),
-                ]),
-              ),
-          ),
-      ].filter(Boolean),
-    ),
-  );
-}
-
 function createKanjiBreakdown(characterDetails, kanjiComponents, kanjiUrl) {
   if (!characterDetails || !characterDetails.length) return "";
 
@@ -475,7 +394,6 @@ export function createWordDetailsContent({
   card,
   characterDetails,
   kanjiComponents,
-  hindiMeaning,
   onPlayAudio,
   onExplainWord,
 }) {
@@ -553,9 +471,6 @@ export function createWordDetailsContent({
       ),
     ),
     createKanjiBreakdown(characterDetails, kanjiComponents, kanjiUrl),
-    hindiMeaning?.meaning?.length
-      ? renderHindiMeanings(hindiMeaning.meaning)
-      : "",
     ...groupedMeanings.flatMap((meanings) => [
       jsxCreateElement(
         "h2",
