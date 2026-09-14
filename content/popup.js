@@ -235,17 +235,43 @@ export class Popup extends ShadowComponent {
     // so the real popup (not the demo) would never pick up the saved scale.
     this.updateStyle();
 
-    // Close popup on Escape key; number keys 1-5 activate review buttons
+    // Close popup on Escape key; number keys 1-5 activate review buttons — scoped + focus trap
     if (!demoMode) {
       const reviewRatings = ['nothing', 'something', 'hard', 'good', 'easy'];
       document.addEventListener('keydown', (event) => {
         if (!this.isVisible()) return;
+        // Ignore typing in inputs/textareas outside popup (allow Escape to close even there)
+        const active = document.activeElement;
+        const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable || active.tagName === 'SELECT');
+        const activeInPopup = active && (this.element.contains(active) || this.shadow.contains(active));
+        if (isTyping && !activeInPopup && event.key !== 'Escape') return;
+        if (event.ctrlKey || event.altKey || event.metaKey) return;
+
         if (event.key === 'Escape') {
+          event.preventDefault();
           this.fadeOut();
+          return;
+        }
+        // Focus trap for Tab — only when focus is inside popup
+        if (event.key === 'Tab') {
+          if (!activeInPopup) return;
+          const focusable = [...this.shadow.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')].filter(el => !el.disabled);
+          if (!focusable.length) return;
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          const current = this.shadow.activeElement || document.activeElement;
+          if (!event.shiftKey && current === last) {
+            event.preventDefault();
+            first.focus();
+          } else if (event.shiftKey && current === first) {
+            event.preventDefault();
+            last.focus();
+          }
           return;
         }
         const num = parseInt(event.key);
         if (num >= 1 && num <= 5 && this.#data) {
+          event.preventDefault();
           requestReview(this.#data.token.card, reviewRatings[num - 1]);
         }
       });

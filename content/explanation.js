@@ -265,10 +265,27 @@ export class ExplanationPopup extends ShadowComponent {
           }
           const attrs = [...child.attributes];
           for (const attr of attrs) {
-            if (attr.name.startsWith('on') || (child.tagName.toLowerCase() === 'a' && attr.name !== 'href')) {
+            if (attr.name.startsWith('on')) {
               child.removeAttribute(attr.name);
-            } else if (child.tagName.toLowerCase() !== 'a' || attr.name !== 'href') {
-              // keep non-event attributes on non-anchor tags
+              continue;
+            }
+            if (child.tagName.toLowerCase() === 'a') {
+              if (attr.name !== 'href') {
+                child.removeAttribute(attr.name);
+              } else {
+                // Validate href protocol — only http/https, block javascript:/data:
+                try {
+                  const url = new URL(attr.value, window.location.href);
+                  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+                    child.removeAttribute(attr.name);
+                  }
+                } catch {
+                  child.removeAttribute(attr.name);
+                }
+              }
+            } else {
+              // Non-anchor: strip all attributes (prevent style/class injection)
+              child.removeAttribute(attr.name);
             }
           }
           walk(child);

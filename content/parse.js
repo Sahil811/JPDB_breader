@@ -1,15 +1,13 @@
 import { nonNull } from '../util.js';
 import { jsxCreateElement } from '../jsx.js';
 import { onWordHoverStart, onWordHoverStop } from './content.js';
+const displayCategoryCache = new Map();
 export function displayCategory(node) {
     if (node instanceof Text || node instanceof CDATASection) {
         return 'text';
     }
     else if (node instanceof Element) {
-        const display = getComputedStyle(node).display.split(/\s/g);
-        if (display[0] === 'none')
-            return 'none';
-        // NOTE Workaround for Chrome not supporting multi-value display and display: ruby
+        // Fast path for ruby tags before computed style
         if (node.tagName === 'RUBY')
             return 'ruby';
         if (node.tagName === 'RP')
@@ -18,39 +16,51 @@ export function displayCategory(node) {
             return 'ruby-text';
         if (node.tagName === 'RB')
             return 'inline';
-        // Not sure how `inline list-item` or `list-item inline` should behave
-        // These are roughly ordered by the frequency I expect them to show up
-        if (display.some(x => x.startsWith('block')))
-            return 'block';
-        if (display.some(x => x.startsWith('inline')))
-            return 'inline';
-        if (display[0] === 'flex')
-            return 'block';
-        if (display[0] === '-webkit-box')
-            return 'block'; // Old name of flex? Still used on Google Search for some reason.
-        if (display[0] === 'grid')
-            return 'block';
-        if (display[0].startsWith('table'))
-            return 'block';
-        if (display[0].startsWith('flow'))
-            return 'block';
-        if (display[0] === 'ruby')
-            return 'ruby';
-        if (display[0].startsWith('ruby-text'))
-            return 'ruby-text';
-        if (display[0].startsWith('ruby-base'))
-            return 'inline';
-        if (display[0].startsWith('math'))
-            return 'inline';
-        if (display.includes('list-item'))
-            return 'block';
-        // Questionable
-        if (display[0] === 'contents')
-            return 'inline';
-        if (display[0] === 'run-in')
-            return 'block';
-        alert(`Warning: Unknown display value ${display.join(' ')}, please report this!`);
-        return 'none';
+        const cacheKey = node.tagName + '|' + (node.className || '');
+        if (displayCategoryCache.has(cacheKey)) return displayCategoryCache.get(cacheKey);
+        const display = getComputedStyle(node).display.split(/\s/g);
+        let cat;
+        if (display[0] === 'none')
+            cat = 'none';
+        else if (display.some(x => x.startsWith('block')))
+            cat = 'block';
+        else if (display.some(x => x.startsWith('inline')))
+            cat = 'inline';
+        else if (display[0] === 'flex')
+            cat = 'block';
+        else if (display[0] === '-webkit-box')
+            cat = 'block'; // Old name of flex? Still used on Google Search for some reason.
+        else if (display[0] === 'grid')
+            cat = 'block';
+        else if (display[0].startsWith('table'))
+            cat = 'block';
+        else if (display[0].startsWith('flow'))
+            cat = 'block';
+        else if (display[0] === 'ruby')
+            cat = 'ruby';
+        else if (display[0].startsWith('ruby-text'))
+            cat = 'ruby-text';
+        else if (display[0].startsWith('ruby-base'))
+            cat = 'inline';
+        else if (display[0].startsWith('math'))
+            cat = 'inline';
+        else if (display.includes('list-item'))
+            cat = 'block';
+        else if (display[0] === 'contents')
+            cat = 'inline';
+        else if (display[0] === 'run-in')
+            cat = 'block';
+        else {
+            console.warn(`JPDBreader: Unknown display value ${display.join(' ')}, please report this!`);
+            cat = 'none';
+        }
+        displayCategoryCache.set(cacheKey, cat);
+        if (displayCategoryCache.size > 300) {
+            // Prevent unbounded growth on pages with many unique class combos
+            const firstKey = displayCategoryCache.keys().next().value;
+            displayCategoryCache.delete(firstKey);
+        }
+        return cat;
     }
     else {
         return 'none';

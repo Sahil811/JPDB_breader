@@ -63,6 +63,10 @@ export function migrateSchema(config) {
   }
 }
 
+function clamp(n, min, max) {
+  return Math.min(Math.max(n, min), max);
+}
+
 export async function loadConfig(forceReload = false) {
   if (configCache && !forceReload) return configCache;
   
@@ -77,6 +81,10 @@ export async function loadConfig(forceReload = false) {
     }
     
     migrateSchema(config);
+    
+    // Clamp numeric ranges — prevents corrupted storage or manual edits from breaking UI
+    config.popupScale = clamp(Number(config.popupScale) || 100, 50, 200);
+    config.contextWidth = clamp(Number(config.contextWidth) || 1, 0, 10);
     
     // If the schema version is not the current version after applying all migrations, 
     // use the default as a fallback.
